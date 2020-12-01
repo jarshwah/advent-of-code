@@ -1,0 +1,6 @@
+isort
+flake8
+black
+mypy
+ipython
+advent-of-code-data
