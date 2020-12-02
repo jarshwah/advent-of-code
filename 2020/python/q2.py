@@ -4,10 +4,9 @@ import aocd
 
 
 def parse(policy: str) -> t.Tuple[int, int, str, str]:
-    count_range, letter, password = policy.split(" ")
-    letter = letter.removesuffix(":")
+    count_range, letter, password = policy.split()
     low, _, high = count_range.partition("-")
-    return int(low), int(high), letter, password
+    return int(low), int(high), letter[0], password
 
 
 def part_one(policies: t.List[str]) -> int:
