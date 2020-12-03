@@ -3,4 +3,5 @@ flake8
 black
 mypy
 ipython
+ipdb
 advent-of-code-data
