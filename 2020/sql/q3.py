@@ -12,7 +12,7 @@ def part_one(db: sqlite3.Connection) -> int:
     """
     cursor = db.cursor()
     cursor.execute(sql)
-    return cursor.fetchone()
+    return cursor.fetchone()[0]
 
 
 def part_two(db: sqlite3.Connection) -> int:
@@ -42,15 +42,14 @@ def part_two(db: sqlite3.Connection) -> int:
         FROM tiles
         CROSS JOIN slopes
         WHERE tile = '#'
-        -- Bug here for the final case of (1R, 2D) ... producing 0,0 2,2
-        AND x = (R * y) % (SELECT count(*) FROM tiles WHERE y = 0)
+        AND x = (R * (y/D)) % (SELECT count(*) FROM tiles WHERE y = 0)
         AND y % D = 0
         GROUP BY R, D
     ) inn
     """
     cursor = db.cursor()
     cursor.execute(sql)
-    return cursor.fetchall()[0]
+    return cursor.fetchone()[0]
 
 
 if __name__ == "__main__":
