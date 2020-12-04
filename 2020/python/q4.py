@@ -9,33 +9,19 @@ def part_one(batchfile: str) -> int:
 
 
 def part_two(batchfile: str) -> int:
-    extractor = re.compile(
-        r"^"
-        r"(?=.*\bbyr:(?P<byr>\d{4})\b)"
-        r"(?=.*\biyr:(?P<iyr>\d{4})\b)"
-        r"(?=.*\beyr:(?P<eyr>\d{4})\b)"
+    validator = re.compile(
+        r"(?=.*\bbyr:(19[2-9]\d|200[0-2])\b)"
+        r"(?=.*\biyr:(201\d|2020)\b)"
+        r"(?=.*\beyr:(202\d|2030)\b)"
+        r"(?=.*\bhgt:((1[5-8]\d|19[0-3])cm|(59|6\d|7[0-6])in)\b)"
         r"(?=.*\bhgt:(?P<hgt>\d{2,3})(?P<units>(cm|in))\b)"
-        r"(?=.*\bhcl:(?P<hcl>#[0-9a-f]{6})\b)"
-        r"(?=.*\becl:(?P<ecl>(amb|blu|brn|gry|grn|hzl|oth))\b)"
-        r"(?=.*\bpid:(?P<pid>\d{9})\b)"
-        r".*$"
+        r"(?=.*\bhcl:(#[0-9a-f]{6})\b)"
+        r"(?=.*\becl:(amb|blu|brn|gry|grn|hzl|oth)\b)"
+        r"(?=.*\bpid:(\d{9})\b)"
     )
-    valid = 0
-    passports = [record.replace("\n", " ") for record in batchfile.split("\n\n")]
-    for passport in passports:
-        if (match := extractor.match(passport)) :
-            parsed = match.groupdict()
-            units = parsed["units"]
-            valid += bool(
-                1920 <= int(parsed["byr"]) <= 2002
-                and 2010 <= int(parsed["iyr"]) <= 2020
-                and 2020 <= int(parsed["eyr"]) <= 2030
-                and (
-                    (units == "cm" and (150 <= int(parsed["hgt"]) <= 193))
-                    or (units == "in" and (59 <= int(parsed["hgt"]) <= 76))
-                )
-            )
-    return valid
+    return sum(
+        bool(validator.match(record.replace("\n", " "))) for record in batchfile.split("\n\n")
+    )
 
 
 if __name__ == "__main__":
