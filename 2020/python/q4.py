@@ -3,7 +3,7 @@ import aocd
 
 
 def part_one(batchfile: str) -> int:
-    passports = [record.replace("\n", " ") for record in batchfile.split("\n\n")]
+    passports = [record for record in batchfile.split("\n\n")]
     required = {"byr:", "iyr:", "eyr:", "hgt:", "hcl:", "ecl:", "pid:"}
     return sum(all(field in passport for field in required) for passport in passports)
 
