@@ -2,7 +2,7 @@ import typing as t
 import aocd
 
 
-table = {ord("B"): "1", ord("F"): "0", ord("L"): "1", ord("R"): "0"}
+table = str.maketrans("FBLR", "0101")
 
 
 def part_one(passes: t.List[str]) -> int:
@@ -11,10 +11,7 @@ def part_one(passes: t.List[str]) -> int:
 
 def part_two(passes: t.List[str]) -> int:
     ordered = sorted(int(bp.translate(table), 2) for bp in passes)
-    for n, bp in enumerate(ordered):
-        if ordered[n + 1] == bp + 2:
-            return bp + 1
-    return 0
+    return next(bp + 1 for n, bp in enumerate(ordered) if ordered[n + 1] == bp + 2)
 
 
 if __name__ == "__main__":
