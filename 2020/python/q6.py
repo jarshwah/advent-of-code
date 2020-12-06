@@ -9,7 +9,7 @@ def part_one(data: t.List[str]) -> int:
 
 def part_two(data: t.List[str]) -> int:
     return sum(
-        len(set.intersection(*[set(person) for person in group.split("\n")])) for group in data
+        len(set.intersection(*[set(person) for person in group.splitlines()])) for group in data
     )
 
 
