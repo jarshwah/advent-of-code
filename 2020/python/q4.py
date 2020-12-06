@@ -14,7 +14,6 @@ def part_two(batchfile: str) -> int:
         r"(?=.*\biyr:(201\d|2020)\b)"
         r"(?=.*\beyr:(202\d|2030)\b)"
         r"(?=.*\bhgt:((1[5-8]\d|19[0-3])cm|(59|6\d|7[0-6])in)\b)"
-        r"(?=.*\bhgt:(?P<hgt>\d{2,3})(?P<units>(cm|in))\b)"
         r"(?=.*\bhcl:(#[0-9a-f]{6})\b)"
         r"(?=.*\becl:(amb|blu|brn|gry|grn|hzl|oth)\b)"
         r"(?=.*\bpid:(\d{9})\b)"
