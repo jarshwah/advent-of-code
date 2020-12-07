@@ -5,3 +5,6 @@ mypy
 ipython
 ipdb
 advent-of-code-data
+
+parse
+networkx
