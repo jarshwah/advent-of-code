@@ -36,9 +36,6 @@ class Instruction:
     def execute(self, pointer: int, acc: int) -> t.Tuple[int, int]:
         return self._exec(pointer, acc, self.opcode, self.num)
 
-    def rewind(self, pointer: int, acc: int) -> t.Tuple[int, int]:
-        return self._exec(pointer, acc, self.opcode, -self.num)
-
     def flipped(self) -> Instruction:
         if self.opcode is OpCode.acc:
             return self
@@ -79,14 +76,13 @@ def part_two(instructions: t.List[Instruction]) -> int:
         if pointer in seen:
             if flip_back >= 0:
                 # flipping this didn't work, so restore to original state
-                instruction = instructions[flip_back]
-                instructions[flip_back] = instruction.flipped()
+                instructions[flip_back] = instructions[flip_back].flipped()
 
             frame = stack.pop()
             seen = frame.seen
             acc = frame.acc
             pointer = frame.pointer
-            instruction = instructions[pointer].flipped()
+            instructions[pointer] = instructions[pointer].flipped()
             flip_back = pointer
         instruction = instructions[pointer]
         seen.add(pointer)
