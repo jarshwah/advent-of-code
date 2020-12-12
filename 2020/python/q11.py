@@ -58,7 +58,7 @@ class GameOfSeats:
                             changed = True
                         else:
                             target[y][x] = place
-            self.render(self.board_pointer)
+            # self.render(self.board_pointer)
         board = self.boards[self.board_pointer]
         return sum(filter(None, itertools.chain(*board)))
 
@@ -200,7 +200,7 @@ class GameOfSeats:
         print()
         print()
         print()
-        time.sleep(0.1)
+        time.sleep(0.01)
 
 
 def part_one(data: t.List[str]) -> int:
