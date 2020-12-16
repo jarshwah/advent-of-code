@@ -5,6 +5,8 @@ from parse import compile
 import typing as t
 import aocd
 
+from utils import only
+
 
 Range = t.Set[int]
 Sections = t.Dict[str, Range]
@@ -50,27 +52,27 @@ def part_two(sections: Sections, your_ticket: Ticket, nearby: Tickets) -> int:
     columns: t.List[Range] = [
         {ticket[n] for ticket in valid_tickets} for n in range(len(your_ticket))
     ]
-    mapping: t.Dict[str, Range] = defaultdict(set)
+    candidates: t.Dict[str, t.Set[int]] = defaultdict(set)
 
     # multiple candidates for each section
     for section, valid_range in sections.items():
         for idx, column in enumerate(columns):
             if not column - valid_range:
-                mapping[section].add(idx)
+                candidates[section].add(idx)
 
     # solve from smallest to largest
-    section_names = sorted(mapping, key=lambda k: len(mapping[k]))
+    section_names = sorted(candidates, key=lambda k: len(candidates[k]))
     for n, section_name in enumerate(section_names, 1):
-        if not len(mapping[section_name]) == 1:
-            raise ValueError("Not gonna work")
-        section_position = next(iter(mapping[section_name]))
+        if not len(candidates[section_name]) == 1:
+            raise ValueError("Go recurse all possibles")
+        section_position = only(candidates[section_name])
         # section now allocated, remove candidate from other sections
         for wrong_name in section_names[n:]:
-            mapping[wrong_name].discard(section_position)
+            candidates[wrong_name].discard(section_position)
 
     return math.prod(
-        your_ticket[next(iter(column))]
-        for section, column in mapping.items()
+        your_ticket[only(column)]
+        for section, column in candidates.items()
         if section.startswith("departure")
     )
 
