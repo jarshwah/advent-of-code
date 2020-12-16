@@ -26,13 +26,6 @@ def part_one(data: t.List[str]) -> int:
 def part_two(data: t.List[str]) -> int:
     memory = {}
 
-    test_data = [
-        "mask = 000000000000000000000000000000X1001X",
-        "mem[42] = 100",
-        "mask = 00000000000000000000000000000000X0XX",
-        "mem[26] = 1",
-    ]
-
     def gen_masks(mask: str) -> t.Iterable[str]:
         if "X" not in mask:
             yield mask
