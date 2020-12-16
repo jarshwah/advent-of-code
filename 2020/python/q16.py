@@ -42,12 +42,14 @@ def parse_input(
 
 def part_one(sections: Sections, your_ticket: Ticket, nearby: Tickets) -> int:
     valid = set(itertools.chain(*sections.values()))
-    return sum(itertools.chain(*(set(ticket) - valid for ticket in nearby)))
+    return sum(itertools.chain(*(set(ticket).difference(valid) for ticket in nearby)))
 
 
 def part_two(sections: Sections, your_ticket: Ticket, nearby: Tickets) -> int:
     valid_ranges = set(itertools.chain(*sections.values()))
-    valid_tickets = [ticket for ticket in nearby if not set(ticket) - valid_ranges] + [your_ticket]
+    valid_tickets = [ticket for ticket in nearby if set(ticket).issubset(valid_ranges)] + [
+        your_ticket
+    ]
 
     columns: t.List[Range] = [
         {ticket[n] for ticket in valid_tickets} for n in range(len(your_ticket))
@@ -57,7 +59,7 @@ def part_two(sections: Sections, your_ticket: Ticket, nearby: Tickets) -> int:
     # multiple candidates for each section
     for section, valid_range in sections.items():
         for idx, column in enumerate(columns):
-            if not column - valid_range:
+            if column.issubset(valid_range):
                 candidates[section].add(idx)
 
     # solve from smallest to largest
