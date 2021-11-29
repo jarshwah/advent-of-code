@@ -10,6 +10,8 @@
             100,
             120
         ],
+        "search.quickOpen.history.filterSortOrder": "recency",
+
         "python.formatting.provider": "black",
         "python.formatting.blackArgs": [
             "--line-length",
@@ -17,11 +19,23 @@
             "--fast"
         ],
         "[python]": {
-            "editor.formatOnSave": true
+            "editor.formatOnSave": true,
+            "editor.formatOnPaste": false,
+            "editor.formatOnSaveMode": "file",
+            "editor.codeActionsOnSave": {
+                "source.organizeImports": true
+            }
         },
+        "python.terminal.activateEnvInCurrentTerminal": true,
+        "python.terminal.activateEnvironment": true,
         "python.analysis.extraPaths": [
-            "2020/python/"
-        ]
+            "python"
+        ],
+        "python.linting.enabled": true,
+        "python.linting.lintOnSave": true,
+        "python.linting.flake8Enabled": true,
+        "python.linting.flake8Path": "flake8",
+        "python.linting.mypyEnabled": true,
     },
     "launch": {
         "version": "0.2.0",
@@ -31,7 +45,10 @@
                 "type": "python",
                 "request": "launch",
                 "program": "${file}",
-                "console": "integratedTerminal"
+                "console": "integratedTerminal",
+                "env": {
+                    "PYTHONPATH": "python"
+                }
             }
         ]
     }

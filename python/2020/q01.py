@@ -1,5 +1,5 @@
-import math
 import itertools
+import math
 import typing as t
 
 import aocd
