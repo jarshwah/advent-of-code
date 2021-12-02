@@ -3,14 +3,14 @@ import aocd
 import utils
 
 
-def part_one(numbers):
+def part_one(numbers: list[int]) -> int:
     """
     Find the count of increasing depth given a list of depths
     """
     return sum(pair[1] > pair[0] for pair in zip(numbers, numbers[1:]))
 
 
-def part_two(numbers):
+def part_two(numbers: list[int]) -> int:
     """
     Find the count of increasing depth for a 3 dimensional sliding window of depth sums
     """
