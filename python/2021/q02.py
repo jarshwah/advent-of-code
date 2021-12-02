@@ -3,9 +3,8 @@ import aocd
 
 def part_one(data: list[str]) -> int:
     position = depth = 0
-    for line in data:
-        direction, units = line.split()
-        units = int(units)
+    directions = [(x[0], int(x[1])) for x in [line.split() for line in data]]
+    for direction, units in directions:
         match direction:
             case "forward":
                 position += units
@@ -18,9 +17,8 @@ def part_one(data: list[str]) -> int:
 
 def part_two(data: list[str]) -> int:
     position = depth = aim = 0
-    for line in data:
-        direction, units = line.split()
-        units = int(units)
+    directions = [(x[0], int(x[1])) for x in [line.split() for line in data]]
+    for direction, units in directions:
         match direction:
             case "forward":
                 position += units
