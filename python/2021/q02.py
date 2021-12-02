@@ -1,42 +1,34 @@
-import typing as t
-
 import aocd
-from parse import compile
-
-import utils
-
-parser = compile("{direction} {unit:d}")
-DIRECTION = t.Literal["forward", "down", "up"]
-
-
-def _produce(lines: list[str]) -> t.Iterator[tuple[DIRECTION, int]]:
-    for line in lines:
-        found = utils.only(parser.findall(line))
-        yield found["direction"], found["unit"]
 
 
 def part_one(data: list[str]) -> int:
     position = depth = 0
-    for direction, units in _produce(data):
-        if direction == "forward":
-            position += units
-        elif direction == "down":
-            depth += units
-        elif direction == "up":
-            depth -= units
+    for line in data:
+        direction, units = line.split()
+        units = int(units)
+        match direction:
+            case "forward":
+                position += units
+            case "down":
+                depth += units
+            case "up":
+                depth -= units
     return position * depth
 
 
 def part_two(data: list[str]) -> int:
     position = depth = aim = 0
-    for direction, units in _produce(data):
-        if direction == "forward":
-            position += units
-            depth += units * aim
-        elif direction == "down":
-            aim += units
-        elif direction == "up":
-            aim -= units
+    for line in data:
+        direction, units = line.split()
+        units = int(units)
+        match direction:
+            case "forward":
+                position += units
+                depth += units * aim
+            case "down":
+                aim += units
+            case "up":
+                aim -= units
     return position * depth
 
 
