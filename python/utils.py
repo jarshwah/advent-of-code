@@ -18,3 +18,7 @@ def only(i: t.Iterable[G]) -> G:
     if len(consumed) != 1:
         raise ValueError(f"i had {len(consumed)} values")
     return consumed[0]
+
+
+def sort_by_length(iterables: t.Iterable[t.Sequence[G]]) -> t.Iterable[t.Sequence[G]]:
+    return sorted(iterables, key=len)
