@@ -10,7 +10,7 @@ from utils import Point, line_algorithm
 def parse(data: str) -> t.Iterable[tuple[Point, Point]]:
     for line in data.splitlines():
         l, r = line.split(" -> ")
-        yield [tuple(map(int, l.split(","))), tuple(map(int, r.split(",")))]
+        yield (tuple(map(int, l.split(","))), tuple(map(int, r.split(","))))
 
 
 def part_one(data: str) -> int:

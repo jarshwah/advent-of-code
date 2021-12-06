@@ -52,7 +52,7 @@ def line_algorithm(start: Point, end: Point) -> t.Iterable[Point]:
     D = 2 * dy - dx
     y = 0
 
-    for x in range(dx + 1):
+    for x in range(int(dx) + 1):
         yield x0 + x * xx + y * yx, y0 + x * xy + y * yy
         if D >= 0:
             y += 1
