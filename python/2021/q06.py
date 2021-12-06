@@ -18,7 +18,7 @@ def how_many_after(fish: list[int], days: int) -> int:
 
 
 def part_one(numbers: list[int]) -> int:
-    how_many_after(numbers, 80)
+    return how_many_after(numbers, 80)
 
 
 def part_two(numbers: list[int]) -> int:
