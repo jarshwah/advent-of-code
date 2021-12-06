@@ -4,8 +4,10 @@ G = t.TypeVar("G")
 Point = tuple[float, float]
 
 
-def int_numbers(input_data: str) -> t.List[int]:
-    return [int(num) for num in input_data.splitlines() if num.strip()]
+def int_numbers(input_data: str, sep=None) -> t.List[int]:
+    if sep is None:
+        return [int(num) for num in input_data.splitlines() if num.strip()]
+    return [int(num) for num in input_data.split(sep) if num.strip()]
 
 
 def first(i: t.Iterable[G]) -> G:
