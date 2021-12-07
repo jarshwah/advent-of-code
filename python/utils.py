@@ -58,3 +58,8 @@ def line_algorithm(start: Point, end: Point) -> t.Iterable[Point]:
             y += 1
             D -= 2 * dx
         D += 2 * dy
+
+
+def split_list(items: list) -> tuple[list, list]:
+    midpoint = len(items) // 2
+    return items[:midpoint], items[midpoint:]
