@@ -1,5 +1,3 @@
-from bisect import bisect_left
-from math import factorial
 from statistics import mean, median
 
 import aocd
@@ -12,34 +10,20 @@ def compute_changes(depths: list[int], target: int) -> int:
 
 
 def compute_changes_scaled(depths: list[int], target: int) -> int:
-    return sum(sum(range(1, int(abs(depth - target) + 1))) for depth in depths)
+    return sum(
+        utils.triangle_number(diff) for depth in depths if (diff := int(abs(target - depth)))
+    )
 
 
 def part_one(numbers: list[int]) -> int:
-    depths = sorted(numbers)
-    partition = depths
-    target = int(median(depths))
-    optimal = compute_changes(depths, target)
-    while len(partition) > 1:
-        target = int(median(partition))
-        changes = compute_changes(depths, target)
-        optimal = min(optimal, changes)
-        l, r = utils.split_list(partition)
-        lc = compute_changes(depths, median(l))
-        rc = compute_changes(depths, median(r))
-        if lc <= rc:
-            partition = l
-        else:
-            partition = r
-    return optimal
+    return compute_changes(numbers, median(numbers))
 
 
 def part_two(numbers: list[int]) -> int:
-    depths = sorted(numbers)
-    target = mean(depths)
-    low, high = int(target), int(target + 1)
-    lc = compute_changes_scaled(depths, low)
-    rc = compute_changes_scaled(depths, high)
+    target = int(mean(numbers))
+    # either integer surrounding the float
+    lc = compute_changes_scaled(numbers, target)
+    rc = compute_changes_scaled(numbers, target + 1)
     return min(lc, rc)
 
 
@@ -53,6 +37,6 @@ def test():
 
 if __name__ == "__main__":
     test()
-    numbers = utils.int_numbers(aocd.get_data(day=7, year=2021), sep=",")
+    numbers = sorted(utils.int_numbers(aocd.get_data(day=7, year=2021), sep=","))
     print("Part 1: ", part_one(numbers))
     print("Part 2: ", part_two(numbers))

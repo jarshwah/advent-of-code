@@ -1,3 +1,4 @@
+import functools
 import typing as t
 
 G = t.TypeVar("G")
@@ -63,3 +64,18 @@ def line_algorithm(start: Point, end: Point) -> t.Iterable[Point]:
 def split_list(items: list) -> tuple[list, list]:
     midpoint = len(items) // 2
     return items[:midpoint], items[midpoint:]
+
+
+def stepped_sum(start: int, end: int) -> int:
+    """
+    Compute the sum difference of integers between two numbers
+
+    ie: 2 -> 7
+        1 + 2 + 3 + 4 + 5 == 15
+    """
+    return triangle_number(abs(start - end))
+
+
+@functools.lru_cache(maxsize=1000)
+def triangle_number(n: int) -> int:
+    return int(n * (n + 1) / 2)
