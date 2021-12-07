@@ -76,6 +76,12 @@ def stepped_sum(start: int, end: int) -> int:
     return triangle_number(abs(start - end))
 
 
-@functools.lru_cache(maxsize=1000)
 def triangle_number(n: int) -> int:
-    return int(n * (n + 1) / 2)
+    """
+    Compute the triange number
+
+    The triangular number of 7 is 28
+
+    1 + 2 + 3 + 4 + 5 + 6 + 7
+    """
+    return n * (n + 1) // 2

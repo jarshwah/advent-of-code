@@ -5,18 +5,12 @@ import aocd
 import utils
 
 
-def compute_changes(depths: list[int], target: int) -> int:
-    return sum(int(abs(depth - target)) for depth in depths)
+def part_one(numbers: list[int]) -> int:
+    return sum(abs(depth - int(median(numbers))) for depth in numbers)
 
 
 def compute_changes_scaled(depths: list[int], target: int) -> int:
-    return sum(
-        utils.triangle_number(diff) for depth in depths if (diff := int(abs(target - depth)))
-    )
-
-
-def part_one(numbers: list[int]) -> int:
-    return compute_changes(numbers, median(numbers))
+    return sum(utils.triangle_number(abs(target - depth)) for depth in depths)
 
 
 def part_two(numbers: list[int]) -> int:
