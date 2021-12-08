@@ -1,4 +1,3 @@
-import functools
 import typing as t
 
 G = t.TypeVar("G")
