@@ -8,12 +8,6 @@ CLOSE = ")]}>"
 POINTS = [3, 57, 1197, 25137]
 
 
-def flip(ch: str) -> str:
-    if ch in CLOSE:
-        return OPEN[CLOSE.index(ch)]
-    return CLOSE[OPEN.index(ch)]
-
-
 def both_parts(lines: str) -> tuple[int, int]:
     a1 = 0
     a2 = []
@@ -23,7 +17,7 @@ def both_parts(lines: str) -> tuple[int, int]:
             if ch in OPEN:
                 stack.append(ch)
                 continue
-            if flip(ch) != stack.pop():
+            if OPEN[CLOSE.index(ch)] != stack.pop():
                 a1 += POINTS[CLOSE.index(ch)]
                 break
         else:
