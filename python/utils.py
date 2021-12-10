@@ -1,4 +1,6 @@
+import dataclasses
 import typing as t
+from collections import deque
 
 G = t.TypeVar("G")
 Point = tuple[float, float]
@@ -84,3 +86,72 @@ def triangle_number(n: int) -> int:
     1 + 2 + 3 + 4 + 5 + 6 + 7
     """
     return n * (n + 1) // 2
+
+
+def sum_points(*points: Point) -> Point:
+    return sum(p[0] for p in points), sum(p[1] for p in points)
+
+
+@dataclasses.dataclass
+class Grid(t.Generic[G]):
+    points: dict[Point, G]
+
+    UP = (0, -1)
+    DOWN = (0, 1)
+    LEFT = (-1, 0)
+    RIGHT = (1, 0)
+    UPLEFT = sum_points(UP, LEFT)
+    UPRIGHT = sum_points(UP, RIGHT)
+    DOWNLEFT = sum_points(DOWN, LEFT)
+    DOWNRIGHT = sum_points(DOWN, RIGHT)
+
+    def __init__(self, rows: t.Iterable[t.Iterable[G]]):
+        self.points = {}
+        for y, row in enumerate(rows):
+            for x, item in enumerate(row):
+                self.points[(x, y)] = item
+
+    @property
+    def _directions(self) -> list[Point]:
+        return [self.UP, self.DOWN, self.LEFT, self.RIGHT]
+
+    @property
+    def _directions_diag(self) -> list[Point]:
+        return self._directions + [self.UPLEFT, self.DOWNLEFT, self.UPRIGHT, self.DOWNRIGHT]
+
+    def get_neighbours(self, point: Point, diag: bool = False) -> t.Iterable[Point]:
+        directions = self._directions_diag if diag else self._directions
+        for d in directions:
+            p = sum_points(point, d)
+            if p in self.points:
+                yield p
+
+    def search(
+        self,
+        comparison_func: t.Callable[[tuple[Point, G], list[tuple[Point, G]]], bool],
+        diagonal: bool = False,
+    ) -> t.Iterable[tuple[Point, G]]:
+        for point in self.points.keys():
+            neighbours = [(n, self.points[n]) for n in self.get_neighbours(point, diag=diagonal)]
+            if comparison_func((point, self.points[point]), neighbours):
+                yield point, self.points[point]
+
+    def collect_recursive(
+        self,
+        point: Point,
+        comparison_func: t.Callable[[tuple[Point, G], list[tuple[Point, G]]], bool],
+        diagonal: bool = False,
+    ) -> t.Iterable[tuple[Point, G]]:
+        queue = deque([point])
+        seen = set()
+        found = set()
+        while queue:
+            p = queue.popleft()
+            if p in seen:
+                continue
+            seen.add(p)
+            neighbours = [(n, self.points[n]) for n in self.get_neighbours(p, diag=diagonal)]
+            if comparison_func((p, self.points[p]), neighbours):
+                found.add(p)
+                queue.extend([n[0] for n in neighbours])
+        return [(f, self.points[f]) for f in found]
