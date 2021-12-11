@@ -9,8 +9,7 @@ POINTS = [3, 57, 1197, 25137]
 
 
 def both_parts(lines: str) -> tuple[int, int]:
-    a1 = 0
-    a2 = []
+    a1, a2 = 0, []
     for line in lines:
         stack = []
         for ch in line:
