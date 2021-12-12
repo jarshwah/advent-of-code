@@ -1,25 +1,25 @@
-import math
-import typing as t
 from collections import deque
+from typing import Deque
 
 import aocd
 
-from utils import Grid
+from utils import Grid, Point
 
 
 def both_parts(grid: Grid) -> tuple[int, int]:
     flashes = 0
     a1 = 0
-    for step in range(1, 500):
-        queue = deque([])
-        # increase energy
-        for point, energy in grid.points.items():
-            energy += 1
-            grid.points[point] = energy
-            if energy > 9:
-                queue.append(point)
+    queue: Deque[Point] = deque([])
 
-        # flash
+    def _inc(p):
+        grid[p] += 1
+        if grid[p] > 9:
+            queue.append(p)
+
+    for step in range(1, 500):
+        for point in grid:
+            _inc(point)
+
         flashed = set()
         while queue:
             p = queue.popleft()
@@ -27,19 +27,17 @@ def both_parts(grid: Grid) -> tuple[int, int]:
                 continue
             flashed.add(p)
             for neighbour in grid.get_neighbours(p, diag=True):
-                grid.points[neighbour] += 1
-                if grid.points[neighbour] > 9:
-                    queue.append(neighbour)
+                _inc(neighbour)
 
-        # reset
         for point in flashed:
-            grid.points[point] = 0
+            grid[point] = 0
 
         flashes += len(flashed)
         if step == 100:
             a1 = flashes
-        if len(flashed) == len(grid.points):
+        if len(flashed) == len(grid):
             return a1, step
+    return -1, -1
 
 
 def test():

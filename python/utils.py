@@ -111,6 +111,21 @@ class Grid(t.Generic[G]):
             for x, item in enumerate(row):
                 self.points[(x, y)] = item
 
+    def __len__(self) -> int:
+        return self.points.__len__()
+
+    def __iter__(self):
+        return self.points.__iter__()
+
+    def __next__(self):
+        return self.points.__next__()
+
+    def __getitem__(self, index: Point) -> G:
+        return self.points[index]
+
+    def __setitem__(self, index: Point, value: G):
+        self.points[index] = value
+
     @property
     def _directions(self) -> list[Point]:
         return [self.UP, self.DOWN, self.LEFT, self.RIGHT]
@@ -138,11 +153,11 @@ class Grid(t.Generic[G]):
 
     def collect_recursive(
         self,
-        point: Point,
+        points: t.Iterable[Point],
         comparison_func: t.Callable[[tuple[Point, G], list[tuple[Point, G]]], bool],
         diagonal: bool = False,
     ) -> t.Iterable[tuple[Point, G]]:
-        queue = deque([point])
+        queue = deque(list(points))
         seen = set()
         found = set()
         while queue:

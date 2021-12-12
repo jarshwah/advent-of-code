@@ -22,7 +22,7 @@ def part_two(grid: Grid) -> int:
     low_points = [p for p, v in grid.search(mindepth)]
     sizes = []
     for lp in low_points:
-        matches = list(grid.collect_recursive(lp, notnine))
+        matches = list(grid.collect_recursive([lp], notnine))
         sizes.append(len(matches))
     top3 = sorted(sizes, reverse=True)[:3]
     return math.prod(top3)
