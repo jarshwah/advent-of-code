@@ -1,4 +1,4 @@
-import typing as t
+from functools import reduce
 
 import aocd
 from parse import parse
@@ -13,70 +13,36 @@ def parse_input(data: str) -> tuple[Points, list[Point]]:
     folds: list[Point] = []
     for line in data.splitlines():
         if r := parse("fold along {}={:d}", line):
-            d, v = r[0], r[1]
-            if d == "x":
-                folds.append((v, 0))
-            else:
-                folds.append((0, v))
-
-        elif r := parse("{:d},{:d}", line):
-            p = (r[0], r[1])
-            points[p] = True
+            folds.append((r[1], 0) if r[0] == "x" else (0, r[1]))
+        elif (xy := line.split(",")) and xy[0]:
+            points[tuple(map(int, xy))] = True
     return points, folds
 
 
 def transpose(points: Points, fold: Point) -> Points:
     x, y = fold
-    if x > 0:
-        return transpose_left(points, x)
-    else:
-        return transpose_up(points, y)
-
-
-def transpose_left(points: Points, x: float) -> Points:
     new_points: Points = {}
+    # Can reduce to an unreadable dict-comp
     for px, py in points:
-        if px < x:
-            new_points[px, py] = True
-        else:
-            nx = 2 * x - px
-            if nx >= 0:
-                new_points[nx, py] = True
-    return new_points
-
-
-def transpose_up(points: Points, y: float) -> Points:
-    new_points: Points = {}
-    for px, py in points:
-        if py < y:
-            new_points[px, py] = True
-        else:
-            ny = 2 * y - py
-            if ny >= 0:
-                new_points[px, ny] = True
+        nx = abs(x - abs(px - x))
+        ny = abs(y - abs(py - y))
+        new_points[nx, ny] = True
     return new_points
 
 
 def part_one(data: str) -> int:
     points, folds = parse_input(data)
-    fold = folds[0]
-    new_points = transpose(points, fold)
-    return sum(new_points.values())
+    new_points = transpose(points, folds[0])
+    return len(new_points)
 
 
-def part_two(data: str) -> int:
+def part_two(data: str) -> None:
     points, folds = parse_input(data)
-    for fold in folds:
-        print(f"{fold=}")
-        points = transpose(points, fold)
+    points = reduce(transpose, folds, points)
     max_x = max(point[0] for point in points)
     max_y = max(point[1] for point in points)
     for y in range(max_y + 1):
-        print()
-        for x in range(max_x + 1):
-            char = "#" if (x, y) in points else "."
-            print(char, end="")
-    print()
+        print("".join(" #"[(x, y) in points] for x in range(max_x + 1)))
 
 
 def test():
@@ -102,9 +68,7 @@ def test():
 fold along y=7
 fold along x=5"""
     answer_1 = part_one(test_input)
-    # answer_2 = part_two(test_input)
     assert answer_1 == 17, answer_1
-    # assert answer_2 == 1, answer_2
 
 
 if __name__ == "__main__":
