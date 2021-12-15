@@ -71,7 +71,7 @@ CN -> C"""
     answer_1 = part_one(test_input)
     answer_2 = part_two(test_input)
     assert answer_1 == 1588, answer_1
-    assert answer_2 == 2651311098752, answer_2
+    assert answer_2 == 2651311098752, answer_2  # this is wrong, wtf
 
 
 if __name__ == "__main__":
