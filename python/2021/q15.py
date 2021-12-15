@@ -2,35 +2,19 @@ from __future__ import annotations
 
 import aocd
 import networkx as nx
-from networkx.algorithms.shortest_paths.weighted import single_source_dijkstra
 
 from utils import Grid, Point
 
 
 def build_graph(data: str) -> tuple[nx.DiGraph, Point, Point, Point]:
-    grid = Grid(rows=((int(n) for n in row) for row in data.splitlines()))
-    first_stop = max(grid)
-    lx = first_stop[0] + 1
-    ly = first_stop[1] + 1
-    for y in range(ly):
-        for x in range(lx):
-            for yd in range(0, 5):
-                for xr in range(0, 5):
-                    if yd == xr == 0:
-                        continue
-                    newy = ly * yd + y
-                    newx = lx * xr + x
-                    weight = grid[x, y] + xr + yd
-                    if weight > 9:
-                        weight -= 9
-                    grid[newx, newy] = weight
-
-    graph = nx.DiGraph()
-    for point in grid:
-        neighbours = grid.get_neighbours(point)
-        for nb in neighbours:
-            graph.add_edge(point, nb, weight=grid[nb])
-    return graph, (0, 0), first_stop, max(grid)
+    grid = Grid.from_number_string(data)
+    original_x, original_y = max(grid)
+    new_grid = grid.replicate(right=5, down=5)
+    for x, y in new_grid:
+        new_grid[x, y] += (x // (original_x + 1)) + (y // (original_y + 1))
+        while new_grid[x, y] > 9:
+            new_grid[x, y] -= 9
+    return new_grid.to_graph(), (0, 0), (original_x, original_y), max(new_grid)
 
 
 def part_one(graph: nx.DiGraph, start: Point, target: Point) -> int:

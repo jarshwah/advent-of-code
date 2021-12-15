@@ -1,6 +1,11 @@
+from __future__ import annotations
+
 import dataclasses
 import typing as t
 from collections import deque
+from copy import deepcopy
+
+import networkx as nx
 
 G = t.TypeVar("G")
 Point = tuple[float, float]
@@ -111,6 +116,12 @@ class Grid(t.Generic[G]):
             for x, item in enumerate(row):
                 self.points[(x, y)] = item
 
+    @classmethod
+    def from_number_string(cls, data: str, separator=None):
+        if separator:
+            return Grid(rows=((int(n) for n in row.split(separator)) for row in data.splitlines()))
+        return Grid(rows=((int(n) for n in row) for row in data.splitlines()))
+
     def __len__(self) -> int:
         return self.points.__len__()
 
@@ -170,3 +181,27 @@ class Grid(t.Generic[G]):
                 found.add(p)
                 queue.extend([n[0] for n in neighbours])
         return [(f, self.points[f]) for f in found]
+
+    def to_graph(self, diagonal=False, weighted=True, directed=True) -> nx.Graph:
+        graph = nx.DiGraph() if directed else nx.Graph()
+        for point in self:
+            neighbours = self.get_neighbours(point, diag=diagonal)
+            for nb in neighbours:
+                if weighted:
+                    graph.add_edge(point, nb, weight=self[nb])
+                else:
+                    graph.add_edge(point, nb)
+        return graph
+
+    def replicate(self, right: int, down: int) -> Grid:
+        grid: Grid = Grid([])
+        size = max(self)
+        length_x = size[0] + 1
+        length_y = size[1] + 1
+        grid = deepcopy(self)
+        for y in range(length_y):
+            for x in range(length_x):
+                for d in range(0, down):
+                    for r in range(0, right):
+                        grid[length_x * r + x, length_y * d + y] = self[x, y]
+        return grid
