@@ -34,11 +34,11 @@ def build_graph(data: str) -> tuple[nx.DiGraph, Point, Point, Point]:
 
 
 def part_one(graph: nx.DiGraph, start: Point, target: Point) -> int:
-    return single_source_dijkstra(graph, start, target)[0]
+    return nx.shortest_path_length(graph, source=start, target=target, weight="weight")
 
 
 def part_two(graph: nx.DiGraph, start: Point, target: Point) -> int:
-    return single_source_dijkstra(graph, start, target)[0]
+    return nx.shortest_path_length(graph, source=start, target=target, weight="weight")
 
 
 def test():
