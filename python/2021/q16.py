@@ -13,12 +13,9 @@ def parse(data: str) -> None:
 
     def parse_packets(bits) -> tuple[int, str]:
         nonlocal versions
-        if not bits or int(bits, 2) == 0:
-            return 0, ""
-
-        version, type_id, bits = bits[:3], int(bits[3:6], 2), bits[6:]
-        versions += int(version, 2)
-        if type_id == 4:  # literal
+        version, type_id, bits = int(bits[:3], 2), int(bits[3:6], 2), bits[6:]
+        versions += version
+        if type_id == 4:
             literal = ""
             while True:
                 parity, chunk = partition(bits, 1)
@@ -31,19 +28,18 @@ def parse(data: str) -> None:
             packets = []
             length_type_id, bits = partition(bits, 1)
             if length_type_id == "0":
-                stlength, bits = partition(bits, 15)
-                tlength = int(stlength, 2)
-                subpackets, bits = partition(bits, tlength)
+                tlength, bits = partition(bits, 15)
+                subpackets, bits = partition(bits, int(tlength, 2))
                 while subpackets:
                     val, subpackets = parse_packets(subpackets)
                     packets.append(val)
             else:
                 spackets, bits = partition(bits, 11)
-                npackets = int(spackets, 2)
-                for _ in range(npackets):
+                for _ in range(int(spackets, 2)):
                     val, bits = parse_packets(bits)
                     packets.append(val)
 
+            # fmt: off
             match type_id:
                 case 0: return sum(packets), bits
                 case 1: return math.prod(packets), bits
@@ -53,6 +49,7 @@ def parse(data: str) -> None:
                 case 6: return (packets[0] < packets[1]), bits
                 case 7: return (packets[0] == packets[1]), bits
                 case _: raise ValueError(type_id)
+            # fmt: on
 
     val, bits = parse_packets(bits)
     return versions, val
