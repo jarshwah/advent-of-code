@@ -16,10 +16,9 @@ skip_glob="**/node_modules/*, **/migrations/**"
 src_paths = ""
 
 [tool.pyright]
-pythonVersion = "3.8"
+pythonVersion = "3.10"
 include = ["src"]
 exclude = [
-    "src/octoenergy/interfaces/packages",
     "**/node_modules",
     "**/static-src",
     "**/__pycache__",
