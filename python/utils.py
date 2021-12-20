@@ -9,6 +9,7 @@ import networkx as nx
 
 G = t.TypeVar("G")
 Point = tuple[float, float]
+SENTINEL = object()
 
 
 def int_numbers(input_data: str, sep=None) -> t.List[int]:
@@ -97,30 +98,37 @@ def sum_points(*points: Point) -> Point:
     return sum(p[0] for p in points), sum(p[1] for p in points)
 
 
+UP = (0, -1)
+DOWN = (0, 1)
+LEFT = (-1, 0)
+RIGHT = (1, 0)
+UPLEFT = sum_points(UP, LEFT)
+UPRIGHT = sum_points(UP, RIGHT)
+DOWNLEFT = sum_points(DOWN, LEFT)
+DOWNRIGHT = sum_points(DOWN, RIGHT)
+DIRECTIONS_4: list[Point] = [UP, RIGHT, DOWN, LEFT]
+DIRECTIONS_8: list[Point] = [UPLEFT, UP, UPRIGHT, RIGHT, DOWNRIGHT, DOWN, DOWNLEFT, LEFT]
+
+
 @dataclasses.dataclass
 class Grid(t.Generic[G]):
     points: dict[Point, G]
 
-    UP = (0, -1)
-    DOWN = (0, 1)
-    LEFT = (-1, 0)
-    RIGHT = (1, 0)
-    UPLEFT = sum_points(UP, LEFT)
-    UPRIGHT = sum_points(UP, RIGHT)
-    DOWNLEFT = sum_points(DOWN, LEFT)
-    DOWNRIGHT = sum_points(DOWN, RIGHT)
-
-    def __init__(self, rows: t.Iterable[t.Iterable[G]]):
+    def __init__(self, rows: t.Iterable[t.Iterable[G]], pad_with: t.Optional[G] = None):
         self.points = {}
+        self.pad_with = pad_with
         for y, row in enumerate(rows):
             for x, item in enumerate(row):
                 self.points[(x, y)] = item
 
     @classmethod
-    def from_number_string(cls, data: str, separator=None):
+    def from_number_string(cls, data: str, separator=None, pad_with: t.Optional[G] = None):
         if separator:
-            return Grid(rows=((int(n) for n in row.split(separator)) for row in data.splitlines()))
-        return Grid(rows=((int(n) for n in row) for row in data.splitlines()))
+            return Grid(
+                rows=((int(n) for n in row.split(separator)) for row in data.splitlines()),
+                pad_with=pad_with,
+            )
+        return Grid(rows=((int(n) for n in row) for row in data.splitlines()), pad_with=pad_with)
 
     def __len__(self) -> int:
         return self.points.__len__()
@@ -139,17 +147,20 @@ class Grid(t.Generic[G]):
 
     @property
     def _directions(self) -> list[Point]:
-        return [self.UP, self.DOWN, self.LEFT, self.RIGHT]
+        return DIRECTIONS_4
 
     @property
     def _directions_diag(self) -> list[Point]:
-        return self._directions + [self.UPLEFT, self.DOWNLEFT, self.UPRIGHT, self.DOWNRIGHT]
+        return DIRECTIONS_8
 
     def get_neighbours(self, point: Point, diag: bool = False) -> t.Iterable[Point]:
         directions = self._directions_diag if diag else self._directions
         for d in directions:
             p = sum_points(point, d)
-            if p in self.points:
+            if p in self:
+                yield p
+            elif self.pad_with is not None:
+                self[p] = self.pad_with
                 yield p
 
     def search(
@@ -205,3 +216,31 @@ class Grid(t.Generic[G]):
                     for r in range(0, right):
                         grid[length_x * r + x, length_y * d + y] = self[x, y]
         return grid
+
+    def add_padding(self, value: G):
+        low = min(self)
+        high = max(self)
+        new_top = low[1] - 1
+        new_bottom = high[1] + 1
+        new_left = low[0] - 1
+        new_right = high[0] + 1
+        for y in range(new_top, new_bottom + 1):
+            if y in (new_top, new_bottom):
+                for x in range(new_left, new_right + 1):
+                    self[x, y] = value
+            else:
+                self[new_left, y] = value
+                self[new_right, y] = value
+
+    def print(self):
+        gmin = min(self)
+        gmax = max(self)
+        for y in range(gmin[1], gmax[1] + 1):
+            line = [str(self[x, y]) for x in range(gmin[0], gmax[0] + 1)]
+            print("".join(line))
+        print()
+
+    def print_line(self, y: int):
+        gmin = min(self)
+        gmax = max(self)
+        print("".join([str(self[x, y]) for x in range(gmin[0], gmax[0] + 1)]))
