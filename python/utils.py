@@ -9,6 +9,7 @@ import networkx as nx
 
 G = t.TypeVar("G")
 Point = tuple[float, float]
+Point3d = tuple[float, float, float]
 SENTINEL = object()
 
 
@@ -244,3 +245,34 @@ class Grid(t.Generic[G]):
         gmin = min(self)
         gmax = max(self)
         print("".join([str(self[x, y]) for x in range(gmin[0], gmax[0] + 1)]))
+
+
+def rotations_90(point: Point3d) -> list[Point3d]:
+    """Produces all 24 90 degree rotations for a 3d Point"""
+    x, y, z = point
+    return [
+        (x, y, z),
+        (x, z, -y),
+        (x, -y, -z),
+        (x, -z, y),
+        (y, x, -z),
+        (y, z, x),
+        (y, -x, z),
+        (y, -z, -x),
+        (z, x, y),
+        (z, y, -x),
+        (z, -x, -y),
+        (z, -y, x),
+        (-x, y, -z),
+        (-x, z, y),
+        (-x, -y, z),
+        (-x, -z, -y),
+        (-y, x, z),
+        (-y, z, -x),
+        (-y, -x, -z),
+        (-y, -z, x),
+        (-z, x, -y),
+        (-z, y, x),
+        (-z, -x, y),
+        (-z, -y, -x),
+    ]
