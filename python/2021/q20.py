@@ -2,8 +2,6 @@ import aocd
 
 import utils
 
-flipper = str.maketrans("01", "10")
-
 
 def parse(data: str) -> tuple[str, utils.Grid[str]]:
     algo, grid_str = data.split("\n\n")
@@ -16,19 +14,20 @@ def enhance(algo: str, pixels: set[utils.Point], iterations: int, printer: bool 
     flasher = algo[0] == "#"
     for n in range(iterations):
         save_pixel = "." if flasher and (n % 2 == 0) else "#"
+        invert = flasher and save_pixel == "#"
         new_pixels: set[utils.Point] = set()
         # Our minimum value can be the bottom right pixel, so we need to extend
         # out in all directions.
         rlo, rhi, clo, chi = get_bounds(pixels)
-        for ri in range(rlo - 3, rhi + 3):
-            for ci in range(clo - 3, chi + 3):
+        for ri in range(rlo - 2, rhi + 3):
+            for ci in range(clo - 2, chi + 3):
                 point = (ri, ci)
                 neighbours = utils.neighbours(point, utils.DIRECTIONS_9)
-                pixel_key = "".join(["1" if nb in pixels else "0" for nb in neighbours])
-                if flasher and save_pixel == "#":
+                pixel_key = int("".join(["1" if nb in pixels else "0" for nb in neighbours]), 2)
+                if invert:
                     # Current pixels are OFF, so flip the key bits
-                    pixel_key = pixel_key.translate(flipper)
-                new_value = algo[int(pixel_key, 2)]
+                    pixel_key ^= 511
+                new_value = algo[pixel_key]
                 if new_value == save_pixel:
                     new_pixels.add(point)
         pixels = new_pixels
