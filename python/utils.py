@@ -225,18 +225,13 @@ class Grid(t.Generic[G]):
                         grid[length_r * newri + ri, length_c * newci + ci] = self[ri, ci]
         return grid
 
-    def print(self):
+    def print(self, missing: G):
         gmin = min(self)
         gmax = max(self)
         for r in range(gmin[1], gmax[1] + 1):
-            line = [str(self[r, c]) for c in range(gmin[0], gmax[0] + 1)]
+            line = [str(self.points.get((r, c), missing)) for c in range(gmin[0], gmax[0] + 1)]
             print("".join(line))
         print()
-
-    def print_line(self, r: int):
-        gmin = min(self)
-        gmax = max(self)
-        print("".join([str(self[r, c]) for c in range(gmin[0], gmax[0] + 1)]))
 
 
 def rotations_90(point: Point3d) -> list[Point3d]:
