@@ -99,16 +99,23 @@ def sum_points(*points: Point) -> Point:
     return sum(p[0] for p in points), sum(p[1] for p in points)
 
 
-UP = (0, -1)
-DOWN = (0, 1)
-LEFT = (-1, 0)
-RIGHT = (1, 0)
+# Represented as ROW, COLUMN (or y,x)
+CENTER = (0, 0)
+UP = (-1, 0)
+DOWN = (1, 0)
+LEFT = (0, -1)
+RIGHT = (0, 1)
 UPLEFT = sum_points(UP, LEFT)
 UPRIGHT = sum_points(UP, RIGHT)
 DOWNLEFT = sum_points(DOWN, LEFT)
 DOWNRIGHT = sum_points(DOWN, RIGHT)
 DIRECTIONS_4: list[Point] = [UP, RIGHT, DOWN, LEFT]
 DIRECTIONS_8: list[Point] = [UPLEFT, UP, UPRIGHT, RIGHT, DOWNRIGHT, DOWN, DOWNLEFT, LEFT]
+DIRECTIONS_9: list[Point] = [UPLEFT, UP, UPRIGHT, LEFT, CENTER, RIGHT, DOWNLEFT, DOWN, DOWNRIGHT]
+
+
+def neighbours(point: Point, directions: list[Point]) -> list[Point]:
+    return [sum_points(point, direction) for direction in directions]
 
 
 @dataclasses.dataclass
@@ -118,9 +125,9 @@ class Grid(t.Generic[G]):
     def __init__(self, rows: t.Iterable[t.Iterable[G]], pad_with: t.Optional[G] = None):
         self.points = {}
         self.pad_with = pad_with
-        for y, row in enumerate(rows):
-            for x, item in enumerate(row):
-                self.points[(x, y)] = item
+        for r, row in enumerate(rows):
+            for c, item in enumerate(row):
+                self.points[(r, c)] = item
 
     @classmethod
     def from_number_string(cls, data: str, separator=None, pad_with: t.Optional[G] = None):
@@ -208,43 +215,28 @@ class Grid(t.Generic[G]):
     def replicate(self, right: int, down: int) -> Grid:
         grid: Grid = Grid([])
         size = max(self)
-        length_x = size[0] + 1
-        length_y = size[1] + 1
+        length_r = size[0] + 1
+        length_c = size[1] + 1
         grid = deepcopy(self)
-        for y in range(length_y):
-            for x in range(length_x):
-                for d in range(0, down):
-                    for r in range(0, right):
-                        grid[length_x * r + x, length_y * d + y] = self[x, y]
+        for ri in range(length_r):
+            for ci in range(length_c):
+                for newri in range(down):
+                    for newci in range(right):
+                        grid[length_r * newri + ri, length_c * newci + ci] = self[ri, ci]
         return grid
-
-    def add_padding(self, value: G):
-        low = min(self)
-        high = max(self)
-        new_top = low[1] - 1
-        new_bottom = high[1] + 1
-        new_left = low[0] - 1
-        new_right = high[0] + 1
-        for y in range(new_top, new_bottom + 1):
-            if y in (new_top, new_bottom):
-                for x in range(new_left, new_right + 1):
-                    self[x, y] = value
-            else:
-                self[new_left, y] = value
-                self[new_right, y] = value
 
     def print(self):
         gmin = min(self)
         gmax = max(self)
-        for y in range(gmin[1], gmax[1] + 1):
-            line = [str(self[x, y]) for x in range(gmin[0], gmax[0] + 1)]
+        for r in range(gmin[1], gmax[1] + 1):
+            line = [str(self[r, c]) for c in range(gmin[0], gmax[0] + 1)]
             print("".join(line))
         print()
 
-    def print_line(self, y: int):
+    def print_line(self, r: int):
         gmin = min(self)
         gmax = max(self)
-        print("".join([str(self[x, y]) for x in range(gmin[0], gmax[0] + 1)]))
+        print("".join([str(self[r, c]) for c in range(gmin[0], gmax[0] + 1)]))
 
 
 def rotations_90(point: Point3d) -> list[Point3d]:
