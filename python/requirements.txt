@@ -8,3 +8,4 @@ advent-of-code-data
 
 parse
 networkx
+cython
