@@ -1,30 +1,31 @@
 from __future__ import annotations
 
 import dataclasses
-import typing as t
 from collections import deque
 from copy import deepcopy
+from typing import Callable, Generic, Iterable, Sequence, TypeVar
 
 import networkx as nx
 
-G = t.TypeVar("G")
+G = TypeVar("G")
 Point = tuple[float, float]
 Point3d = tuple[float, float, float]
+PointNd = TypeVar("PointNd", bound=tuple[float, ...])
 SENTINEL = object()
 
 
-def int_numbers(input_data: str, sep=None) -> t.List[int]:
+def int_numbers(input_data: str, sep=None) -> list[int]:
     if sep is None:
         return [int(num) for num in input_data.splitlines() if num.strip()]
     return [int(num) for num in input_data.split(sep) if num.strip()]
 
 
-def first(i: t.Iterable[G]) -> G:
+def first(i: Iterable[G]) -> G:
     """Goes boom if empty"""
     return next(iter(i))
 
 
-def only(i: t.Iterable[G]) -> G:
+def only(i: Iterable[G]) -> G:
     """Goes boom if len != 1"""
     consumed = list(i)
     if len(consumed) != 1:
@@ -32,11 +33,11 @@ def only(i: t.Iterable[G]) -> G:
     return consumed[0]
 
 
-def sort_by_length(iterables: t.Iterable[t.Sequence[G]]) -> t.Iterable[t.Sequence[G]]:
+def sort_by_length(iterables: Iterable[Sequence[G]]) -> Iterable[Sequence[G]]:
     return sorted(iterables, key=len)
 
 
-def line_algorithm(start: Point, end: Point) -> t.Iterable[Point]:
+def line_algorithm(start: Point, end: Point) -> Iterable[Point]:
     """
     Finds all points between `start` and `end` points.
     """
@@ -74,6 +75,10 @@ def split_list(items: list) -> tuple[list, list]:
     return items[:midpoint], items[midpoint:]
 
 
+def partition(seq: Sequence[G], idx: int) -> tuple[Sequence[G], Sequence[G]]:
+    return seq[:idx], seq[idx:]
+
+
 def stepped_sum(start: int, end: int) -> int:
     """
     Compute the sum difference of integers between two numbers
@@ -93,6 +98,18 @@ def triangle_number(n: int) -> int:
     1 + 2 + 3 + 4 + 5 + 6 + 7
     """
     return n * (n + 1) // 2
+
+
+def manhattan(p1: PointNd, p2: PointNd) -> int:
+    return sum(abs(a - b) for a, b in zip(p1, p2, strict=True))  # type: ignore
+
+
+def point_subtract(p1: PointNd, p2: PointNd) -> PointNd:
+    return tuple(a - b for a, b in zip(p1, p2, strict=True))  # type: ignore
+
+
+def point_add(p1: PointNd, p2: PointNd) -> PointNd:
+    return tuple(a + b for a, b in zip(p1, p2, strict=True))  # type: ignore
 
 
 def sum_points(*points: Point) -> Point:
@@ -119,10 +136,10 @@ def neighbours(point: Point, directions: list[Point]) -> list[Point]:
 
 
 @dataclasses.dataclass
-class Grid(t.Generic[G]):
+class Grid(Generic[G]):
     points: dict[Point, G]
 
-    def __init__(self, rows: t.Iterable[t.Iterable[G]], pad_with: t.Optional[G] = None):
+    def __init__(self, rows: Iterable[Iterable[G]], pad_with: G | None = None):
         self.points = {}
         self.pad_with = pad_with
         for r, row in enumerate(rows):
@@ -130,7 +147,7 @@ class Grid(t.Generic[G]):
                 self.points[(r, c)] = item
 
     @classmethod
-    def from_number_string(cls, data: str, separator=None, pad_with: t.Optional[G] = None):
+    def from_number_string(cls, data: str, separator=None, pad_with: G | None = None):
         if separator:
             return Grid(
                 rows=((int(n) for n in row.split(separator)) for row in data.splitlines()),
@@ -161,7 +178,7 @@ class Grid(t.Generic[G]):
     def _directions_diag(self) -> list[Point]:
         return DIRECTIONS_8
 
-    def get_neighbours(self, point: Point, diag: bool = False) -> t.Iterable[Point]:
+    def get_neighbours(self, point: Point, diag: bool = False) -> Iterable[Point]:
         directions = self._directions_diag if diag else self._directions
         for d in directions:
             p = sum_points(point, d)
@@ -173,9 +190,9 @@ class Grid(t.Generic[G]):
 
     def search(
         self,
-        comparison_func: t.Callable[[tuple[Point, G], list[tuple[Point, G]]], bool],
+        comparison_func: Callable[[tuple[Point, G], list[tuple[Point, G]]], bool],
         diagonal: bool = False,
-    ) -> t.Iterable[tuple[Point, G]]:
+    ) -> Iterable[tuple[Point, G]]:
         for point in self.points.keys():
             neighbours = [(n, self.points[n]) for n in self.get_neighbours(point, diag=diagonal)]
             if comparison_func((point, self.points[point]), neighbours):
@@ -183,10 +200,10 @@ class Grid(t.Generic[G]):
 
     def collect_recursive(
         self,
-        points: t.Iterable[Point],
-        comparison_func: t.Callable[[tuple[Point, G], list[tuple[Point, G]]], bool],
+        points: Iterable[Point],
+        comparison_func: Callable[[tuple[Point, G], list[tuple[Point, G]]], bool],
         diagonal: bool = False,
-    ) -> t.Iterable[tuple[Point, G]]:
+    ) -> Iterable[tuple[Point, G]]:
         queue = deque(list(points))
         seen = set()
         found = set()
