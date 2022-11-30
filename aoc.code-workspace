@@ -24,9 +24,10 @@
             "editor.formatOnSaveMode": "file",
             "editor.codeActionsOnSave": {
                 "source.organizeImports": true
-            }
+            },
         },
         "python.terminal.activateEnvInCurrentTerminal": true,
+        "python.terminal.executeInFileDir": true,
         "python.terminal.activateEnvironment": true,
         "python.analysis.extraPaths": [
             "python"
@@ -45,6 +46,7 @@
                 "type": "python",
                 "request": "launch",
                 "program": "${file}",
+                "cwd": "${fileDirname}",
                 "console": "integratedTerminal",
                 "env": {
                     "PYTHONPATH": "python"
