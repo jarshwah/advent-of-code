@@ -1,22 +1,19 @@
 import aocd
+import utils
 
 
 def part_one(data: str) -> int:
     """
     Find the sum of calories of the elf holding the most calories.
     """
-    return max(sum(int(cals) for cals in elf.split()) for elf in data.split("\n\n"))
+    return max(sum(group) for group in utils.Input(data).group().integers)
 
 
 def part_two(data: str) -> int:
     """
     Find the sum of the caolories of the top 3 elves holding the most calories.
     """
-    return sum(
-        sorted(
-            (sum(int(cals) for cals in elf.split()) for elf in data.split("\n\n")), reverse=True
-        )[:3]
-    )
+    return sum(sorted((sum(group) for group in utils.Input(data).group().integers))[-3:])
 
 
 def test():
