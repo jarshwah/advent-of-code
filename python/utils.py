@@ -6,6 +6,7 @@ from copy import deepcopy
 from typing import Callable, Generic, Iterable, Sequence, TypeVar
 
 import networkx as nx
+from parse import parse
 
 G = TypeVar("G")
 Point = tuple[float, float]
@@ -34,6 +35,9 @@ class Input:
     def float(self) -> float:
         return float(self.data)
 
+    def parse(self, parser: str):
+        return parse(parser, self.string)
+
     def split(self, sep: str | None = None) -> InputList:
         return InputList(data=[Input(data=token) for token in self.data.split(sep)])
 
@@ -61,6 +65,17 @@ class InputList:
     def floats(self) -> list[float]:
         return [inp.float for inp in self.data]
 
+    def parse(self, *parsers: str):
+        results = []
+        for s in self.strings:
+            for p in parsers:
+                if result := parse(p, s):
+                    results.append(result)
+                    break
+            else:
+                raise ValueError(f"{s} was not parsed")
+        return results
+
     def split(self, sep: str | None = None) -> InputGroup:
         return InputGroup(data=[inp.split(sep) for inp in self.data])
 
@@ -84,6 +99,9 @@ class InputGroup:
     @property
     def floats(self) -> list[list[float]]:
         return [inp.floats for inp in self.data]
+
+    def parse(self, *parsers: str):
+        return [inp.parse(*parsers) for inp in self.data]
 
 
 def int_numbers(input_data: str, sep=None) -> list[int]:
