@@ -14,6 +14,78 @@ PointNd = TypeVar("PointNd", bound=tuple[float, ...])
 SENTINEL = object()
 
 
+@dataclasses.dataclass
+class Input:
+    data: str
+
+    @property
+    def string(self) -> str:
+        return self.data
+
+    @property
+    def integer(self) -> int:
+        return int(self.data)
+
+    @property
+    def number(self) -> int:
+        return self.integer
+
+    @property
+    def float(self) -> float:
+        return float(self.data)
+
+    def split(self, sep: str | None = None) -> InputList:
+        return InputList(data=[Input(data=token) for token in self.data.split(sep)])
+
+    def group(self, group: str | None = "\n\n", sep: str | None = None) -> InputGroup:
+        return self.split(group).split(sep)
+
+
+@dataclasses.dataclass
+class InputList:
+    data: list[Input]
+
+    @property
+    def strings(self) -> list[str]:
+        return [inp.string for inp in self.data]
+
+    @property
+    def integers(self) -> list[int]:
+        return [inp.integer for inp in self.data]
+
+    @property
+    def numbers(self) -> list[int]:
+        return self.integers
+
+    @property
+    def floats(self) -> list[float]:
+        return [inp.float for inp in self.data]
+
+    def split(self, sep: str | None = None) -> InputGroup:
+        return InputGroup(data=[inp.split(sep) for inp in self.data])
+
+
+@dataclasses.dataclass
+class InputGroup:
+    data: list[InputList]
+
+    @property
+    def strings(self) -> list[list[str]]:
+        return [inp.strings for inp in self.data]
+
+    @property
+    def integers(self) -> list[list[int]]:
+        return [inp.integers for inp in self.data]
+
+    @property
+    def numbers(self) -> list[list[int]]:
+        return self.integers
+
+    @property
+    def floats(self) -> list[list[float]]:
+        return [inp.floats for inp in self.data]
+
+
 def int_numbers(input_data: str, sep=None) -> list[int]:
     if sep is None:
         return [int(num) for num in input_data.splitlines() if num.strip()]
