@@ -1,23 +1,43 @@
-import typing as t
-
 import aocd
-import utils
 
 
 def part_one(data: str) -> int:
-    return 1
+    """
+    Find the sum of calories of the elf holding the most calories.
+    """
+    return max(sum(int(cals) for cals in elf.split()) for elf in data.split("\n\n"))
 
 
 def part_two(data: str) -> int:
-    return 1
+    """
+    Find the sum of the caolories of the top 3 elves holding the most calories.
+    """
+    return sum(
+        sorted(
+            (sum(int(cals) for cals in elf.split()) for elf in data.split("\n\n")), reverse=True
+        )[:3]
+    )
 
 
 def test():
-    test_input = []
+    test_input = """1000
+2000
+3000
+
+4000
+
+5000
+6000
+
+7000
+8000
+9000
+
+10000"""
     answer_1 = part_one(test_input)
     answer_2 = part_two(test_input)
-    assert answer_1 == 1, answer_1
-    assert answer_2 == 1, answer_2
+    assert answer_1 == 24000, answer_1
+    assert answer_2 == 45000, answer_2
 
 
 if __name__ == "__main__":
