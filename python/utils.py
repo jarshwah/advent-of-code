@@ -100,6 +100,14 @@ class InputGroup:
     def floats(self) -> list[list[float]]:
         return [inp.floats for inp in self.data]
 
+    @property
+    def number_grid(self) -> Grid[int]:
+        return Grid(rows=self.numbers)
+
+    @property
+    def string_grid(self) -> Grid[str]:
+        return Grid(rows=self.strings)
+
     def parse(self, *parsers: str):
         return [inp.parse(*parsers) for inp in self.data]
 
