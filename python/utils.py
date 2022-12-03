@@ -177,6 +177,11 @@ def partition(seq: Sequence[G], idx: int) -> tuple[Sequence[G], Sequence[G]]:
     return seq[:idx], seq[idx:]
 
 
+def partition_middle(seq: Sequence[G]) -> tuple[Sequence[G], Sequence[G]]:
+    midpoint = len(seq) // 2
+    return seq[:midpoint], seq[midpoint:]
+
+
 def stepped_sum(start: int, end: int) -> int:
     """
     Compute the sum difference of integers between two numbers
