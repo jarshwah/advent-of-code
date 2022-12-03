@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import dataclasses
+import itertools
 from collections import deque
 from copy import deepcopy
 from typing import Callable, Generic, Iterable, Sequence, TypeVar
@@ -180,6 +181,10 @@ def partition(seq: Sequence[G], idx: int) -> tuple[Sequence[G], Sequence[G]]:
 def partition_middle(seq: Sequence[G]) -> tuple[Sequence[G], Sequence[G]]:
     midpoint = len(seq) // 2
     return seq[:midpoint], seq[midpoint:]
+
+
+def chunked(it: Iterable[G], n: int) -> Iterable[Iterable[G]]:
+    return itertools.zip_longest(*[iter(it)] * n)
 
 
 def stepped_sum(start: int, end: int) -> int:

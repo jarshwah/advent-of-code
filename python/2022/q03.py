@@ -1,5 +1,4 @@
 import string
-import typing as t
 
 import aocd
 import utils
@@ -19,9 +18,8 @@ def part_one(raw: str) -> int:
 def part_two(raw: str) -> int:
     total = 0
     rucksacks = utils.Input(raw).split().strings
-    for n in range(0, len(rucksacks), 3):
-        sacks = [set(sack) for sack in rucksacks[n : n + 3]]
-        common = utils.only(set.intersection(*sacks))
+    for sacks in utils.chunked(rucksacks, 3):
+        common = utils.only(set.intersection(*[set(sack) for sack in sacks]))
         total += priority.index(common)
     return total
 
