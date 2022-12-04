@@ -9,3 +9,4 @@ advent-of-code-data
 parse
 networkx
 cython
+more-itertools
