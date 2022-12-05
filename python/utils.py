@@ -183,8 +183,8 @@ def partition_middle(seq: Sequence[G]) -> tuple[Sequence[G], Sequence[G]]:
     return seq[:midpoint], seq[midpoint:]
 
 
-def chunked(it: Iterable[G], n: int) -> Iterable[Iterable[G]]:
-    return itertools.zip_longest(*[iter(it)] * n)
+def chunked(it: Iterable[G], n: int, fillvalue: G | None = None) -> Iterable[Iterable[G]]:
+    return itertools.zip_longest(*[iter(it)] * n, fillvalue=fillvalue)
 
 
 def stepped_sum(start: int, end: int) -> int:
