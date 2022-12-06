@@ -1,19 +1,17 @@
 import aocd
-import utils
 from more_itertools import windowed
 
 
 def part_one(raw: str) -> int:
-    return solve(raw, 4)
+    return find_marker(raw, 4)
 
 
 def part_two(raw: str) -> int:
-    return solve(raw, 14)
+    return find_marker(raw, 14)
 
 
-def solve(raw: str, marker: int) -> int:
-    data = utils.Input(raw).string
-    for idx, substr in enumerate(windowed(data, marker)):
+def find_marker(raw: str, marker: int) -> int:
+    for idx, substr in enumerate(windowed(raw, marker)):
         if len(set(substr)) == marker:
             return idx + marker
     return 1
