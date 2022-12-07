@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import typing as t
 from dataclasses import dataclass, field
+from functools import cached_property
 
 import aocd
 
@@ -18,7 +19,6 @@ class Directory:
     parent: Directory | None = None
     subdirs: dict[str, Directory] = field(default_factory=dict)
     files: dict[str, File] = field(default_factory=dict)
-    _size: int = field(init=False, repr=False, default=0)
 
     def cd(self, dirname: str) -> Directory:
         if dirname == "..":
@@ -28,15 +28,9 @@ class Directory:
     def file_found(self, filename: str, filesize: int) -> None:
         self.files.setdefault(filename, File(size=filesize, name=filename))
 
-    def _get_size(self) -> int:
-        return sum(f.size for f in self.files.values()) + sum(
-            d.size() for d in self.subdirs.values()
-        )
-
+    @cached_property
     def size(self) -> int:
-        if self._size == 0:
-            self._size = self._get_size()
-        return self._size
+        return sum(f.size for f in self.files.values()) + sum(d.size for d in self.subdirs.values())
 
     def tree(self) -> t.Iterable[Directory]:
         yield self
@@ -66,15 +60,15 @@ def parse_terminal(lines: list[str]) -> Directory:
 
 def part_one(raw: str) -> int:
     root = parse_terminal(raw.splitlines())
-    return sum(size_of for subdir in root.tree() if (size_of := subdir.size()) <= 100000)
+    return sum(size_of for subdir in root.tree() if (size_of := subdir.size) <= 100000)
 
 
 def part_two(raw: str) -> int:
     root = parse_terminal(raw.splitlines())
-    consumed = root.size()
+    consumed = root.size
     free = 70000000 - consumed
     target = 30000000 - free
-    return min(size_of for subdir in root.tree() if (size_of := subdir.size()) >= target)
+    return min(size_of for subdir in root.tree() if (size_of := subdir.size) >= target)
 
 
 def test():
