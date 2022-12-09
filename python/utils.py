@@ -269,9 +269,6 @@ class Grid(Generic[G]):
     def __iter__(self):
         return self.points.__iter__()
 
-    def __next__(self):
-        return self.points.__next__()
-
     def __getitem__(self, index: Point) -> G:
         return self.points[index]
 
