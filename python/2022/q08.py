@@ -1,8 +1,23 @@
+import math
+from collections import defaultdict, deque
+
 import aocd
 import utils
 
 
 def part_one(raw: str) -> int:
+    """
+    Scan each row and column backwards and forwards counting the number of visible
+    nodes and stopping when we hit a node that isn't visible.
+
+    The 4 loops are ugly, but perform 10 times better than the naive implementation
+    that visits every node and checks.
+
+    Complexity is O(n). In the worst case we visit every node 4 times.
+
+    $ python -m timeit -n 50 -s 'import q08, aocd; data = aocd.get_data(day=8, year=2022);' 'q08.part_one(data)'
+        50 loops, best of 5: 6.73 msec per loop
+    """
     grid = utils.Grid.from_number_string(raw)
     can_see = set()
     width = max(grid)[0] + 1
@@ -11,9 +26,9 @@ def part_one(raw: str) -> int:
         prev = -1
         for col_num in range(width):
             location = row_num, col_num
-            if grid[location] > prev:
+            if (height := grid[location]) > prev:
                 can_see.add(location)
-                prev = max(grid[location], prev)
+                prev = max(height, prev)
                 continue
 
     # look from top
@@ -21,9 +36,9 @@ def part_one(raw: str) -> int:
         prev = -1
         for col_num in range(width):
             location = col_num, row_num
-            if grid[location] > prev:
+            if (height := grid[location]) > prev:
                 can_see.add(location)
-                prev = max(grid[location], prev)
+                prev = max(height, prev)
                 continue
 
     # look from right
@@ -31,9 +46,9 @@ def part_one(raw: str) -> int:
         prev = -1
         for col_num in range(width - 1, -1, -1):
             location = row_num, col_num
-            if grid[location] > prev:
+            if (height := grid[location]) > prev:
                 can_see.add(location)
-                prev = max(grid[location], prev)
+                prev = max(height, prev)
                 continue
 
     # look from bottom
@@ -41,12 +56,46 @@ def part_one(raw: str) -> int:
         prev = -1
         for col_num in range(width - 1, -1, -1):
             location = col_num, row_num
-            if grid[location] > prev:
+            if (height := grid[location]) > prev:
                 can_see.add(location)
-                prev = max(grid[location], prev)
+                prev = max(height, prev)
                 continue
 
     return len(can_see)
+
+
+def part_one_alt(raw: str) -> int:
+    """
+    Visit every node and check for visibility towards each edge.
+
+    This is a much simpler implementation but is 10 times slower than the
+    original.
+
+    Complexity is O(n^2). In the worst case we visit every node n/4 times.
+
+    $ python -m timeit -n 50 -s 'import q08, aocd; data = aocd.get_data(day=8, year=2022);' 'q08.part_one_alt(data)'
+        50 loops, best of 5: 66.3 msec per loop
+    """
+    grid = utils.Grid.from_number_string(raw)
+    found = 0
+    for point in grid:
+        height = grid[point]
+        visible = False
+        for direction in utils.DIRECTIONS_4:
+            current = point
+            if visible:
+                break
+            while True:
+                current = utils.sum_points(current, direction)
+                if current not in grid:
+                    visible = True
+                    break
+                current_height = grid[current]
+                if current_height >= height:
+                    break
+        if visible:
+            found += 1
+    return found
 
 
 def part_two(raw: str) -> int:
