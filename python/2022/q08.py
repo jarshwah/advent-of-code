@@ -119,6 +119,62 @@ def part_two(raw: str) -> int:
     return best_view
 
 
+def part_two_alt(raw: str) -> int:
+    """
+    Find the visibility in all directions for each node then find the best
+    visibility by multiplying the visibility of each direction.
+
+    Visibility for a direction is determined by:
+        0 if the neighbour is outside the grid
+        1 if the neighbour is of equal or greater height
+        otherwise: the visibility of our neighbour + 1
+
+    We can recursively check the visibility of our neighbours and cache the
+    results.
+    """
+    grid = utils.Grid.from_number_string(raw)
+    seen: dict[
+        utils.Point, dict[utils.UP | utils.RIGHT | utils.DOWN | utils.LEFT, int]
+    ] = defaultdict(dict)
+    for point in grid:
+        queue = deque([(point, direction) for direction in utils.DIRECTIONS_4])
+        while queue:
+            node, direction = queue.popleft()
+            node_height = grid[node]
+            found = seen[node].get(direction)
+            if found:
+                continue
+
+            # 0 if neighbour is outside the grid
+            neighbour = utils.sum_points(node, direction)
+            if neighbour not in grid:
+                seen[node][direction] = 0
+                continue
+
+            # 1 if neighbour is of equal or greater height
+            neighbour_height = grid[neighbour]
+            if neighbour_height >= node_height:
+                seen[node][direction] = 1
+                continue
+
+            # otherwise, the visibility of our neighbour + 1
+            if direction in seen[neighbour]:
+                seen[node][direction] = seen[neighbour][direction] + 1
+                continue
+
+            # if we don't yet have neighbour visibility we add the neighbour
+            # onto the queue to recursively resolve, we'll recheck later
+            queue.appendleft((neighbour, direction))
+            # and when that has resolved, we'll need to re-resolve ourselves
+            queue.append((node, direction))
+
+    # everything now has a visibility score, so we take the product of all directions
+    # for each node and find the max
+    # (52, 86) == 52 * 12 * 46 * 6 == 172224
+    # TODO: some of the neighbours aren't computing properly... 🤔
+    return max(math.prod(directions.values()) for directions in seen.values())
+
+
 def test():
     test_input = """30373
 25512
