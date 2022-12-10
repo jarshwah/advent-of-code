@@ -263,11 +263,17 @@ class Grid(Generic[G]):
             )
         return Grid(rows=((int(n) for n in row) for row in data.splitlines()), pad_with=pad_with)
 
+    def get(self, key: G, default: G | None = None) -> G | None:
+        return self.points.get(key, default)
+
     def __len__(self) -> int:
         return self.points.__len__()
 
     def __iter__(self):
         return self.points.__iter__()
+
+    def __contains__(self, key: G) -> bool:
+        return key in self.points
 
     def __getitem__(self, index: Point) -> G:
         return self.points[index]
