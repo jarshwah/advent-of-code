@@ -53,7 +53,8 @@
                 "cwd": "${fileDirname}",
                 "console": "integratedTerminal",
                 "env": {
-                    "PYTHONPATH": "python"
+                    "PYTHONPATH": "python",
+                    "PYDEVD_CONTAINER_RANDOM_ACCESS_MAX_ITEMS": "10000"
                 }
             }
         ]
