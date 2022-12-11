@@ -4,6 +4,7 @@ import dataclasses
 import itertools
 from collections import deque
 from copy import deepcopy
+from functools import cached_property
 from typing import Callable, Generic, Iterable, Sequence, TypeVar
 
 import networkx as nx
@@ -280,6 +281,14 @@ class Grid(Generic[G]):
 
     def __setitem__(self, index: Point, value: G):
         self.points[index] = value
+
+    @cached_property
+    def width(self) -> int:
+        return max(self)[0] + 1
+
+    @cached_property
+    def height(self) -> int:
+        return max(self)[1] + 1
 
     @property
     def _directions(self) -> list[Point]:
