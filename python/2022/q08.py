@@ -1,5 +1,4 @@
-import math
-from collections import defaultdict, deque
+from collections import defaultdict
 
 import aocd
 import utils
@@ -99,6 +98,17 @@ def part_one_alt(raw: str) -> int:
 
 
 def part_two(raw: str) -> int:
+    """
+    Visit every node and check visibility along each direction.
+
+    The implementation is easy, but the performance isn't good, as we scan over
+    each node many times.
+
+    Complexity is O(n^2). In the worst case we visit every node n/4 times.
+
+    $ python -m timeit -n 10 -s 'import q08, aocd; data = aocd.get_data(day=8, year=2022);' 'q08.part_two(data)'
+        10 loops, best of 5: 83.6 msec per loop
+    """
     grid = utils.Grid.from_number_string(raw)
     best_view = 0
     for point in grid:
@@ -121,58 +131,67 @@ def part_two(raw: str) -> int:
 
 def part_two_alt(raw: str) -> int:
     """
-    Find the visibility in all directions for each node then find the best
-    visibility by multiplying the visibility of each direction.
+    Scan in each direction, keeping track of the last position we've seen from
+    each height. The viewing distance is the distance between the current point
+    and the last known point for that height.
 
-    Visibility for a direction is determined by:
-        0 if the neighbour is outside the grid
-        1 if the neighbour is of equal or greater height
-        otherwise: the visibility of our neighbour + 1
+    Complexity is O(n). In the worst case we visit every node 4 times.
 
-    We can recursively check the visibility of our neighbours and cache the
-    results.
+    The optimisation is to remember the previous location of each height. After
+    visiting each node, we set all heights equal to and lower to the current
+    position, since no smaller height can look past us.
+
+    $ python -m timeit -n 10 -s 'import q08, aocd; data = aocd.get_data(day=8, year=2022);' 'q08.part_two_alt(data)'
+        10 loops, best of 5: 19.9 msec per loop
     """
+    seen = defaultdict(lambda: 1)
     grid = utils.Grid.from_number_string(raw)
-    seen: dict[
-        utils.Point, dict[utils.UP | utils.RIGHT | utils.DOWN | utils.LEFT, int]
-    ] = defaultdict(dict)
-    for point in grid:
-        queue = deque([(point, direction) for direction in utils.DIRECTIONS_4])
-        while queue:
-            node, direction = queue.popleft()
-            node_height = grid[node]
-            found = seen[node].get(direction)
-            if found:
-                continue
+    width = max(grid)[0]
+    # look from the left moving right
+    for row_num in range(width + 1):
+        last_height = {n: 0 for n in range(10)}
+        for col_num in range(width + 1):
+            location = row_num, col_num
+            height = grid[location]
+            prev_pos = last_height[height]
+            seen[location] *= col_num - prev_pos
+            for n in range(height, -1, -1):
+                last_height[n] = col_num
 
-            # 0 if neighbour is outside the grid
-            neighbour = utils.sum_points(node, direction)
-            if neighbour not in grid:
-                seen[node][direction] = 0
-                continue
+    # look from top moving down
+    for col_num in range(width + 1):
+        last_height = {n: 0 for n in range(10)}
+        for row_num in range(width + 1):
+            location = row_num, col_num
+            height = grid[location]
+            prev_pos = last_height[height]
+            seen[location] *= row_num - prev_pos
+            for n in range(height, -1, -1):
+                last_height[n] = row_num
 
-            # 1 if neighbour is of equal or greater height
-            neighbour_height = grid[neighbour]
-            if neighbour_height >= node_height:
-                seen[node][direction] = 1
-                continue
+    # look from right moving left
+    for row_num in range(width, -1, -1):
+        last_height = {n: width for n in range(10)}
+        for col_num in range(width, -1, -1):
+            location = row_num, col_num
+            height = grid[location]
+            prev_pos = last_height[height]
+            seen[location] *= prev_pos - col_num
+            for n in range(height, -1, -1):
+                last_height[n] = col_num
 
-            # otherwise, the visibility of our neighbour + 1
-            if direction in seen[neighbour]:
-                seen[node][direction] = seen[neighbour][direction] + 1
-                continue
+    # look from bottom moving up
+    for col_num in range(width, -1, -1):
+        last_height = {n: width for n in range(10)}
+        for row_num in range(width, -1, -1):
+            location = row_num, col_num
+            height = grid[location]
+            prev_pos = last_height[height]
+            seen[location] *= prev_pos - row_num
+            for n in range(height, -1, -1):
+                last_height[n] = row_num
 
-            # if we don't yet have neighbour visibility we add the neighbour
-            # onto the queue to recursively resolve, we'll recheck later
-            queue.appendleft((neighbour, direction))
-            # and when that has resolved, we'll need to re-resolve ourselves
-            queue.append((node, direction))
-
-    # everything now has a visibility score, so we take the product of all directions
-    # for each node and find the max
-    # (52, 86) == 52 * 12 * 46 * 6 == 172224
-    # TODO: some of the neighbours aren't computing properly... 🤔
-    return max(math.prod(directions.values()) for directions in seen.values())
+    return max(seen.values())
 
 
 def test():
@@ -182,7 +201,7 @@ def test():
 33549
 35390"""
     answer_1 = part_one(test_input)
-    answer_2 = part_two(test_input)
+    answer_2 = part_two_alt(test_input)
     assert answer_1 == 21, answer_1
     assert answer_2 == 8, answer_2
 
@@ -191,4 +210,4 @@ if __name__ == "__main__":
     test()
     data = aocd.get_data(day=8, year=2022)
     print("Part 1: ", part_one(data))
-    print("Part 2: ", part_two(data))
+    print("Part 2: ", part_two_alt(data))
