@@ -21,11 +21,11 @@ def solve(raw: str, all_lowest: bool = False):
             num_row.append(ord(col))
         rows.append(num_row)
     grid = utils.Grid(rows=rows)
-    graph = nx.DiGraph()
-    for point in grid:
-        for neighbour in grid.get_neighbours(point):
-            if grid[point] >= grid[neighbour] - 1:
-                graph.add_edge(point, neighbour)
+
+    def is_connected(a: utils.Point, b: utils.Point) -> bool:
+        return grid[a] >= grid[b] - 1
+
+    graph = grid.to_graph(weighted=False, is_connected_func=is_connected)
     return min(
         nx.shortest_path_length(graph, source=start, target=end)
         for start in possible_starts

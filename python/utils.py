@@ -338,15 +338,22 @@ class Grid(Generic[G]):
                 queue.extend([n[0] for n in neighbours])
         return [(f, self.points[f]) for f in found]
 
-    def to_graph(self, diagonal=False, weighted=True, directed=True) -> nx.Graph:
+    def to_graph(
+        self,
+        diagonal=False,
+        weighted=True,
+        directed=True,
+        is_connected_func: Callable[[G, G], bool] | None = None,
+    ) -> nx.Graph:
         graph = nx.DiGraph() if directed else nx.Graph()
         for point in self:
             neighbours = self.get_neighbours(point, diag=diagonal)
             for nb in neighbours:
-                if weighted:
-                    graph.add_edge(point, nb, weight=self[nb])
-                else:
-                    graph.add_edge(point, nb)
+                if is_connected_func is None or is_connected_func(point, nb):
+                    if weighted:
+                        graph.add_edge(point, nb, weight=self[nb])
+                    else:
+                        graph.add_edge(point, nb)
         return graph
 
     def replicate(self, right: int, down: int) -> Grid:
