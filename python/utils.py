@@ -284,11 +284,11 @@ class Grid(Generic[G]):
 
     @cached_property
     def width(self) -> int:
-        return max(self)[0] + 1
+        return max(self)[1] + 1
 
     @cached_property
     def height(self) -> int:
-        return max(self)[1] + 1
+        return max(self)[0] + 1
 
     @property
     def _directions(self) -> list[Point]:
