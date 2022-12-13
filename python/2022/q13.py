@@ -13,16 +13,11 @@ def compare_recursive(left: RecursiveInt, right: RecursiveInt) -> int:
     match (left, right):
         case (int(left), int(right)):
             return left - right
-        case (list(left), list(right)) if not left:
-            return -1
-        case (list(left), list(right)) if not right:
-            return 1
-        case (list(left), list(right)) if len(left) < len(right):
-            return first([r for z in zip(left, right) if (r := compare_recursive(*z))] + [-1])
-        case (list(left), list(right)) if len(left) > len(right):
-            return first([r for z in zip(left, right) if (r := compare_recursive(*z))] + [1])
         case (list(left), list(right)):
-            return first([r for z in zip(left, right) if (r := compare_recursive(*z))] + [0])
+            return first(
+                [r for z in zip(left, right) if (r := compare_recursive(*z))]
+                + [len(left) - len(right)]
+            )
         case (int(left), list(right)):
             return compare_recursive([left], right)
         case (list(left), int(right)):
