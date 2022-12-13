@@ -1,60 +1,51 @@
 import itertools
 from ast import literal_eval
 from functools import cmp_to_key
-from typing import Literal, Type
 
 import aocd
 import utils
+from utils import first
 
 RecursiveInt = int | None | list["RecursiveInt"]
 
 
 def compare_recursive(left: RecursiveInt, right: RecursiveInt) -> int:
-    if left is None:
-        return -1
-    if right is None:
-        return 1
-    if isinstance(left, int) and isinstance(right, int):
-        if left < right:
+    match (left, right):
+        case (int(left), int(right)):
+            return left - right
+        case (list(left), list(right)) if not left:
             return -1
-        elif left > right:
+        case (list(left), list(right)) if not right:
             return 1
-        return 0
-
-    if isinstance(left, list) and isinstance(right, list):
-        if not left:
-            return -1
-        if not right:
-            return 1
-        for pair in itertools.zip_longest(left, right, fillvalue=None):
-            compared = compare_recursive(pair[0], pair[1])
-            if compared == 0:
-                continue
-            return compared
-        return 0
-    if isinstance(left, int):
-        return compare_recursive([left], right)
-    if isinstance(right, int):
-        return compare_recursive(left, [right])
-    raise ValueError(left, right)
+        case (list(left), list(right)) if len(left) < len(right):
+            return first([r for z in zip(left, right) if (r := compare_recursive(*z))] + [-1])
+        case (list(left), list(right)) if len(left) > len(right):
+            return first([r for z in zip(left, right) if (r := compare_recursive(*z))] + [1])
+        case (list(left), list(right)):
+            return first([r for z in zip(left, right) if (r := compare_recursive(*z))] + [0])
+        case (int(left), list(right)):
+            return compare_recursive([left], right)
+        case (list(left), int(right)):
+            return compare_recursive(left, [right])
 
 
 def part_one(raw: str) -> int:
-    ordered = []
-    for pair_num, pair in enumerate(utils.Input(raw).group("\n\n", sep="\n").strings, 1):
-        left = literal_eval(pair[0])
-        right = literal_eval(pair[1])
-        if compare_recursive(left, right) < 0:
-            ordered.append(pair_num)
-    return sum(ordered)
+    return sum(
+        pair_num
+        for pair_num, pair in enumerate(utils.Input(raw).group("\n\n", sep="\n").strings, 1)
+        if compare_recursive(literal_eval(pair[0]), literal_eval(pair[1])) < 0
+    )
 
 
 def part_two(raw: str) -> int:
-    packets = []
-    for pair in utils.Input(raw).group("\n\n", sep="\n").strings:
-        packets.extend([literal_eval(pair[0]), literal_eval(pair[1])])
-    packets.extend(([[2]], [[6]]))
-    sorted_packets = sorted(packets, key=cmp_to_key(compare_recursive))
+
+    packets = [
+        (literal_eval(pair[0]), literal_eval(pair[1]))
+        for pair in utils.Input(raw).group("\n\n", sep="\n").strings
+    ] + [([[2]], [[6]])]
+    sorted_packets = sorted(
+        itertools.chain.from_iterable(packets), key=cmp_to_key(compare_recursive)
+    )
 
     return (sorted_packets.index([[2]]) + 1) * (sorted_packets.index([[6]]) + 1)
 
