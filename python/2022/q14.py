@@ -1,4 +1,3 @@
-import copy
 import enum
 from ast import literal_eval
 
@@ -66,6 +65,59 @@ def part_two(cave: dict[str, M]) -> int:
     return grains
 
 
+def part_two_alt(raw: str) -> int:
+    """
+    Does not work yet.
+
+    Compute the 2-triangle number from the origin to the floor which gives us
+    the full possible triange.
+
+    Then remove the total count of rocks.
+
+    Then remove the 2-triange count from beneath each horizontal line of rocks,
+    since no sand can flow there (excluding spaces occupied by rocks).
+
+    Issues:
+        1. Rocks like ###.###.### should count as an uninterupted line where
+           the gaps would have been excluded by a previous triangle
+
+        2. Need to account for where a full side of a triangle is blocked by a
+           vertical wall (it cuts the triangle and stops sand getting in, expanding
+           the empty space within)
+    """
+    floor = 0
+    rocks = set()
+    empty = set()
+    horizontal_lines = []
+    for path in raw.splitlines():
+        paths = [tuple(reversed(literal_eval(point.strip()))) for point in path.split(" -> ")]
+        for from_point, to_point in more_itertools.pairwise(paths):
+            for rock in utils.line_algorithm(from_point, to_point):
+                rocks.add(rock)
+            floor = max(floor, to_point[0])
+            if from_point[0] == to_point[0]:
+                # capture horizontal lines so we can exclude the triangle beneath them
+                horizontal_lines.append((from_point, to_point))
+    floor += 2
+
+    # Remove the triangular space beneath each horizontal line
+    for from_point, to_point in horizontal_lines:
+        rnum = from_point[0]
+        cmin, cmax = sorted((from_point[1], to_point[1]))
+        rows = (cmax - cmin) // 2
+        for rdiff in range(1, rows + 1):
+            if rnum + rdiff >= floor:
+                break
+            for cdiff in range(cmin + rdiff, cmax - rdiff + 1):
+                excluded = (rnum + rdiff, cdiff)
+                empty.add(excluded)
+                # TODO: if we run into a rock on the right we have to stop
+                # TODO: if we run into a rock on the left, we shouldn't reduce the left
+                # TODO: empty triangles act as rocks when computing space beneath ie ###.### should be continuous
+    sand_can_occupy = floor**2
+    return sand_can_occupy - len(rocks | empty)
+
+
 def print_cave(cave: dict[utils.Point, M]) -> None:
     print()
     rmin = min(k[0] for k in cave)
@@ -76,7 +128,9 @@ def print_cave(cave: dict[utils.Point, M]) -> None:
         print("\n", end="")
         for c in range(cmin, cmax):
             p = (r, c)
-            if p in cave:
+            if p == (0, 500):
+                print("+", end="")
+            elif p in cave:
                 print(cave[p].value, end="")
             else:
                 print(M.AIR.value, end="")
@@ -86,15 +140,20 @@ def test():
     test_input = """498,4 -> 498,6 -> 496,6
 503,4 -> 502,4 -> 502,9 -> 494,9"""
     cave = parse(test_input)
-    answer_1 = part_one(copy.deepcopy(cave))
-    answer_2 = part_two(cave)
+    answer_1 = part_one(cave.copy())
+    answer_2 = part_two(cave.copy())
+    answer_2_alt = part_two_alt(test_input)
     assert answer_1 == 24, answer_1
     assert answer_2 == 93, answer_2
+    assert answer_2_alt == 93, answer_2_alt
 
 
 if __name__ == "__main__":
     test()
     data = aocd.get_data(day=14, year=2022)
     cave = parse(data)
-    print("Part 1: ", part_one(copy.deepcopy(cave)))
-    print("Part 2: ", part_two(cave))
+    print("Part 1: ", part_one(cave.copy()))
+    print("Part 2: ", part_two(cave.copy()))
+    # P2: 26625  P2Alt: 26854
+    # Answer too high  - see issues in alt docstring
+    print("Part 2 Alt (too high): ", part_two_alt(data))

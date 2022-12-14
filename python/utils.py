@@ -209,6 +209,17 @@ def triangle_number(n: int) -> int:
     return n * (n + 1) // 2
 
 
+def triange_number_2(n: int) -> int:
+    """
+    Compute the 2-triangle number
+
+    The triangular number of 7 is 49
+
+    1 + 3 + 5 + 7 + 9 + 11 + 13
+    """
+    return n**2
+
+
 def manhattan(p1: PointNd, p2: PointNd) -> int:
     return sum(abs(a - b) for a, b in zip(p1, p2, strict=True))  # type: ignore
 
