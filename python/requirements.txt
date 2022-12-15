@@ -11,3 +11,4 @@ parse
 networkx
 cython
 more-itertools
+z3-solver

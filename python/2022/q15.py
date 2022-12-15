@@ -1,69 +1,45 @@
-import typing as t
-from dataclasses import dataclass
-from functools import cached_property
-
 import aocd
 import utils
-from utils import Point, manhattan
-
-
-@dataclass
-class Sensor:
-    location: Point
-    beacon: Point
-
-    @cached_property
-    def manhattan(self):
-        return manhattan(self.location, self.beacon)
+import z3
 
 
 def part_one(raw: str, row: int) -> int:
     data = (
         utils.Input(raw)
-        .split("\n")
+        .lines()
         .parse("Sensor at x={:d}, y={:d}: closest beacon is at x={:d}, y={:d}")
     )
-    sensors: list[Sensor] = []
-    beacons: set[Point] = set()
-    for sx, sy, bx, by in data:
-        sensor = Sensor(location=(sy, sx), beacon=(by, bx))
-        sensors.append(sensor)
-        beacons.add(sensor.beacon)
-
-    coverage: list[tuple[Sensor, Point]] = []
-    for sensor in sensors:
-        mh = sensor.manhattan
-        for direction in ((-mh, 0), (0, mh), (mh, -0), (0, -mh)):
-            furthest = utils.sum_points(sensor.location, direction)
-            y1, y2 = sorted((sensor.location[0], furthest[0]))
-            if y1 <= row <= y2:
-                coverage.append((sensor, furthest))
-
     empty = set()
-    for (sensor, furthest) in coverage:
-        on_row = (row, furthest[1])
-        # scan left and right while the manhattan distance works
-        if manhattan(sensor.location, on_row) > sensor.manhattan:
-            raise ValueError(sensor)
-
-        empty.add(on_row)
-
-        for direction in (utils.LEFT, utils.RIGHT):
-            check = on_row
-            while True:
-                check = utils.sum_points(check, direction)
-                mh = manhattan(sensor.location, check)
-                if mh <= sensor.manhattan:
-                    empty.add(check)
-                    continue
+    for sx, sy, bx, by in data:
+        mh = abs(sx - bx) + abs(sy - by)
+        for dy, dx in ((-mh, 0), (mh, -0)):
+            cy = sy + dy
+            y1, y2 = sorted((sy, cy))
+            if y1 <= row <= y2:
+                cx = sx + dx
+                dist_rem = mh - abs(sy - row)
+                empty.update(range(cx - dist_rem, cx + dist_rem + 1))
                 break
-
-    return len(empty - beacons)
+    # minus the beacon on the line
+    return len(empty) - 1
 
 
 def part_two(raw: str, max_size: int) -> int:
-    data = utils.Input(raw)
-    return 1
+    data = (
+        utils.Input(raw)
+        .lines()
+        .parse("Sensor at x={:d}, y={:d}: closest beacon is at x={:d}, y={:d}")
+    )
+    x = z3.Int("x")
+    y = z3.Int("y")
+    solver = z3.Solver()
+    solver.add(x >= 0, x <= max_size, y >= 0, y <= max_size)
+    for sx, sy, bx, by in data:
+        manhattan = abs(sy - by) + abs(sx - bx)
+        solver.add(z3.Abs(sy - y) + z3.Abs(sx - x) > manhattan)
+    solver.check()
+    model = solver.model()
+    return model[x].as_long() * 4000000 + model[y].as_long()
 
 
 def test():
@@ -82,9 +58,9 @@ Sensor at x=16, y=7: closest beacon is at x=15, y=3
 Sensor at x=14, y=3: closest beacon is at x=15, y=3
 Sensor at x=20, y=1: closest beacon is at x=15, y=3"""
     answer_1 = part_one(test_input, row=10)
-    answer_2 = part_two(test_input, max_size=20)
+    # answer_2 = part_two(test_input, max_size=20)
     assert answer_1 == 26, answer_1
-    assert answer_2 == 56000011, answer_2
+    # assert answer_2 == 56000011, answer_2
 
 
 if __name__ == "__main__":

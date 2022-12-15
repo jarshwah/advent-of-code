@@ -40,6 +40,9 @@ class Input:
     def parse(self, parser: str):
         return parse(parser, self.string)
 
+    def lines(self) -> InputList:
+        return self.split("\n")
+
     def split(self, sep: str | None = None) -> InputList:
         return InputList(data=[Input(data=token) for token in self.data.split(sep)])
 
