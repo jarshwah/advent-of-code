@@ -4,7 +4,7 @@ import z3
 
 def part_one(raw: str) -> int:
     data = raw.splitlines()
-    solver = z3.Solver()
+    solver = z3.Optimize()
     terms = {}
     for line in data:
         monkey, equation = line.split(":")
@@ -43,7 +43,7 @@ def part_one(raw: str) -> int:
 
 def part_two(raw: str) -> int:
     data = raw.splitlines()
-    solver = z3.Solver()
+    solver = z3.Optimize()
     terms = {}
     for line in data:
         monkey, equation = line.split(":")
