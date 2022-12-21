@@ -5,6 +5,7 @@ import re
 from dataclasses import dataclass
 
 import aocd
+import networkx as nx
 import utils
 
 re_valves = re.compile(r"([A-Z]{2})")
@@ -16,6 +17,7 @@ class Frame:
     valve: str
     opened: frozenset[str]
     pressure: int
+    time: int
 
     def __eq__(self, other: Frame):
         return self.pressure == other.pressure
@@ -24,155 +26,82 @@ class Frame:
         return self.pressure < other.pressure
 
 
-@dataclass(eq=True, frozen=True)
-class Pair:
-    valves: tuple[str, str]
-    opened: frozenset[str]
-    pressure: int
-
-    def __eq__(self, other: Frame):
-        return self.pressure == other.pressure
-
-    def __lt__(self, other: Frame):
-        return self.pressure < other.pressure
-
-
-def part_one(raw: str) -> int:
-    paths = {}
-    already_open = set()
+def solve(raw: str, minutes: int, actors: int) -> int:
+    # Form a graph, and calculate the path/cost from going from all nodes with
+    # a useful valve to all other nodes with a useful valve, plus AA to each of
+    # them.
+    # Then we iterate through all possibilities going from USEFUL -> USEFUL rather
+    # than branching at each possible destination.
+    start = "AA"
+    useful: dict[str, int] = {}
+    graph = nx.Graph()
     for line in utils.Input(raw).lines().strings:
         valves = re_valves.findall(line)
         rate = int(re_rate.search(line)[1])
         curr_valve = valves[0]
         dest_valves = valves[1:]
-        paths[curr_valve] = (rate, tuple(dest_valves))
-        if rate == 0:
-            already_open.add(curr_valve)
+        if rate > 0:
+            useful[curr_valve] = rate
+        for dest in dest_valves:
+            graph.add_edge(curr_valve, dest)
 
-    # (valve, opened_valves) => pressure
-    best: dict[tuple[str, frozenset[str]], int] = {}
-    queue = [Frame("AA", frozenset(already_open), 0)]
-    for minute in range(30, 0, -1):
-        new_queue = []
-        for frame in queue:
-            lookup = (frame.valve, frame.opened)
-            if frame.pressure <= best.get(lookup, -1):
-                # We've visited here with higher pressure, abort path
+    # Compute all useful paths
+    lengths: dict[frozenset[str], int] = {}
+    for u1, u2 in itertools.combinations(useful, 2):
+        length = nx.shortest_path_length(graph, u1, u2)
+        lengths[frozenset((u1, u2))] = length
+    for u1 in useful:
+        length = nx.shortest_path_length(graph, start, u1)
+        lengths[frozenset((start, u1))] = length
+
+    finished: set[Frame] = set()
+    # (valve, visited) = (pressure, time)
+    best: dict[tuple[str, frozenset[str], int], int] = {}
+    queue = [Frame(start, frozenset(), 0, 1)]
+    while queue:
+        frame = queue.pop()
+        if len(frame.opened) >= 3:
+            finished.add(frame)
+
+        # Prune same paths where the time and pressure is lower
+        lookup = (frame.valve, frame.opened)
+        found = best.get(lookup)
+        if found and found[0] >= frame.pressure and found[1] <= frame.time:
+            continue
+        best[lookup] = (frame.pressure, frame.time)
+
+        try_next = []
+        for path, rate in useful.items():
+            if path in frame.opened:
                 continue
-            best[lookup] = frame.pressure
-            rate, dests = paths[frame.valve]
-            # Open the valve?
-            if frame.valve not in frame.opened:
-                new_queue.append(
+
+            cost = lengths[frozenset((frame.valve, path))]
+            dest_time = frame.time + cost + 1
+            if dest_time <= minutes:
+                try_next.append(
                     Frame(
-                        frame.valve,
-                        frame.opened | {frame.valve},
-                        frame.pressure + (rate * (minute - 1)),
+                        path,
+                        frame.opened | {path},
+                        frame.pressure + (rate * (minutes - dest_time + 1)),
+                        dest_time,
                     )
                 )
-            # Move to another valve
-            new_queue.extend(Frame(dest, frame.opened, frame.pressure) for dest in dests)
-        # recurse
-        queue = new_queue
-    return max(frame.pressure for frame in queue)
+        queue.extend(try_next)
 
+    ordered = sorted(finished, key=lambda f: f.pressure, reverse=True)
+    if actors == 1:
+        return ordered[0].pressure
 
-def part_two(raw: str) -> int:
-    # TODO:
-    # Form a graph, then compute the cost of going from every node to every
-    # other node. Exclude nodes with 0 flow, we don't ever want to rest there.
-    #
-    # Compute all paths and their flow rate under the time limit
-    #
-    # Then find the max sum of pairs with distinct paths that do not intersect starting
-    # from highest to lowest.
-    paths = {}
-    already_open = set()
-    for line in utils.Input(raw).lines().strings:
-        valves = re_valves.findall(line)
-        rate = int(re_rate.search(line)[1])
-        curr_valve = valves[0]
-        dest_valves = valves[1:]
-        paths[curr_valve] = (rate, tuple(dest_valves))
-        if rate == 0:
-            already_open.add(curr_valve)
+    if actors == 2:
+        optimal = 0
+        # Answer is within top 1500, don't look at them all
+        check = ((p1, p2) for p1 in ordered[:1500] for p2 in ordered[1:1500] if p1 != p2)
+        for p1, p2 in check:
+            if p1.opened.isdisjoint(p2.opened):
+                optimal = max(optimal, p1.pressure + p2.pressure)
+        return optimal
 
-
-def part_two_too_slow(raw: str) -> int:
-    paths = {}
-    already_open = set()
-    for line in utils.Input(raw).lines().strings:
-        valves = re_valves.findall(line)
-        rate = int(re_rate.search(line)[1])
-        curr_valve = valves[0]
-        dest_valves = valves[1:]
-        paths[curr_valve] = (rate, tuple(dest_valves))
-        if rate == 0:
-            already_open.add(curr_valve)
-
-    # ((valves,), opened_valves) => pressure
-    best: dict[tuple[tuple[str, str], frozenset[str]], int] = {}
-    queue = [Pair(("AA", "AA"), frozenset(already_open), 0)]
-    opening_combinations = list(itertools.product((True, False), repeat=2))
-    for minute in range(26, 0, -1):
-        new_queue = []
-        for frame in queue:
-            lookup = (frame.valves, frame.opened)
-            if frame.pressure <= best.get(lookup, -1):
-                # We've visited here with higher pressure, abort path
-                print(f"Found at {minute}: {lookup}")
-                continue
-            best[lookup] = frame.pressure
-            opened = frame.opened
-            pressure = frame.pressure
-            v1, v2 = frame.valves
-            same_valve = v1 == v2
-            rate1, dests1 = paths[v1]
-            rate2, dests2 = paths[v2]
-
-            for open1, open2 in opening_combinations:
-                match (open1, open2):
-                    case True, True if v1 not in opened and v2 not in opened and not same_valve:
-                        new_queue.append(
-                            Pair(
-                                (v1, v2),
-                                opened | {v1, v2},
-                                pressure + (rate1 * (minute - 1)) + (rate2 * (minute - 1)),
-                            )
-                        )
-
-                    case True, False if v1 not in opened:
-                        # Only open v1 and traverse v2
-                        new_queue.extend(
-                            Pair(
-                                (v1, dest),
-                                opened | {v1},
-                                pressure + (rate1 * (minute - 1)),
-                            )
-                            for dest in dests2
-                        )
-                    case False, True if v2 not in opened:
-                        # Only open v2 and traverse v1
-                        new_queue.extend(
-                            Pair(
-                                (dest, v2),
-                                opened | {v2},
-                                pressure + (rate2 * (minute - 1)),
-                            )
-                            for dest in dests1
-                        )
-                    case False, False:
-                        # Open neither, traverse both v1,v2, in all combinations
-                        new_queue.extend(
-                            Pair((d1, d2), opened, pressure)
-                            for d1, d2 in itertools.product(dests1, dests2)
-                        )
-                    case _:
-                        print("Continuing??")
-        if not new_queue:
-            print(f"No queue {minute}: {max(frame.pressure for frame in queue)}")
-        queue = new_queue
-    return max(frame.pressure for frame in queue)
+    raise ValueError(actors)
 
 
 def test():
@@ -186,8 +115,8 @@ Valve GG has flow rate=0; tunnels lead to valves FF, HH
 Valve HH has flow rate=22; tunnel leads to valve GG
 Valve II has flow rate=0; tunnels lead to valves AA, JJ
 Valve JJ has flow rate=21; tunnel leads to valve II"""
-    answer_1 = part_one(test_input)
-    answer_2 = part_two(test_input)
+    answer_1 = solve(test_input, 30, 1)
+    answer_2 = solve(test_input, 26, 2)
     assert answer_1 == 1651, answer_1
     assert answer_2 == 1707, answer_2
 
@@ -195,5 +124,5 @@ Valve JJ has flow rate=21; tunnel leads to valve II"""
 if __name__ == "__main__":
     test()
     data = aocd.get_data(day=16, year=2022)
-    print("Part 1: ", part_one(data))
-    # print("Part 2: ", part_two(data))
+    print("Part 1: ", solve(data, 30, 1))
+    print("Part 2: ", solve(data, 26, 2))
