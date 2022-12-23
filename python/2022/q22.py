@@ -212,7 +212,7 @@ B.#....#...A
     answer_1 = part_one(test_input)
     answer_2 = part_two(test_input)
     assert answer_1 == 6032, answer_1
-    assert answer_2 == 1, answer_2
+    assert answer_2 == 5031, answer_2
 
 
 if __name__ == "__main__":
