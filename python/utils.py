@@ -276,7 +276,7 @@ DIRECTIONS_9: list[Point] = [
 
 
 def neighbours(point: Point, directions: list[Point]) -> list[Point]:
-    return [sum_points(point, direction) for direction in directions]
+    return [(point[0] + d[0], point[1] + d[1]) for d in directions]
 
 
 @dataclasses.dataclass

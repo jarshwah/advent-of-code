@@ -1,27 +1,47 @@
-import typing as t
 from collections import deque
 
 import aocd
-import utils
-from utils import DOWN, DOWNLEFT, DOWNRIGHT, LEFT, RIGHT, UP, UPLEFT, UPRIGHT, Point
+from utils import (
+    DOWN,
+    DOWNLEFT,
+    DOWNRIGHT,
+    LEFT,
+    RIGHT,
+    UP,
+    UPLEFT,
+    UPRIGHT,
+    Point,
+    neighbours,
+)
 
 
 def solve(raw: str) -> tuple[int, int]:
-    grid = utils.Grid(rows=[[]])
+    grid: set[Point] = set()
+    directions8 = [
+        UPLEFT,
+        UP,
+        UPRIGHT,
+        RIGHT,
+        DOWNRIGHT,
+        DOWN,
+        DOWNLEFT,
+        LEFT,
+    ]
     considerations = deque(
         [
-            (UPLEFT, UP, UPRIGHT),
-            (DOWNLEFT, DOWN, DOWNRIGHT),
-            (UPLEFT, LEFT, DOWNLEFT),
-            (UPRIGHT, RIGHT, DOWNRIGHT),
+            (0, 1, 2),  # UPLEFT, UP, UPRIGHT
+            (4, 5, 6),  # DOWNRIGHT, DOWN, DOWNLEFT
+            (6, 7, 0),  # DOWNLEFT, LEFT, UPLEFT
+            (2, 3, 4),  # UPRIGHT, RIGHT, DOWNRIGHT
         ]
     )
+
     for row_num, line in enumerate(raw.splitlines()):
         for col_num, tile in enumerate(line):
             if tile == "#":
-                grid[row_num, col_num] = "#"
+                grid.add((row_num, col_num))
     size_at_10 = 0
-    for step in range(100000):
+    for step in range(2000):
         if step == 10:
             minr = min(elf[0] for elf in grid)
             maxr = max(elf[0] for elf in grid)
@@ -32,35 +52,27 @@ def solve(raw: str) -> tuple[int, int]:
             size_at_10 = (height * width) - len(grid)
         # to_point: from_point
         suggestions: dict[Point, Point] = {}
-        dupes: set[Point] = set()
         for elf in grid:
-            diag = list(grid.get_neighbours(elf, diag=True))
-            if not diag:
-                # No neighbours, stay put
+            surrounded = neighbours(elf, directions8)
+            if set(surrounded).isdisjoint(grid):
+                # No Neighbours, stay put
                 continue
-            found = False
             for consider in considerations:
-                if found:
-                    break
-                nbs = utils.neighbours(elf, directions=consider)
-                if any(nb in grid for nb in nbs):
-                    # Clash, keep checking
+                nbs = {surrounded[nb] for nb in consider}
+                if not nbs.isdisjoint(grid):
+                    # clash, keep checking
                     continue
-                # We move to the middle neighbour
-                move_to = nbs[1]
-                # dupe, we can't move there and won't consider any others
+                move_to = surrounded[consider[1]]
                 if move_to in suggestions:
-                    dupes.add(move_to)
+                    # dupe, we can't move there and won't consider any others
+                    suggestions.pop(move_to)
                     break
                 suggestions[move_to] = elf
-                found = True
                 break
-        # Cancel duplicates
-        for dupe in dupes:
-            suggestions.pop(dupe, None)
         # Now move them
         for new_pos, old_pos in suggestions.items():
-            grid[new_pos] = grid.points.pop(old_pos)
+            grid.discard(old_pos)
+            grid.add(new_pos)
 
         considerations.append(considerations.popleft())
         if not suggestions:
@@ -83,7 +95,7 @@ def test():
 
 
 if __name__ == "__main__":
-    test()
+    # test()
     data = aocd.get_data(day=23, year=2022)
     answer_1, answer_2 = solve(data)
     print("Part 1: ", answer_1)
