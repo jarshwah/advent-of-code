@@ -4,7 +4,7 @@ import dataclasses
 import enum
 
 import aocd
-from utils import Input, Point
+from utils import Point
 
 
 class Turn(str, enum.Enum):
@@ -20,20 +20,22 @@ class Facing(enum.IntEnum):
 
     @classmethod
     def rotate(cls, value: Facing, turn: Turn) -> Facing:
-        # fmt: off
-        match (value, turn):
-            case (Facing.L, Turn.L): return Facing.D
-            case (Facing.L, Turn.R): return Facing.U
+        match (turn):
+            case Turn.L:
+                return Facing((value.value - 1) % 4)
+            case Turn.R:
+                return Facing((value.value + 1) % 4)
 
-            case (Facing.U, Turn.L): return Facing.L
-            case (Facing.U, Turn.R): return Facing.R
-
-            case (Facing.R, Turn.L): return Facing.U
-            case (Facing.R, Turn.R): return Facing.D
-
-            case (Facing.D, Turn.L): return Facing.R
-            case (Facing.D, Turn.R): return Facing.L
-        # fmt: on
+    def move(self) -> tuple[int, int]:
+        match (self):
+            case Facing.R:
+                return (0, 1)
+            case Facing.D:
+                return (1, 0)
+            case Facing.L:
+                return (0, -1)
+            case Facing.U:
+                return (-1, 0)
 
 
 @dataclasses.dataclass
@@ -52,10 +54,22 @@ class Node:
     down: Node | None = None
 
     def __repr__(self) -> str:
-        return f"Node(row={self.row}, col={self.col}, empty={self.empty})"
+        return f"Node(row={self.row}, col={self.col}, empty={self.empty}, square={self.square})"
 
     def __str__(self) -> str:
-        return f"Node(({self.row},{self.col}): {'.' if self.empty else '#'})"
+        return f"Node(({self.row},{self.col}) [{self.square}]: {'.' if self.empty else '#'}"
+
+    @property
+    def square(self) -> int:
+        squares = {
+            (0, 1): 1,
+            (0, 2): 2,
+            (1, 1): 3,
+            (2, 1): 4,
+            (2, 0): 5,
+            (3, 0): 6,
+        }
+        return squares[self.row // 50, self.col // 50]
 
     def resolve_neighbours_plane(self, locations: dict[Point, Node]):
         right = (self.row, self.col + 1)
@@ -112,7 +126,6 @@ class Map:
                 self.direction = Facing.rotate(self.direction, rotation)
             case _:
                 raise ValueError(instruction)
-        # self.draw()
 
     def simulate(self) -> int:
         self.assert_nodes_have_neighbours()
@@ -188,35 +201,82 @@ def part_one(raw: str) -> int:
     return state.simulate()
 
 
+def edge_map(row: int, col: int, facing: Facing) -> tuple[int, int, Facing]:
+    """
+     12
+     3
+     4
+    65
+    """
+    squares = {
+        (0, 1): 1,
+        (0, 2): 2,
+        (1, 1): 3,
+        (2, 1): 4,
+        (2, 0): 5,
+        (3, 0): 6,
+    }
+    square = squares[row // 50, col // 50]
+    # fmt: off
+    match (square, facing):
+        case (2, Facing.R): return (149 - row % 50, 99, Facing.L)
+        case (2, Facing.D): return (50 + col % 50, 99, Facing.L)
+        case (2, Facing.U): return (199, col - 100, Facing.U)
+        case (1, Facing.L): return (149 - row % 50, 0, Facing.R)
+        case (1, Facing.U): return (150 + col % 50, 0, Facing.R)
+        case (3, Facing.R): return (49, 100 + row % 50, Facing.U)
+        case (3, Facing.L): return (100, row % 50, Facing.D)
+        case (4, Facing.R): return (49 - row % 50, 149, Facing.L)
+        case (4, Facing.D): return (150 + col % 50, 49, Facing.L)
+        case (5, Facing.L): return (49 - row % 50, 50, Facing.R)
+        case (5, Facing.U): return (50 + col % 50, 50, Facing.R)
+        case (6, Facing.R): return (149, 50 + row % 50, Facing.U)
+        case (6, Facing.D): return (0, 100 + col, Facing.D)
+        case (6, Facing.L): return (0, 50 + row % 50, Facing.D)
+        case _: raise ValueError(square, facing)
+    # fmt: on
+
+
 def part_two(raw: str) -> int:
-    data = Input(raw)
-    return 1
+    cube_net, instr = raw.split("\n\n")
+    instructions = parse_instructions(instr)
+    locations = parse_locations(cube_net)
+    prow, pcol = min(locations)
+    facing = Facing.R
+    for instruction in instructions:
+        match instruction:
+            case Instruction(Turn(rotation)):
+                facing = facing.rotate(facing, rotation)
+            case Instruction(int(steps)):
+                for _ in range(steps):
+                    nrow, ncol = facing.move()
+                    pos = locations.get((prow + nrow, pcol + ncol))
+                    if pos is None:
+                        nrow, ncol, nfacing = edge_map(prow, pcol, facing)
+                        if not locations[nrow, ncol].empty:
+                            # Wall on edge
+                            break
+                        prow = nrow
+                        pcol = ncol
+                        facing = nfacing
+                    elif pos.empty:
+                        prow += nrow
+                        pcol += ncol
+                    else:
+                        break
+
+    return 1000 * (prow + 1) + 4 * (pcol + 1) + facing.value
 
 
 def test():
     # has trailing whitespace so read from file
-    example = """        ...#
-        .#..
-        #...
-        ....
-...#.D.....#
-........#...
-B.#....#...A
-.....C....#.
-        ...#....
-        .....#..
-        .#......
-        ......#.
-"""
     test_input = open("./q22.example").read()
     answer_1 = part_one(test_input)
-    answer_2 = part_two(test_input)
     assert answer_1 == 6032, answer_1
-    assert answer_2 == 5031, answer_2
 
 
 if __name__ == "__main__":
     test()
     data = aocd.get_data(day=22, year=2022)
     print("Part 1: ", part_one(data))
-    # print("Part 2: ", part_two(data))
+    print("Part 2: ", part_two(data))
