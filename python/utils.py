@@ -13,6 +13,7 @@ from parse import parse
 G = TypeVar("G")
 Point = tuple[float, float]
 Point3d = tuple[float, float, float]
+Point4d = tuple[float, float, float, float]
 PointNd = TypeVar("PointNd", bound=tuple[float, ...])
 SENTINEL = object()
 
