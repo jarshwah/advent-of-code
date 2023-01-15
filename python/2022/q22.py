@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 import enum
+from typing import Callable
 
 import aocd
 from utils import Point
@@ -18,13 +19,12 @@ class Facing(enum.IntEnum):
     L = 2
     U = 3
 
-    @classmethod
-    def rotate(cls, value: Facing, turn: Turn) -> Facing:
+    def rotate(self, turn: Turn) -> Facing:
         match (turn):
             case Turn.L:
-                return Facing((value.value - 1) % 4)
+                return Facing((self.value - 1) % 4)
             case Turn.R:
-                return Facing((value.value + 1) % 4)
+                return Facing((self.value + 1) % 4)
 
     def move(self) -> tuple[int, int]:
         match (self):
@@ -48,123 +48,12 @@ class Node:
     row: int
     col: int
     empty: bool
-    left: Node | None = None
-    up: Node | None = None
-    right: Node | None = None
-    down: Node | None = None
 
     def __repr__(self) -> str:
-        return f"Node(row={self.row}, col={self.col}, empty={self.empty}, square={self.square})"
+        return f"Node(row={self.row}, col={self.col}, empty={self.empty})"
 
     def __str__(self) -> str:
-        return f"Node(({self.row},{self.col}) [{self.square}]: {'.' if self.empty else '#'}"
-
-    @property
-    def square(self) -> int:
-        squares = {
-            (0, 1): 1,
-            (0, 2): 2,
-            (1, 1): 3,
-            (2, 1): 4,
-            (2, 0): 5,
-            (3, 0): 6,
-        }
-        return squares[self.row // 50, self.col // 50]
-
-    def resolve_neighbours_plane(self, locations: dict[Point, Node]):
-        right = (self.row, self.col + 1)
-        if right not in locations:
-            right = (self.row, min(nb.col for nb in locations.values() if nb.row == self.row))
-        self.right = locations[right]
-
-        left = (self.row, self.col - 1)
-        if left not in locations:
-            left = (self.row, max(nb.col for nb in locations.values() if nb.row == self.row))
-        self.left = locations[left]
-
-        down = (self.row + 1, self.col)
-        if down not in locations:
-            down = (min(nb.row for nb in locations.values() if nb.col == self.col), self.col)
-        self.down = locations[down]
-
-        up = (self.row - 1, self.col)
-        if up not in locations:
-            up = (max(nb.row for nb in locations.values() if nb.col == self.col), self.col)
-        self.up = locations[up]
-
-
-@dataclasses.dataclass
-class Map:
-    pointer: Node
-    direction: Facing
-    locations: dict[Point, Node]
-    instructions: int
-
-    def move(self, steps: int) -> Node:
-        # fmt: off
-        match (self.direction):
-            case Facing.L: attr = "left"
-            case Facing.U: attr = "up"
-            case Facing.R: attr = "right"
-            case Facing.D: attr = "down"
-            case _: raise ValueError(self.direction)
-        # fmt: on
-        curr = self.pointer
-        for _ in range(steps):
-            check: Node = getattr(curr, attr)
-            if check.empty:
-                curr = check
-                continue
-            break
-        self.pointer = curr
-
-    def process_instruction(self, instruction: Instruction):
-        match (instruction):
-            case Instruction(int(steps)):
-                self.move(steps)
-            case Instruction(Turn(rotation)):
-                self.direction = Facing.rotate(self.direction, rotation)
-            case _:
-                raise ValueError(instruction)
-
-    def simulate(self) -> int:
-        self.assert_nodes_have_neighbours()
-        for instruction in self.instructions:
-            self.process_instruction(instruction)
-        row = self.pointer.row
-        col = self.pointer.col
-        return (1000 * (row + 1)) + (4 * (col + 1)) + self.direction.value
-
-    def assert_nodes_have_neighbours(self):
-        for node in self.locations.values():
-            assert node.right, node
-            assert node.down, node
-            assert node.left, node
-            assert node.up, node
-
-    def draw(self):
-        print(end="\n\n")
-        facing = ">"
-        # fmt: off
-        if self.direction == Facing.L: facing = "<"
-        elif self.direction == Facing.R: facing = ">"
-        elif self.direction == Facing.D: facing = "v"
-        elif self.direction == Facing.U: facing = "^"
-        # fmt: on
-        maxr = max(point[0] for point in self.locations)
-        maxc = max(point[1] for point in self.locations)
-        for rn in range(maxr + 1):
-            line = ""
-            for cn in range(maxc + 1):
-                if self.pointer.row == rn and self.pointer.col == cn:
-                    line += facing
-                    continue
-                loc = self.locations.get((rn, cn))
-                if not loc:
-                    line += " "
-                    continue
-                line += "." if loc.empty else "#"
-            print(line)
+        return f"Node(({self.row},{self.col}): {'.' if self.empty else '#'}"
 
 
 def parse_instructions(instructions: str) -> list[Instruction]:
@@ -190,18 +79,23 @@ def parse_locations(grid: str) -> dict[Point, Node]:
     return locations
 
 
-def part_one(raw: str) -> int:
-    grid, instr = raw.split("\n\n")
-    instructions = parse_instructions(instr)
-    locations = parse_locations(grid)
-    for node in locations.values():
-        node.resolve_neighbours_plane(locations)
-    pointer = locations[min(locations)]
-    state = Map(pointer=pointer, direction=Facing.R, locations=locations, instructions=instructions)
-    return state.simulate()
+def edge_map_2d(
+    row: int, col: int, facing: Facing, locations: dict[Point, Node]
+) -> tuple[int, int, Facing]:
+    match facing:
+        case Facing.R:
+            return (row, min(nb.col for nb in locations.values() if nb.row == row), facing)
+        case Facing.L:
+            return (row, max(nb.col for nb in locations.values() if nb.row == row), facing)
+        case Facing.D:
+            return (min(nb.row for nb in locations.values() if nb.col == col), col, facing)
+        case Facing.U:
+            return (max(nb.row for nb in locations.values() if nb.col == col), col, facing)
 
 
-def edge_map(row: int, col: int, facing: Facing) -> tuple[int, int, Facing]:
+def edge_map_3d(
+    row: int, col: int, facing: Facing, locations: dict[Point, Node]
+) -> tuple[int, int, Facing]:
     """
      12
      3
@@ -237,7 +131,9 @@ def edge_map(row: int, col: int, facing: Facing) -> tuple[int, int, Facing]:
     # fmt: on
 
 
-def part_two(raw: str) -> int:
+def solve(
+    raw: str, edge_map: Callable[[int, int, Facing, dict[Point, Node]], tuple[int, int, Facing]]
+) -> int:
     cube_net, instr = raw.split("\n\n")
     instructions = parse_instructions(instr)
     locations = parse_locations(cube_net)
@@ -246,13 +142,13 @@ def part_two(raw: str) -> int:
     for instruction in instructions:
         match instruction:
             case Instruction(Turn(rotation)):
-                facing = facing.rotate(facing, rotation)
+                facing = facing.rotate(rotation)
             case Instruction(int(steps)):
                 for _ in range(steps):
                     nrow, ncol = facing.move()
                     pos = locations.get((prow + nrow, pcol + ncol))
                     if pos is None:
-                        nrow, ncol, nfacing = edge_map(prow, pcol, facing)
+                        nrow, ncol, nfacing = edge_map(prow, pcol, facing, locations)
                         if not locations[nrow, ncol].empty:
                             # Wall on edge
                             break
@@ -271,12 +167,12 @@ def part_two(raw: str) -> int:
 def test():
     # has trailing whitespace so read from file
     test_input = open("./q22.example").read()
-    answer_1 = part_one(test_input)
+    answer_1 = solve(test_input, edge_map_2d)
     assert answer_1 == 6032, answer_1
 
 
 if __name__ == "__main__":
     test()
     data = aocd.get_data(day=22, year=2022)
-    print("Part 1: ", part_one(data))
-    print("Part 2: ", part_two(data))
+    print("Part 1: ", solve(data, edge_map_2d))
+    print("Part 2: ", solve(data, edge_map_3d))
