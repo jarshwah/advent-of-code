@@ -1,7 +1,4 @@
 ruff
-isort
-flake8
-black
 mypy
 ipython
 ipdb
@@ -13,3 +10,4 @@ cython
 more-itertools
 z3-solver
 numpy
+pyparsing

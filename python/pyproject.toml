@@ -1,25 +1,35 @@
-[tool.black]
-line-length = 99
-skip-numeric-underscore-normalization = 1
-target-version = ["py310"]
-
-[tool.isort]
-multi_line_output = 3
-include_trailing_comma = "True"
-force_grid_wrap = 0
-known_third_party = "aocd"
-known_first_party = "utils"
-default_section = "THIRDPARTY"
-use_parentheses = "True"
-line_length = 99
-skip_glob="**/node_modules/*, **/migrations/**"
-src_paths = ""
-
 [tool.pyright]
-pythonVersion = "3.10"
+pythonVersion = "3.12"
 include = ["src"]
 exclude = [
     "**/node_modules",
     "**/static-src",
     "**/__pycache__",
+]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 99
+extend-exclude = [
+    ".DS_Store",
+    ".pytest_cache",
+    "__pycache__",
+]
+
+[tool.ruff.per-file-ignores]
+"__init__.py" = [
+    "F401",  # `foo` imported but unused
+]
+
+[tool.ruff.isort]
+known-third-party = [
+    "aocd",
+]
+section-order = [
+    "future",
+    "standard-library",
+    "third-party",
+    "first-party",
+    "project",
+    "local-folder",
 ]
