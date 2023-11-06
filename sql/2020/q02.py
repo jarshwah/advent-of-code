@@ -97,7 +97,9 @@ if __name__ == "__main__":
     db = sqlite3.connect(":memory:")
     db.execute("CREATE TABLE passwords (password text)")
     passwords = [
-        [record] for record in aocd.get_data(day=2, year=2020).splitlines() if record.strip()
+        [record]
+        for record in aocd.get_data(day=2, year=2020).splitlines()
+        if record.strip()
     ]
     db.executemany("INSERT INTO passwords values (?)", passwords)
     print("Part 1: ", part_one(db))

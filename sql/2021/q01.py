@@ -37,7 +37,8 @@ if __name__ == "__main__":
     db = sqlite3.connect(":memory:")
     db.execute("CREATE TABLE depths (depth int, position int)")
     depths = [
-        [int(num), idx] for idx, num in enumerate(aocd.get_data(day=1, year=2021).splitlines())
+        [int(num), idx]
+        for idx, num in enumerate(aocd.get_data(day=1, year=2021).splitlines())
     ]
     db.executemany("INSERT INTO depths values (?, ?)", depths)
     print("Part 1: ", part_one(db))

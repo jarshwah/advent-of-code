@@ -1,4 +1,5 @@
 import sqlite3
+
 import aocd
 
 
@@ -30,7 +31,11 @@ def part_two(db: sqlite3.Connection) -> int:
 if __name__ == "__main__":
     db = sqlite3.connect(":memory:")
     db.execute("CREATE TABLE expenses (expense int)")
-    expenses = [[int(num)] for num in aocd.get_data(day=1, year=2020).splitlines() if num.strip()]
+    expenses = [
+        [int(num)]
+        for num in aocd.get_data(day=1, year=2020).splitlines()
+        if num.strip()
+    ]
     db.executemany("INSERT INTO expenses values (?)", expenses)
     print("Part 1: ", part_one(db))
     print("Part 2: ", part_two(db))
