@@ -16,6 +16,11 @@ extend-exclude = [
     "__pycache__",
 ]
 
+[tool.ruff.lint]
+ignore = [
+    "E701"
+]
+
 [tool.ruff.per-file-ignores]
 "__init__.py" = [
     "F401",  # `foo` imported but unused
@@ -30,6 +35,5 @@ section-order = [
     "standard-library",
     "third-party",
     "first-party",
-    "project",
     "local-folder",
 ]

@@ -6,8 +6,8 @@ import utils
 def parse(data: str) -> list[tuple[list[str], list[str]]]:
     rows = []
     for line in data.splitlines():
-        l, r = line.split(" | ")
-        rows.append((l.strip().split(), r.strip().split()))
+        L, R = line.split(" | ")
+        rows.append((L.strip().split(), R.strip().split()))
     return rows
 
 
@@ -36,7 +36,9 @@ def solve(row: tuple[list[str], list[str]]) -> int:
     # 5 is length 5 and fully contained within 6
     d5 = set(utils.only(c for c in flashes if len(c) == 5 and not set(c) - d6))
     # 3 is length 5, but not 5, and fully contained within 9
-    d3 = set(utils.only(c for c in flashes if len(c) == 5 and not set(c) - d9 and not set(c) == d5))
+    d3 = set(
+        utils.only(c for c in flashes if len(c) == 5 and not set(c) - d9 and not set(c) == d5)
+    )
     # 2 is length 5 and not 3 or 5
     d2 = set(utils.only(c for c in flashes if len(c) == 5 and set(c) not in [d3, d5]))
 

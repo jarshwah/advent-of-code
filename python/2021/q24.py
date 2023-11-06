@@ -1,9 +1,9 @@
+import aocd
 import pyximport
 
 pyximport.install()
 
-import aocd
-import q24c
+import q24c  # noqa: E402
 
 data = aocd.get_data(day=24, year=2021).split("inp w")[1:]
 a_vars = [int(prog.splitlines()[1:][4].split()[-1]) for prog in [prog for prog in data]]

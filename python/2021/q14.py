@@ -1,9 +1,6 @@
-import typing as t
 from collections import Counter
 
 import aocd
-
-import utils
 
 
 def part_one(data: str) -> int:

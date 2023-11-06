@@ -1,7 +1,5 @@
-import typing as t
-
 import aocd
-import pyparsing as pp
+
 import utils
 
 
@@ -13,7 +11,7 @@ def part_one(raw: str) -> int:
 
 
 def part_two(raw: str) -> int:
-    data = utils.Input(raw)
+    # data = utils.Input(raw)
     return 1
 
 

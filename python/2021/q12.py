@@ -7,9 +7,9 @@ import aocd
 def solve(data: str, allow_twice: bool) -> int:
     nodes: dict[str, list[str]] = defaultdict(list)
     for line in data.splitlines():
-        l, r = line.split("-")
-        nodes[l].append(r)
-        nodes[r].append(l)
+        L, R = line.split("-")
+        nodes[L].append(R)
+        nodes[R].append(L)
     num = 0
     node: str = "start"
     queue: t.Deque[tuple[str, set[str], bool]] = deque([(node, set(), False)])

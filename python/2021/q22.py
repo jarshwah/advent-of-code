@@ -6,8 +6,6 @@ from typing import Iterable, Optional
 import aocd
 from parse import parse
 
-import utils
-
 
 @dataclasses.dataclass
 class Instruction:

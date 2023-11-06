@@ -1,8 +1,8 @@
-import copy
 import math
 from collections import defaultdict, deque
 
 import aocd
+
 import utils
 from utils import DOWN, LEFT, RIGHT, UP, Point
 
@@ -31,7 +31,7 @@ def get_next_board(board: dict[Point, set[str]]) -> dict[Point, set[str]]:
     nb: dict[Point, set[str]] = defaultdict(set)
     for position, tiles in board.items():
         for tile in tiles:
-            match (tile):
+            match tile:
                 case "#":
                     nb[position].add("#")
                 case ">":
@@ -66,7 +66,7 @@ def get_next_board(board: dict[Point, set[str]]) -> dict[Point, set[str]]:
     return nb
 
 
-def solve(raw: str) -> int:
+def solve(raw: str) -> tuple[int, int]:
     start: dict[Point, set[str]] = {}
     rows = utils.Input(raw).lines().strings
     for rownum, row in enumerate(rows):
@@ -125,11 +125,6 @@ def traverse(boards: list[dict[Point, set[str]]], step: int, start: Point, dest:
         )
 
     return best
-
-
-def part_two(raw: str) -> int:
-    data = utils.Input(raw)
-    return 1
 
 
 def test():

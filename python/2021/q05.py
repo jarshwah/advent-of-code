@@ -9,8 +9,8 @@ from utils import Point, line_algorithm
 
 def parse(data: str) -> t.Iterable[tuple[Point, Point]]:
     for line in data.splitlines():
-        l, r = line.split(" -> ")
-        yield (tuple(map(int, l.split(","))), tuple(map(int, r.split(","))))
+        L, R = line.split(" -> ")
+        yield (tuple(map(int, L.split(","))), tuple(map(int, R.split(","))))
 
 
 def part_one(data: str) -> int:

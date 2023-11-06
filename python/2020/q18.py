@@ -4,7 +4,6 @@ import re
 from dataclasses import dataclass
 
 import aocd
-import utils
 
 
 @dataclass

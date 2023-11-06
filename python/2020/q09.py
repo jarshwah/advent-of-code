@@ -1,6 +1,6 @@
-from collections import deque
 import itertools
 import typing as t
+
 import aocd
 
 
