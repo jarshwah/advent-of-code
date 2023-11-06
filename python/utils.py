@@ -188,9 +188,7 @@ def partition_middle(seq: Sequence[G]) -> tuple[Sequence[G], Sequence[G]]:
     return seq[:midpoint], seq[midpoint:]
 
 
-def chunked(
-    it: Iterable[G], n: int, fillvalue: G | None = None
-) -> Iterable[Iterable[G]]:
+def chunked(it: Iterable[G], n: int, fillvalue: G | None = None) -> Iterable[Iterable[G]]:
     return itertools.zip_longest(*[iter(it)] * n, fillvalue=fillvalue)
 
 
@@ -295,14 +293,10 @@ class Grid(Generic[G]):
     def from_number_string(cls, data: str, separator=None, pad_with: G | None = None):
         if separator:
             return Grid(
-                rows=(
-                    (int(n) for n in row.split(separator)) for row in data.splitlines()
-                ),
+                rows=((int(n) for n in row.split(separator)) for row in data.splitlines()),
                 pad_with=pad_with,
             )
-        return Grid(
-            rows=((int(n) for n in row) for row in data.splitlines()), pad_with=pad_with
-        )
+        return Grid(rows=((int(n) for n in row) for row in data.splitlines()), pad_with=pad_with)
 
     def get(self, key: G, default: G | None = None) -> G | None:
         return self.points.get(key, default)
@@ -354,9 +348,7 @@ class Grid(Generic[G]):
         diagonal: bool = False,
     ) -> Iterable[tuple[Point, G]]:
         for point in self.points.keys():
-            neighbours = [
-                (n, self.points[n]) for n in self.get_neighbours(point, diag=diagonal)
-            ]
+            neighbours = [(n, self.points[n]) for n in self.get_neighbours(point, diag=diagonal)]
             if comparison_func((point, self.points[point]), neighbours):
                 yield point, self.points[point]
 
@@ -374,9 +366,7 @@ class Grid(Generic[G]):
             if p in seen:
                 continue
             seen.add(p)
-            neighbours = [
-                (n, self.points[n]) for n in self.get_neighbours(p, diag=diagonal)
-            ]
+            neighbours = [(n, self.points[n]) for n in self.get_neighbours(p, diag=diagonal)]
             if comparison_func((p, self.points[p]), neighbours):
                 found.add(p)
                 queue.extend([n[0] for n in neighbours])
@@ -410,9 +400,7 @@ class Grid(Generic[G]):
             for ci in range(length_c):
                 for newri in range(down):
                     for newci in range(right):
-                        grid[length_r * newri + ri, length_c * newci + ci] = self[
-                            ri, ci
-                        ]
+                        grid[length_r * newri + ri, length_c * newci + ci] = self[ri, ci]
         return grid
 
     def print(self, missing: G):
@@ -422,9 +410,7 @@ class Grid(Generic[G]):
         cmax = max(node[1] for node in self)
 
         for r in range(rmin, rmax + 1):
-            line = [
-                str(self.points.get((r, c), missing)) for c in range(cmin, cmax + 1)
-            ]
+            line = [str(self.points.get((r, c), missing)) for c in range(cmin, cmax + 1)]
             print("".join(line))
         print()
 

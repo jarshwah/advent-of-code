@@ -9,7 +9,7 @@ def part_one(raw: str) -> int:
     for line in data:
         monkey, equation = line.split(":")
         parts = equation.strip().split(" ")
-        match (parts):
+        match parts:
             case [num]:
                 term = terms.setdefault(monkey, z3.Int(monkey))
                 n = int(num)
@@ -48,7 +48,7 @@ def part_two(raw: str) -> int:
     for line in data:
         monkey, equation = line.split(":")
         parts = equation.strip().split(" ")
-        match (parts):
+        match parts:
             case [num] if monkey == "humn":
                 term = terms.setdefault(monkey, z3.Int(monkey))
             case [num]:

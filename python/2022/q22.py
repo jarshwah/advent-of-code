@@ -20,14 +20,14 @@ class Facing(enum.IntEnum):
     U = 3
 
     def rotate(self, turn: Turn) -> Facing:
-        match (turn):
+        match turn:
             case Turn.L:
                 return Facing((self.value - 1) % 4)
             case Turn.R:
                 return Facing((self.value + 1) % 4)
 
     def move(self) -> tuple[int, int]:
-        match (self):
+        match self:
             case Facing.R:
                 return (0, 1)
             case Facing.D:

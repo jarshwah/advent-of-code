@@ -33,7 +33,6 @@ def part_one(raw: str) -> int:
 
 
 def part_two(raw: str) -> int:
-
     packets = [
         (literal_eval(pair[0]), literal_eval(pair[1]))
         for pair in utils.Input(raw).group("\n\n", sep="\n").strings

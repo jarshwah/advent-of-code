@@ -125,7 +125,7 @@ class Maze:
             if new_maze:
                 yield (new_maze, cost)
 
-        for (room, room_type) in [
+        for room, room_type in [
             (self.A, Amphipod.A),
             (self.B, Amphipod.B),
             (self.C, Amphipod.C),
@@ -170,7 +170,7 @@ def solve(maze: Maze, energy: int) -> int:
         return energy
 
     min_energy = 1e9
-    for (new_maze, move_energy) in maze.moves():
+    for new_maze, move_energy in maze.moves():
         new_energy = solve(new_maze, energy + move_energy)
         if new_energy is None:
             continue
