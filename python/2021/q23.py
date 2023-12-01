@@ -5,7 +5,6 @@ from collections import defaultdict
 from dataclasses import dataclass
 from enum import IntEnum
 from functools import cache
-from typing import Optional
 from collections.abc import Iterable
 
 import aocd
