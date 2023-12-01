@@ -1,7 +1,8 @@
 from __future__ import annotations
 
 import dataclasses
-from typing import Iterable, Optional
+from typing import Optional
+from collections.abc import Iterable
 
 import aocd
 from parse import parse
@@ -55,7 +56,7 @@ class Instruction:
 
     def overlapping_dimension(
         self, this: tuple[int, int], that: tuple[int, int]
-    ) -> Optional[tuple[int, int]]:
+    ) -> tuple[int, int] | None:
         if min(this) > max(that) or min(that) > max(this):
             # if either start after the finish of the other, no overlap
             return None

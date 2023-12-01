@@ -121,7 +121,7 @@ def traverse(boards: list[dict[Point, set[str]]], step: int, start: Point, dest:
             best = min(best, step)
             continue
         queue.extend(
-            ((pos, step) for pos in possibles if pos in next_board and next_board[pos] == EMPTY)
+            (pos, step) for pos in possibles if pos in next_board and next_board[pos] == EMPTY
         )
 
     return best

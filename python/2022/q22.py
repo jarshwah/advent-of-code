@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 import enum
-from typing import Callable
+from collections.abc import Callable
 
 import aocd
 from utils import Point

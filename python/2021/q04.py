@@ -4,14 +4,14 @@ from typing import Dict, Set, Tuple
 
 import aocd
 
-Lookup = Dict[int, Set[Tuple[int, int, int]]]
+Lookup = dict[int, set[tuple[int, int, int]]]
 Row = list[int]
 Board = list[Row]
 Boards = list[Board]
 Numbers = list[int]
 
 
-def parse_input(data: str) -> Tuple[list[Board], Numbers, Lookup]:
+def parse_input(data: str) -> tuple[list[Board], Numbers, Lookup]:
     lines = data.splitlines()
     numbers: Numbers = [int(num) for num in lines[0].split(",")]
     board: Board = []

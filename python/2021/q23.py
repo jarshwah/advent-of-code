@@ -5,7 +5,8 @@ from collections import defaultdict
 from dataclasses import dataclass
 from enum import IntEnum
 from functools import cache
-from typing import Iterable, Optional
+from typing import Optional
+from collections.abc import Iterable
 
 import aocd
 
@@ -49,7 +50,7 @@ class Maze:
             return sum(self.hallway[from_pos + 1 : to_pos + 1]) == 0
         return sum(self.hallway[to_pos:from_pos]) == 0
 
-    def move_to_home(self, amph: Amphipod, from_hallway: int) -> tuple[Optional[Maze], int]:
+    def move_to_home(self, amph: Amphipod, from_hallway: int) -> tuple[Maze | None, int]:
         entrance = self.room_entrance(amph)
         if not self.hallway_clear(from_hallway, entrance):
             return None, 0

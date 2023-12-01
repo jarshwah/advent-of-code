@@ -1,6 +1,6 @@
 import itertools
 from collections import deque
-from typing import Callable
+from collections.abc import Callable
 
 import aocd
 from utils import Point3d, Point4d, PointNd

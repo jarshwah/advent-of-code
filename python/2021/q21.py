@@ -8,7 +8,7 @@ import aocd
 
 
 def part_one(data: str) -> int:
-    p1, p2 = [int(line[-1]) for line in data.splitlines()]
+    p1, p2 = (int(line[-1]) for line in data.splitlines())
     dice = range(1, 100000, 3)
     players = [[p1, 0], [p2, 0]]
     for n in dice:
@@ -45,7 +45,7 @@ def play(p1, s1, p2, s2) -> tuple[int, int]:
 
 
 def part_two(data: str) -> int:
-    p1, p2 = [int(line[-1]) for line in data.splitlines()]
+    p1, p2 = (int(line[-1]) for line in data.splitlines())
     w1, w2 = play(p1, 0, p2, 0)
     return max(w1, w2)
 

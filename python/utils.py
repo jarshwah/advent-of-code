@@ -5,7 +5,8 @@ import itertools
 from collections import deque
 from copy import deepcopy
 from functools import cached_property
-from typing import Callable, Generic, Iterable, Sequence, TypeVar
+from typing import Generic, TypeVar
+from collections.abc import Callable, Iterable, Sequence
 
 import networkx as nx
 from parse import parse
