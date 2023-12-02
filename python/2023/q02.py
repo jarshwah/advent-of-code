@@ -1,43 +1,39 @@
-from math import prod
-from collections import defaultdict
-import copy
-import aocd
-import utils
 import re
+from collections import Counter, defaultdict
+from math import prod
+
+import aocd
+
+import utils
 
 
 def part_one(raw: str) -> int:
     data = utils.Input(raw).lines().strings
-    config = {"red": 12, "green": 13, "blue": 14}
     valid = 0
-    pattern = r"(\d+) (\w+)"
     for line in data:
-        game_number = int(line.split(":")[0][4:])
-        too_many = False
+        game_number = int(line.split(":")[0].split()[1])
+        impossible = False
         for sets in line.split(":")[1].split(";"):
-            ours = copy.copy(config)
-            for match in re.findall(pattern, sets):
-                ours[match[1]] -= int(match[0])
-            if any(v < 0 for v in ours.values()):
-                too_many = True
+            start = Counter({"red": 12, "green": 13, "blue": 14})
+            compare = Counter(
+                {match[1]: int(match[0]) for match in re.findall(r"(\d+) (\w+)", sets)}
+            )
+            if len(start - compare) < 3:
+                impossible = True
                 break
-        if not too_many:
+        if not impossible:
             valid += game_number
-            continue
     return valid
 
 
 def part_two(raw: str) -> int:
     data = utils.Input(raw).lines().strings
     total = 0
-    pattern = r"(\d+) (\w+)"
     for line in data:
         counts = defaultdict(list)
-        for sets in line.split(":")[1].split(";"):
-            for match in re.findall(pattern, sets):
-                counts[match[1]].append(int(match[0]))
-        power = prod([max(nums) for nums in counts.values()])
-        total += power
+        for match in re.findall(r"(\d+) (\w+)", line):
+            counts[match[1]].append(int(match[0]))
+        total += prod([max(nums) for nums in counts.values()])
     return total
 
 
