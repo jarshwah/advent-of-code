@@ -4,6 +4,9 @@ ipython
 ipdb
 pre-commit
 advent-of-code-data
+pytest
+pytest-xdist
+pytest-timeout
 
 parse
 networkx
