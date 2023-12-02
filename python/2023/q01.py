@@ -1,4 +1,3 @@
-import re
 import aocd
 import utils
 
@@ -10,29 +9,25 @@ def part_one(raw: str) -> int:
         for c in line:
             if c.isdigit():
                 nums.append(c)
-        total += int(f"{nums[0]}{nums[-1]}")
+        total += int(nums[0] + nums[-1])
 
     return total
 
 
 def part_two(raw: str) -> int:
+    words = ("one", "two", "three", "four", "five", "six", "seven", "eight", "nine")
     total = 0
     for line in utils.Input(raw).lines().strings:
-        line = re.sub("one", "o1e", line)
-        line = re.sub("two", "t2o", line)
-        line = re.sub("three", "t3e", line)
-        line = re.sub("four", "f4r", line)
-        line = re.sub("five", "f5e", line)
-        line = re.sub("six", "s6x", line)
-        line = re.sub("seven", "s7n", line)
-        line = re.sub("eight", "e8t", line)
-        line = re.sub("nine", "n9e", line)
-
         nums = []
-        for c in line:
+        for idx, c in enumerate(line):
             if c.isdigit():
                 nums.append(c)
-        total += int(f"{nums[0]}{nums[-1]}")
+            else:
+                for num, word in enumerate(words, 1):
+                    if line[idx : idx + len(word)].startswith(word):
+                        nums.append(str(num))
+                        break
+        total += int(nums[0] + nums[-1])
 
     return total
 
