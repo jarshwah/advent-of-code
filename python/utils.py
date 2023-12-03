@@ -3,10 +3,10 @@ from __future__ import annotations
 import dataclasses
 import itertools
 from collections import deque
+from collections.abc import Callable, Iterable, Sequence
 from copy import deepcopy
 from functools import cached_property
 from typing import Generic, TypeVar
-from collections.abc import Callable, Iterable, Sequence
 
 import networkx as nx
 from parse import parse
