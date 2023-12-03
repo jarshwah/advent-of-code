@@ -40,5 +40,4 @@ section-order = [
 
 [tool.pytest.ini_options]
 python_files = "*.py"
-addopts="-n 4"
 timeout=60

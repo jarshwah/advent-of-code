@@ -51,6 +51,12 @@ class Input:
     def group(self, group: str | None = "\n\n", sep: str | None = None) -> InputGroup:
         return self.split(group).split(sep)
 
+    def grid(self) -> Grid[str]:
+        return Grid.from_string(self.data)
+
+    def grid_int(self) -> Grid[int]:
+        return Grid.from_number_string(self.data)
+
 
 @dataclasses.dataclass
 class InputList:
@@ -107,16 +113,14 @@ class InputGroup:
     def floats(self) -> list[list[float]]:
         return [inp.floats for inp in self.data]
 
-    @property
-    def number_grid(self) -> Grid[int]:
-        return Grid(rows=self.numbers)
-
-    @property
-    def string_grid(self) -> Grid[str]:
-        return Grid(rows=self.strings)
-
     def parse(self, *parsers: str):
         return [inp.parse(*parsers) for inp in self.data]
+
+    def grid(self) -> Grid[str]:
+        return Grid(rows=(s for string in self.strings for s in string))
+
+    def grid_int(self) -> Grid[int]:
+        return Grid(rows=((int(item) for item in row) for group in self.strings for row in group))
 
 
 def int_numbers(input_data: str, sep=None) -> list[int]:
@@ -291,7 +295,9 @@ class Grid(Generic[G]):
                 self.points[(r, c)] = item
 
     @classmethod
-    def from_number_string(cls, data: str, separator=None, pad_with: G | None = None):
+    def from_number_string(
+        cls, data: str, separator=None, pad_with: int | None = None
+    ) -> Grid[int]:
         if separator:
             return Grid(
                 rows=((int(n) for n in row.split(separator)) for row in data.splitlines()),
@@ -299,7 +305,16 @@ class Grid(Generic[G]):
             )
         return Grid(rows=((int(n) for n in row) for row in data.splitlines()), pad_with=pad_with)
 
-    def get(self, key: G, default: G | None = None) -> G | None:
+    @classmethod
+    def from_string(cls, data: str, separator=None, pad_with: str | None = None) -> Grid[str]:
+        if separator:
+            return Grid(
+                rows=((n for n in row.split(separator)) for row in data.splitlines()),
+                pad_with=pad_with,
+            )
+        return Grid(rows=((n for n in row) for row in data.splitlines()), pad_with=pad_with)
+
+    def get(self, key: Point, default: G | None = None) -> G | None:
         return self.points.get(key, default)
 
     def __len__(self) -> int:
