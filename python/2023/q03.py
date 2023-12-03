@@ -6,64 +6,41 @@ import aocd
 
 import utils
 
-ok_symbols = set(".0123456789")
-
-
-class Found(Exception):
-    pass
-
 
 def part_one(raw: str) -> int:
-    parts = []
-    grid = []
-    for row in utils.Input(raw).lines().strings:
-        grid.append(row)
-
-    rc = len(grid)
-    cc = len(grid[0])
-
-    for rn, row in enumerate(grid):
-        line = "".join(row)
-        for match in re.finditer(r"(\d+)", line):
-            part_num = match.group(0)
-            start = match.start()
-            end = match.end()
-            try:
-                for cn in range(start, end):
-                    if any(
-                        grid[nr][nc] not in ok_symbols
-                        for nr, nc in utils.neighbours((rn, cn), utils.DIRECTIONS_8)
-                        if 0 <= nr < rc and 0 <= nc < cc
-                    ):
-                        raise Found
-            except Found:
-                parts.append(int(part_num))
-    return sum(parts)
-
-
-def part_two(raw: str) -> int:
-    grid = []
-    for row in utils.Input(raw).lines().strings:
-        grid.append(row)
-
-    rc = len(grid)
-    cc = len(grid[0])
-    gears = defaultdict(list)
-    for rn, row in enumerate(grid):
-        line = "".join(row)
-        for match in re.finditer(r"(\d+)", line):
+    grid = utils.Input(raw).grid()
+    total = 0
+    ok_symbols = set(".0123456789")
+    for rn, row in enumerate(grid.rows()):
+        for match in re.finditer(r"(\d+)", "".join(row)):
             part_num = int(match.group(0))
             start = match.start()
             end = match.end()
-            try:
-                for cn in range(start, end):
-                    for nr, nc in utils.neighbours((rn, cn), utils.DIRECTIONS_8):
-                        if 0 <= nr < rc and 0 <= nc < cc:
-                            if grid[nr][nc] == "*":
-                                gears[(nr, nc)].append(part_num)
-                                raise Found
-            except Found:
-                pass
+            for cn in range(start, end):
+                if any(
+                    nb
+                    for nb in grid.get_neighbours((rn, cn), diag=True)
+                    if grid[nb] not in ok_symbols
+                ):
+                    total += part_num
+                    break
+    return total
+
+
+def part_two(raw: str) -> int:
+    grid = utils.Input(raw).grid()
+    gears = defaultdict(set)
+    GEAR = "*"
+    for rn, row in enumerate(grid.rows()):
+        for match in re.finditer(r"(\d+)", "".join(row)):
+            part_num = int(match.group(0))
+            start = match.start()
+            end = match.end()
+            for cn in range(start, end):
+                for nb in (
+                    nb for nb in grid.get_neighbours((rn, cn), diag=True) if grid[nb] == GEAR
+                ):
+                    gears[nb].add(part_num)
     return sum(prod(nums) for nums in gears.values() if len(nums) == 2)
 
 
