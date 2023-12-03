@@ -225,3 +225,17 @@ class TestInputGroup:
         assert grid[2, 1] == 8
         assert grid[2, 2] == 9
         assert len(grid) == 9
+
+
+class TestGrid:
+    def test_rows(self):
+        data = dedent(
+            """\
+            abc
+            123"""
+        )
+        grid = utils.Input(data).grid()
+        rows = list(grid.rows())
+        assert rows == [["a", "b", "c"], ["1", "2", "3"]]
+        joined = ["".join(row) for row in rows]
+        assert joined == ["abc", "123"]

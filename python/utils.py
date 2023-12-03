@@ -332,6 +332,10 @@ class Grid(Generic[G]):
     def __setitem__(self, index: Point, value: G):
         self.points[index] = value
 
+    def rows(self) -> Iterable[Iterable[G]]:
+        for r in range(self.height):
+            yield [self[r, c] for c in range(self.width)]
+
     @cached_property
     def width(self) -> int:
         return max(self)[1] + 1
