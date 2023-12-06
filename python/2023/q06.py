@@ -1,5 +1,3 @@
-import math
-
 import aocd
 
 import utils
@@ -9,27 +7,22 @@ def part_one(raw: str) -> int:
     games = zip(
         *[[int(n) for n in s.split(":")[1].split()] for s in utils.Input(raw).lines().strings]
     )
-    game_wins = []
+    game_wins = 1
     for time, record in games:
         wins = 0
         for attempt in range(1, time):
             would_be = attempt * (time - attempt)
             if would_be > record:
                 wins += 1
-        game_wins.append(wins)
-    return math.prod(game_wins)
+        game_wins *= wins
+    return game_wins
 
 
 def part_two(raw: str) -> int:
-    time_s, distance_s = utils.Input(raw).lines().strings
-    time = int(time_s.split(":")[1].replace(" ", ""))
-    distance = int(distance_s.split(":")[1].replace(" ", ""))
-    wins = 0
-    for attempt in range(1, time):
-        would_be = attempt * (time - attempt)
-        if would_be > distance:
-            wins += 1
-    return wins
+    time, distance = [
+        int(s.split(":")[1].replace(" ", "")) for s in utils.Input(raw).lines().strings
+    ]
+    return sum(1 for attempt in range(1, time) if attempt * (time - attempt) > distance)
 
 
 def test():
