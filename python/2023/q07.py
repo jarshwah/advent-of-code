@@ -58,12 +58,12 @@ class Hand:
         cards = tuple(1 if card == 11 else card for card in self.cards)
         if 1 not in cards:
             return self.result()
-        return max(
-            (
-                self.best_hand(tuple(wild if card == 1 else card for card in cards))
-                for wild in NON_WILDS
-            )
-        ), *cards
+
+        # Find the best hand by replacing the wilds with the most common card
+        no_wilds = tuple(card for card in cards if card != 1)
+        top = 14 if not no_wilds else Counter(no_wilds).most_common()[0][0]
+        replacement_cards = tuple(top if card == 1 else card for card in cards)
+        return self.best_hand(replacement_cards), *cards
 
 
 def get_hands(raw: str) -> list[Hand]:
