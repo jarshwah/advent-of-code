@@ -1,3 +1,4 @@
+import itertools
 from collections.abc import Iterable
 
 import aocd
@@ -12,9 +13,9 @@ def differences(numbers: list[int]) -> Iterable[int]:
 
 def add_placeholders(stack: list[list[int]]) -> None:
     stack[-1].append(0)
-    for i in range(len(stack) - 1, 0, -1):
-        stack[i - 1].append(stack[i - 1][-1] + stack[i][-1])
-        stack[i - 1].insert(0, stack[i - 1][0] - stack[i][0])
+    for curr, prev in itertools.pairwise(stack[::-1]):
+        prev.append(prev[-1] + curr[-1])
+        prev.insert(0, prev[0] - curr[0])
 
 
 def both_parts(raw: str) -> tuple[int, int]:
