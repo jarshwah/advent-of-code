@@ -362,6 +362,15 @@ class Grid(Generic[G]):
                 self[p] = self.pad_with
                 yield p
 
+    def neighbours_of(self, point: Point, directions: list[Point]) -> Iterable[Point]:
+        for d in directions:
+            p = sum_points(point, d)
+            if p in self:
+                yield p
+            elif self.pad_with is not None:
+                self[p] = self.pad_with
+                yield p
+
     def search(
         self,
         comparison_func: Callable[[tuple[Point, G], list[tuple[Point, G]]], bool],
@@ -397,13 +406,13 @@ class Grid(Generic[G]):
         diagonal=False,
         weighted=True,
         directed=True,
-        is_connected_func: Callable[[G, G], bool] | None = None,
+        is_connected_func: Callable[[Grid, Point, Point], bool] | None = None,
     ) -> nx.Graph:
         graph = nx.DiGraph() if directed else nx.Graph()
         for point in self:
             neighbours = self.get_neighbours(point, diag=diagonal)
             for nb in neighbours:
-                if is_connected_func is None or is_connected_func(point, nb):
+                if is_connected_func is None or is_connected_func(self, point, nb):
                     if weighted:
                         graph.add_edge(point, nb, weight=self[nb])
                     else:

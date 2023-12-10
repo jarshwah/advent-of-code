@@ -1,5 +1,6 @@
 import aocd
 import networkx as nx
+
 import utils
 
 
@@ -22,7 +23,7 @@ def solve(raw: str, all_lowest: bool = False):
         rows.append(num_row)
     grid = utils.Grid(rows=rows)
 
-    def is_connected(a: utils.Point, b: utils.Point) -> bool:
+    def is_connected(grid: utils.Grid, a: utils.Point, b: utils.Point) -> bool:
         return grid[a] >= grid[b] - 1
 
     graph = grid.to_graph(weighted=False, is_connected_func=is_connected)
