@@ -44,6 +44,8 @@ def is_connected(grid: utils.Grid, check: utils.Point, target: utils.Point) -> b
 def both_parts(raw: str) -> tuple[int, int]:
     grid = utils.Input(raw).grid()
     start = utils.only(p for p in grid if grid[p] == "S")
+    # TODO: using networkx to determine the path is incredibly slow, re-write as
+    # dfs
     graph = grid.to_graph(
         diagonal=False, weighted=False, directed=True, is_connected_func=is_connected
     )
