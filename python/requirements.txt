@@ -16,3 +16,4 @@ z3-solver
 numpy
 pyparsing
 shapely
+matplotlib
