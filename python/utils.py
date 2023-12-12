@@ -336,6 +336,10 @@ class Grid(Generic[G]):
         for r in range(self.height):
             yield [self[r, c] for c in range(self.width)]
 
+    def cols(self) -> Iterable[Iterable[G]]:
+        for c in range(self.width):
+            yield [self[r, c] for r in range(self.height)]
+
     @cached_property
     def width(self) -> int:
         return max(self)[1] + 1
@@ -352,17 +356,11 @@ class Grid(Generic[G]):
     def _directions_diag(self) -> list[Point]:
         return DIRECTIONS_8
 
-    def get_neighbours(self, point: Point, diag: bool = False) -> Iterable[Point]:
-        directions = self._directions_diag if diag else self._directions
-        for d in directions:
-            p = sum_points(point, d)
-            if p in self:
-                yield p
-            elif self.pad_with is not None:
-                self[p] = self.pad_with
-                yield p
-
-    def neighbours_of(self, point: Point, directions: list[Point]) -> Iterable[Point]:
+    def get_neighbours(
+        self, point: Point, diag: bool = False, directions: Sequence[Point] | None = None
+    ) -> Iterable[Point]:
+        if directions is None:
+            directions = self._directions_diag if diag else self._directions
         for d in directions:
             p = sum_points(point, d)
             if p in self:
@@ -432,7 +430,7 @@ class Grid(Generic[G]):
                         grid[length_r * newri + ri, length_c * newci + ci] = self[ri, ci]
         return grid
 
-    def print(self, missing: G):
+    def print(self, missing: G | None = None):
         rmin = min(self)[0]
         rmax = max(self)[0]
         cmin = min(node[1] for node in self)

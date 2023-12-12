@@ -239,3 +239,15 @@ class TestGrid:
         assert rows == [["a", "b", "c"], ["1", "2", "3"]]
         joined = ["".join(row) for row in rows]
         assert joined == ["abc", "123"]
+
+    def test_cols(self):
+        data = dedent(
+            """\
+            abc
+            123"""
+        )
+        grid = utils.Input(data).grid()
+        cols = list(grid.cols())
+        assert cols == [["a", "1"], ["b", "2"], ["c", "3"]]
+        joined = ["".join(col) for col in cols]
+        assert joined == ["a1", "b2", "c3"]
