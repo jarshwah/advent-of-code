@@ -197,6 +197,10 @@ def chunked(it: Iterable[G], n: int, fillvalue: G | None = None) -> Iterable[Ite
     return itertools.zip_longest(*[iter(it)] * n, fillvalue=fillvalue)
 
 
+def transpose(rows: list[list[G]]) -> list[list[G]]:
+    return list(map(list, zip(*rows)))
+
+
 def stepped_sum(start: int, end: int) -> int:
     """
     Compute the sum difference of integers between two numbers
