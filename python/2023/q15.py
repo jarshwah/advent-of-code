@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import dataclasses
-from collections import deque
 from functools import reduce
 
 import aocd
@@ -28,27 +27,26 @@ def part_one(raw: str) -> int:
 
 
 def part_two(raw: str) -> int:
-    boxes: list[deque] = []
+    boxes: list[list[Lens]] = []
     for _ in range(256):
-        boxes.append(deque())
+        boxes.append([])
 
-    sequences = utils.Input(raw).string.strip("\n").split(",")
+    sequences = utils.Input(raw).string.strip("\n").replace("-", "").split(",")
     for seq in sequences:
-        if "=" in seq:
-            label, focal = seq.split("=")
-            lens = Lens(label, int(focal))
-            box = boxes[hashed(label)]
-            try:
-                idx = box.index(lens)
-                box[idx].focal = lens.focal
-            except ValueError:
-                box.append(lens)
-        else:
-            label = seq.split("-")[0]
-            try:
-                boxes[hashed(label)].remove(Lens(label, 0))
-            except ValueError:
-                pass
+        match seq.split("="):
+            case [label, focal]:
+                lens = Lens(label, int(focal))
+                box = boxes[hashed(label)]
+                try:
+                    idx = box.index(lens)
+                    box[idx].focal = lens.focal
+                except ValueError:
+                    box.append(lens)
+            case [label]:
+                try:
+                    boxes[hashed(label)].remove(Lens(label, 0))
+                except ValueError:
+                    pass
     power = 0
     for bn, box in enumerate(boxes, 1):
         for sn, lens in enumerate(box, 1):
