@@ -7,8 +7,8 @@ import aocd
 import utils
 
 
-def hashed(s: str, start: int = 0) -> int:
-    return reduce(lambda total, ch: ((ord(ch) + total) * 17) % 256, s, start)
+def hashed(label: str) -> int:
+    return reduce(lambda total, ch: ((ord(ch) + total) * 17) % 256, label, 0)
 
 
 def part_one(raw: str) -> int:
@@ -22,16 +22,13 @@ def part_two(raw: str) -> int:
     for seq in sequences:
         match seq.split("="):
             case [label, focal]:
-                box = boxes[hashed(label)]
-                box.setdefault(label, int(focal))
-                box[label] = int(focal)
+                boxes[hashed(label)][label] = int(focal)
             case [label]:
                 boxes[hashed(label)].pop(label, None)
-    power = 0
-    for bn, box in enumerate(boxes, 1):
-        for sn, lens in enumerate(box, 1):
-            power += bn * sn * box[lens]
-    return power
+
+    return sum(
+        bn * sn * box[lens] for bn, box in enumerate(boxes, 1) for sn, lens in enumerate(box, 1)
+    )
 
 
 def test():
