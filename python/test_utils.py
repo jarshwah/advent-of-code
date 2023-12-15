@@ -251,3 +251,21 @@ class TestGrid:
         assert cols == [["a", "1"], ["b", "2"], ["c", "3"]]
         joined = ["".join(col) for col in cols]
         assert joined == ["a1", "b2", "c3"]
+
+    def test_strings(self):
+        data = dedent(
+            """\
+            abc
+            123"""
+        )
+        grid = utils.Input(data).grid()
+        assert grid.strings() == ["abc", "123"]
+
+    def test_hash_key(self):
+        data = dedent(
+            """\
+            abc
+            123"""
+        )
+        grid = utils.Input(data).grid()
+        assert grid.hash_key() == "abc123"

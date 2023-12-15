@@ -434,16 +434,24 @@ class Grid(Generic[G]):
                         grid[length_r * newri + ri, length_c * newci + ci] = self[ri, ci]
         return grid
 
-    def print(self, missing: G | None = None):
+    def print(self, missing: G | str = "?"):
+        for row in self.strings(missing):
+            print("".join(row))
+        print()
+
+    def strings(self, missing: G | str = "?") -> list[str]:
         rmin = min(self)[0]
         rmax = max(self)[0]
         cmin = min(node[1] for node in self)
         cmax = max(node[1] for node in self)
 
-        for r in range(rmin, rmax + 1):
-            line = [str(self.points.get((r, c), missing)) for c in range(cmin, cmax + 1)]
-            print("".join(line))
-        print()
+        return [
+            "".join(str(self.points.get((r, c), missing)) for c in range(cmin, cmax + 1))
+            for r in range(rmin, rmax + 1)
+        ]
+
+    def hash_key(self) -> str:
+        return "".join(self.strings())
 
 
 def rotations_90(point: Point3d) -> list[Point3d]:

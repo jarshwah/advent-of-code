@@ -70,22 +70,10 @@ def north_load(grid: utils.Grid) -> int:
     return total
 
 
-def have_seen(grid: utils.Grid) -> tuple[frozenset, int]:
-    load = north_load(grid)
-    positions = set()
-    for rn in range(grid.height):
-        for cn in range(grid.width):
-            if grid[rn, cn] == "O":
-                positions.add((rn, cn))
-
-    return frozenset(positions), load
-
-
 def part_two(raw: str) -> int:
     grid = utils.Input(raw).grid()
 
     cycles = {}
-    stop_cache = False
     n = 0
     target = 1e9
     while n < target:
@@ -93,14 +81,13 @@ def part_two(raw: str) -> int:
         grid = tilt_west(grid)
         grid = tilt_south(grid)
         grid = tilt_east(grid)
-        if not stop_cache:
-            key = have_seen(grid)
-            if key in cycles:
-                stop_cache = True
-                first_seen = cycles[key]
-                where = n - first_seen
-                inc = (target - n) // where
-                n += inc * where
+        key = grid.hash_key()
+        if key in cycles:
+            first_seen = cycles[key]
+            where = n - first_seen
+            inc = (target - n) // where
+            n += inc * where
+        else:
             cycles[key] = n
         n += 1
     return north_load(grid)
