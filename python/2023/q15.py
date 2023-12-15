@@ -1,20 +1,10 @@
 from __future__ import annotations
 
-import dataclasses
 from functools import reduce
 
 import aocd
 
 import utils
-
-
-@dataclasses.dataclass()
-class Lens:
-    label: str
-    focal: int
-
-    def __eq__(self, other: Lens) -> bool:
-        return self.label == other.label
 
 
 def hashed(s: str, start: int = 0) -> int:
@@ -27,30 +17,20 @@ def part_one(raw: str) -> int:
 
 
 def part_two(raw: str) -> int:
-    boxes: list[list[Lens]] = []
-    for _ in range(256):
-        boxes.append([])
-
+    boxes: list[dict[str, int]] = [{} for _ in range(256)]
     sequences = utils.Input(raw).string.strip("\n").replace("-", "").split(",")
     for seq in sequences:
         match seq.split("="):
             case [label, focal]:
-                lens = Lens(label, int(focal))
                 box = boxes[hashed(label)]
-                try:
-                    idx = box.index(lens)
-                    box[idx].focal = lens.focal
-                except ValueError:
-                    box.append(lens)
+                box.setdefault(label, int(focal))
+                box[label] = int(focal)
             case [label]:
-                try:
-                    boxes[hashed(label)].remove(Lens(label, 0))
-                except ValueError:
-                    pass
+                boxes[hashed(label)].pop(label, None)
     power = 0
     for bn, box in enumerate(boxes, 1):
         for sn, lens in enumerate(box, 1):
-            power += bn * sn * lens.focal
+            power += bn * sn * box[lens]
     return power
 
 
