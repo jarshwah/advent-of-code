@@ -17,8 +17,8 @@ def part_one(raw: str) -> int:
 
 
 def part_two(raw: str) -> int:
-    boxes: list[dict[str, int]] = [{} for _ in range(256)]
     sequences = utils.Input(raw).string.strip("\n").replace("-", "").split(",")
+    boxes: list[dict[str, int]] = [{} for _ in range(256)]
     for seq in sequences:
         match seq.split("="):
             case [label, focal]:
