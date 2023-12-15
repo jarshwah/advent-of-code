@@ -88,16 +88,17 @@ def part_two(raw: str) -> int:
     stop_cache = False
     n = 0
     target = 1e9
-    while n < target:  # N = 8
+    while n < target:
         grid = tilt_north(grid)
         grid = tilt_west(grid)
         grid = tilt_south(grid)
         grid = tilt_east(grid)
         if not stop_cache:
-            key = have_seen(grid)  # FOUND @ 4
+            key = have_seen(grid)
             if key in cycles:
                 stop_cache = True
-                where = n - cycles[key]
+                first_seen = cycles[key]
+                where = n - first_seen
                 inc = (target - n) // where
                 n += inc * where
             cycles[key] = n
