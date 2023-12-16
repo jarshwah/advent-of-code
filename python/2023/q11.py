@@ -5,42 +5,6 @@ import aocd
 import utils
 
 
-def expand_map(rows: list[str]) -> list[str]:
-    non_empty_cols = set()
-    non_empty_rows = set()
-    num_cols = len(rows[0])
-    for rn, row in enumerate(rows):
-        for cn, col in enumerate(row):
-            if col == "#":
-                non_empty_cols.add(cn)
-                non_empty_rows.add(rn)
-    new_rows = []
-    added_rows = 0
-    for rn, row in enumerate(rows):
-        added_cols = 0
-        row_chars = list(row)
-        for new_cn in range(num_cols):
-            if new_cn not in non_empty_cols:
-                row_chars.insert(new_cn + added_cols, ".")
-                added_cols += 1
-        new_rows.append("".join(row_chars))
-        if rn not in non_empty_rows:
-            new_rows.insert(rn + added_rows, ["."] * (num_cols + added_cols))
-            added_rows += 1
-    return new_rows
-
-
-def part_one_first_attempt(raw: str) -> int:
-    rows = expand_map(utils.Input(raw).lines().strings)
-    grid = utils.Grid(rows)
-    galaxies = (point for point in grid.points if grid[point] == "#")
-    combinations = itertools.combinations(galaxies, 2)
-    paths = []
-    for pair in combinations:
-        paths.append((utils.manhattan(*pair), pair))
-    return sum(path[0] for path in paths)
-
-
 def both_parts(raw: str, expand: int) -> int:
     rows = utils.Input(raw).lines().strings
     non_empty_cols = set()
