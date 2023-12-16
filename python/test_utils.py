@@ -269,3 +269,45 @@ class TestGrid:
         )
         grid = utils.Input(data).grid()
         assert grid.hash_key() == "abc123"
+
+    def test_rotate(self):
+        data = dedent(
+            """\
+            abc
+            123"""
+        )
+        grid = utils.Input(data).grid()
+        assert grid.strings() == ["abc", "123"]
+        grid = grid.rotate(1)
+        assert grid.strings() == ["1a", "2b", "3c"]
+        grid = grid.rotate(1)
+        assert grid.strings() == ["321", "cba"]
+        grid = grid.rotate(1)
+        assert grid.strings() == ["c3", "b2", "a1"]
+        grid = grid.rotate(1)
+        assert grid.strings() == ["abc", "123"]
+        grid = grid.rotate(2)
+        assert grid.strings() == ["321", "cba"]
+        grid = grid.rotate(-1)
+        assert grid.strings() == ["1a", "2b", "3c"]
+
+    def test_transpose(self):
+        data = dedent(
+            """\
+            abc
+            123"""
+        )
+        grid = utils.Input(data).grid()
+        assert grid.strings() == ["abc", "123"]
+        grid = grid.transpose()
+        assert grid.strings() == ["a1", "b2", "c3"]
+        grid = grid.transpose()
+        assert grid.strings() == ["abc", "123"]
+
+
+class TestRotate:
+    def test_rotate_1(self):
+        rows = ["abc", "123"]
+        assert utils.rotate(rows, 1) == [list("1a"), list("2b"), list("3c")]
+        assert utils.rotate(rows, 3) == [list("c3"), list("b2"), list("a1")]
+        assert utils.rotate(rows, -1) == [list("c3"), list("b2"), list("a1")]

@@ -3,32 +3,6 @@ import aocd
 import utils
 
 
-def tilt_west(grid: utils.Grid) -> utils.Grid:
-    for rn in range(grid.height):
-        last_block = -1
-        for cn in range(grid.width):
-            if grid[rn, cn] == "O":
-                grid[rn, cn] = "."
-                last_block += 1
-                grid[rn, last_block] = "O"
-            elif grid[rn, cn] == "#":
-                last_block = cn
-    return grid
-
-
-def tilt_east(grid: utils.Grid) -> utils.Grid:
-    for rn in range(grid.height - 1, -1, -1):
-        last_block = grid.width
-        for cn in range(grid.width - 1, -1, -1):
-            if grid[rn, cn] == "O":
-                grid[rn, cn] = "."
-                last_block -= 1
-                grid[rn, last_block] = "O"
-            elif grid[rn, cn] == "#":
-                last_block = cn
-    return grid
-
-
 def tilt_north(grid: utils.Grid) -> utils.Grid:
     for cn in range(grid.width):
         last_block = -1
@@ -36,19 +10,6 @@ def tilt_north(grid: utils.Grid) -> utils.Grid:
             if grid[rn, cn] == "O":
                 grid[rn, cn] = "."
                 last_block += 1
-                grid[last_block, cn] = "O"
-            elif grid[rn, cn] == "#":
-                last_block = rn
-    return grid
-
-
-def tilt_south(grid: utils.Grid) -> utils.Grid:
-    for cn in range(grid.width - 1, -1, -1):
-        last_block = grid.height
-        for rn in range(grid.height - 1, -1, -1):
-            if grid[rn, cn] == "O":
-                grid[rn, cn] = "."
-                last_block -= 1
                 grid[last_block, cn] = "O"
             elif grid[rn, cn] == "#":
                 last_block = rn
@@ -77,10 +38,10 @@ def part_two(raw: str) -> int:
     n = 0
     target = 1e9
     while n < target:
-        grid = tilt_north(grid)
-        grid = tilt_west(grid)
-        grid = tilt_south(grid)
-        grid = tilt_east(grid)
+        grid = tilt_north(grid).rotate(1)
+        grid = tilt_north(grid).rotate(1)
+        grid = tilt_north(grid).rotate(1)
+        grid = tilt_north(grid).rotate(1)
         key = grid.hash_key()
         if key in cycles:
             first_seen = cycles[key]

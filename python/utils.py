@@ -201,6 +201,12 @@ def transpose(rows: list[list[G]]) -> list[list[G]]:
     return list(map(list, zip(*rows)))
 
 
+def rotate(rows: list[list[G]], rotations: int = 1) -> list[list[G]]:
+    for _ in range(rotations % 4):
+        rows = list(map(list, zip(*reversed(rows))))
+    return rows
+
+
 def stepped_sum(start: int, end: int) -> int:
     """
     Compute the sum difference of integers between two numbers
@@ -433,6 +439,12 @@ class Grid(Generic[G]):
                     for newci in range(right):
                         grid[length_r * newri + ri, length_c * newci + ci] = self[ri, ci]
         return grid
+
+    def rotate(self, rotations: int = 1) -> Grid:
+        return Grid(rows=rotate(list(self.rows()), rotations=rotations))
+
+    def transpose(self) -> Grid:
+        return Grid(rows=transpose(list(self.rows())))
 
     def print(self, missing: G | str = "?"):
         for row in self.strings(missing):
