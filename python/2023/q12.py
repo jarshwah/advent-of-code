@@ -1,17 +1,12 @@
 import ast
-import re
-from functools import lru_cache
+from functools import cache
 
 import aocd
 
 import utils
 
-OPERATIONAL = "."
-DAMAGED = "#"
-UNKNOWN = "?"
 
-
-@lru_cache(maxsize=None)
+@cache
 def possible_configs(config: str, curr_matches: int, matches: tuple[int, ...]) -> int:
     if not config:
         # Exhausted our set
@@ -24,8 +19,8 @@ def possible_configs(config: str, curr_matches: int, matches: tuple[int, ...]) -
         # Didn't match
         return 0
 
-    remaining_damaged = config.count(DAMAGED)
-    remaining_unknown = config.count(UNKNOWN)
+    remaining_damaged = config.count("#")
+    remaining_unknown = config.count("?")
     remaining_matches = sum(matches)
     slots = remaining_damaged + remaining_unknown
 
@@ -37,50 +32,46 @@ def possible_configs(config: str, curr_matches: int, matches: tuple[int, ...]) -
         # We have no matches left but remaining damaged, exit early
         return 0
 
+    if curr_matches and matches and matches[0] < curr_matches:
+        # We've exceeded, exit early
+        return 0
+
     num_configs = 0
-    check = config[0]
 
-    if check == OPERATIONAL:
-        if not curr_matches:
-            # Continue on without any match
-            num_configs += possible_configs(config[1:], 0, matches)
-        elif curr_matches == matches[0]:
-            # Completed the match
-            num_configs += possible_configs(config[1:], 0, matches[1:])
-        else:
-            # We hit an operational mid-way through a match, exit early
-            return 0
+    match config[0]:
+        case ".":
+            if not curr_matches:
+                # Continue on without any match
+                num_configs += possible_configs(config[1:], 0, matches)
+            elif curr_matches == matches[0]:
+                # Completed the match
+                num_configs += possible_configs(config[1:], 0, matches[1:])
+            else:
+                # We hit an operational mid-way through a match, exit early
+                return 0
 
-    elif check == UNKNOWN:
-        if not curr_matches:
-            # Branch into match and non-match
-            num_configs += possible_configs(config[1:], 0, matches)
-            num_configs += possible_configs(config[1:], 1, matches)
-        elif curr_matches == matches[0]:
-            # Match completed, continue to next match
-            num_configs += possible_configs(config[1:], 0, matches[1:])
-        else:
-            # Continue matching the current
-            num_configs += possible_configs(config[1:], curr_matches + 1, matches)
+        case "?":
+            if not curr_matches:
+                # Branch into match and non-match
+                num_configs += possible_configs(config[1:], 0, matches)
+                num_configs += possible_configs(config[1:], 1, matches)
+            elif curr_matches == matches[0]:
+                # Match completed, continue to next match
+                num_configs += possible_configs(config[1:], 0, matches[1:])
+            else:
+                # Continue matching the current
+                num_configs += possible_configs(config[1:], curr_matches + 1, matches)
 
-    elif check == DAMAGED:
-        if not curr_matches:
-            num_configs += possible_configs(config[1:], 1, matches)
-        else:
-            num_configs += possible_configs(config[1:], curr_matches + 1, matches)
+        case "#":
+            if not curr_matches:
+                num_configs += possible_configs(config[1:], 1, matches)
+            elif curr_matches >= matches[0]:
+                # we've exceeded the match, exit early
+                return 0
+            else:
+                num_configs += possible_configs(config[1:], curr_matches + 1, matches)
 
     return num_configs
-
-
-def matches(config: str, broken: tuple[int, ...]) -> int:
-    check = f".{config}."  # pad with dots to make regex easier
-    matcher = ""
-    for digit in broken:
-        matcher += rf"([\?\#]{{{digit}}})([\?\.]+)"
-
-    matcher = r"(?=(\." + matcher + "))"
-    # abort - not working.
-    return len(re.findall(matcher, check))
 
 
 def part_one(raw: str) -> int:
