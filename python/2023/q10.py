@@ -1,6 +1,5 @@
 import aocd
 import matplotlib
-import networkx as nx
 
 import utils
 
@@ -46,23 +45,38 @@ def is_connected(grid: utils.Grid, check: utils.Point, target: utils.Point) -> b
 def both_parts(raw: str) -> tuple[int, int]:
     grid = utils.Input(raw).grid()
     start = utils.only(p for p in grid if grid[p] == "S")
-    # TODO: using networkx to determine the path is incredibly slow, re-write as
-    # dfs
-    graph = grid.to_graph(
-        diagonal=False, weighted=False, directed=True, is_connected_func=is_connected
-    )
-    from_, to_ = graph[start].keys()
-    all_paths = list(nx.all_simple_paths(graph, from_, to_))
-    longest = max(all_paths, key=len)
 
-    farthest_point = (len(longest) + 1) // 2
-    trapped_squares = 0
-    loop = set(longest)
-    # Draw a polygon using the loop points, and then check all points in the grid
-    # to see if they are inside or outside the polgygon.
-    poly = matplotlib.path.Path(longest)
-    trapped_squares = sum(1 for point in grid if point not in loop and poly.contains_point(point))
-    return farthest_point, trapped_squares
+    # Determine the beginning and end of the path
+    source = None
+    target = None
+    for nb in "|-LJ7F":
+        d1, d2 = NEIGHBOURS[nb]
+        source = utils.point_add(start, d1)
+        target = utils.point_add(start, d2)
+        if is_connected(grid, start, source) and is_connected(grid, start, target):
+            break
+
+    assert source is not None and target is not None
+
+    # There is only a single valid path, so no need to use A* to estimate,
+    # or a queue to navigate
+    path = [start, source]
+    while True:
+        check = path[-1]
+        if check == target:
+            farthest_point = len(path) // 2
+            loop = set(path)
+            poly = matplotlib.path.Path(path)
+            trapped_squares = sum(
+                1 for point in grid if point not in loop and poly.contains_point(point)
+            )
+            return farthest_point, trapped_squares
+
+        for nb in grid.get_neighbours(check, directions=NEIGHBOURS[grid[check]]):
+            if nb == path[-2]:
+                continue
+            path.append(nb)
+            break
 
 
 def test():
