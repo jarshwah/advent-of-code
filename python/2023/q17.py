@@ -28,13 +28,14 @@ def get_heat(
 
     while queue:
         score, current, direction, forward_steps = heapq.heappop(queue)
-        if (current, direction, forward_steps) in visited:
+        updown_or_leftright = abs(direction[0])
+        if (current, updown_or_leftright, forward_steps) in visited:
             continue
 
         if current == goal and forward_steps >= min_forward:
             return score
 
-        visited[(current, direction, forward_steps)] = score
+        visited[(current, updown_or_leftright, forward_steps)] = score
 
         if forward_steps < min_forward:
             # If we have a minimum number of moves, skip to the end of that, saves about half a second
