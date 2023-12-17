@@ -289,6 +289,14 @@ DIRECTIONS_9: list[Point] = [
 ]
 
 
+def turn_right(direction: Point) -> Point:
+    return DIRECTIONS_4[(DIRECTIONS_4.index(direction) + 1) % len(DIRECTIONS_4)]
+
+
+def turn_left(direction: Point) -> Point:
+    return DIRECTIONS_4[(DIRECTIONS_4.index(direction) - 1) % len(DIRECTIONS_4)]
+
+
 def neighbours(point: Point, directions: list[Point]) -> list[Point]:
     return [(point[0] + d[0], point[1] + d[1]) for d in directions]
 
