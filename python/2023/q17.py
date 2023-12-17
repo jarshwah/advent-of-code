@@ -15,6 +15,17 @@ def get_heat(
 ) -> int:
     visited = {}
     queue = [(0, start, start_direction, 0)]
+
+    def skip(current: utils.Point, direction: utils.Point, steps: int) -> tuple[utils.Point, int]:
+        curr = current
+        scores = 0
+        for _ in range(steps):
+            curr = utils.point_add(curr, direction)
+            if curr not in grid:
+                return current, 0
+            scores += grid[curr]
+        return curr, scores
+
     while queue:
         score, current, direction, forward_steps = heapq.heappop(queue)
         if (current, direction, forward_steps) in visited:
@@ -25,10 +36,15 @@ def get_heat(
 
         visited[(current, direction, forward_steps)] = score
 
-        # Generate neighbours
+        if forward_steps < min_forward:
+            # If we have a minimum number of moves, skip to the end of that, saves about half a second
+            new_current, sum_score = skip(current, direction, min_forward - forward_steps)
+            if new_current != current:
+                heapq.heappush(queue, (score + sum_score, new_current, direction, min_forward))
+            continue
+
         possible_directions = [direction] if forward_steps < max_forward else []
-        if forward_steps >= min_forward:
-            possible_directions.extend((utils.turn_left(direction), utils.turn_right(direction)))
+        possible_directions.extend((utils.turn_left(direction), utils.turn_right(direction)))
 
         neighbours = [
             (node, turn)
@@ -36,8 +52,6 @@ def get_heat(
             if ((node := utils.point_add(current, turn)) in grid)
         ]
         for nb, new_direction in neighbours:
-            if nb not in grid:
-                continue
             heapq.heappush(
                 queue,
                 (
@@ -60,7 +74,7 @@ def part_one(raw: str) -> int:
         goal=(grid.height - 1, grid.width - 1),
         start_direction=utils.RIGHT,
         max_forward=3,
-        min_forward=0,
+        min_forward=1,
     )
 
 
