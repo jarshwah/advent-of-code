@@ -311,3 +311,38 @@ class TestRotate:
         assert utils.rotate(rows, 1) == [list("1a"), list("2b"), list("3c")]
         assert utils.rotate(rows, 3) == [list("c3"), list("b2"), list("a1")]
         assert utils.rotate(rows, -1) == [list("c3"), list("b2"), list("a1")]
+
+
+class TestShoelace:
+    def test_area(self):
+        points = [(0, 0), (1, 0), (1, 1), (0, 1)]
+        assert utils.shoelace(points) == 1
+
+    def test_larger_area(self):
+        # fmt: off
+        points = [
+            # They must be in order, this is going clockwise, but the points
+            # are not in their actual location.
+            (0, 0), (0, 1), (0, 2),
+            (1, 2),         (0, 2),
+            (2, 2), (2, 1), (2, 1),
+        ]
+        # fmt: on
+        assert utils.shoelace(points) == 3 == utils.area_inside_boundary(points)
+
+    def test_showlace_iter(self):
+        # fmt: off
+        points = [
+            # They must be in order, this is going clockwise, but the points
+            # are not in their actual location.
+            (0, 0), (0, 1), (0, 2),
+            (1, 2),         (0, 2),
+            (2, 2), (2, 1), (2, 1),
+        ]
+        # fmt: on
+        gen = utils.shoelace_iter(points[0])
+        next(gen)
+        for point in points[1:]:
+            gen.send(point)
+        area = next(gen)
+        assert area == 3

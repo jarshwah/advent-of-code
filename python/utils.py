@@ -239,6 +239,60 @@ def triange_number_2(n: int) -> int:
     return n**2
 
 
+def shoelace(points: Sequence[Point]) -> int:
+    """
+    Find the area within a polgygon, excluding the boundary
+    """
+    return area_inside_boundary(points)
+
+
+def picks_theorem(num_points: int, inside_area: int) -> int:
+    """
+    Find the area of a polygon including the boundary
+    """
+    return inside_area + num_points // 2 + 1
+
+
+def area_inside_boundary(points: Sequence[Point]) -> int:
+    return (
+        abs(
+            sum(
+                x1 * y2 - x2 * y1
+                for (x1, y1), (x2, y2) in itertools.pairwise(points + [points[0]])
+            )
+        )
+        // 2
+    )
+
+
+def area_including_boundary(points: Sequence[Point]) -> int:
+    return picks_theorem(len(points), shoelace(points))
+
+
+def shoelace_iter(point: Point) -> Iterable[int]:
+    """
+    Compute the shoelace area iteratively.
+
+    Usage:
+        >>> area_gen = shoelace_iter(first_point)
+        >>> next(area_gen)  # initialize
+        >>> for point in points:
+        ...    area_gen.send(point)
+        >>> area = next(area_gen)
+    """
+    area = 0
+    first = point
+    prev = point
+    while True:
+        current = yield (area)
+        if current is None:
+            break
+        area += prev[0] * current[1] - prev[1] * current[0]
+        prev = current
+    area += prev[0] * first[1] - prev[1] * first[0]
+    yield abs(area) // 2
+
+
 def manhattan(p1: PointNd, p2: PointNd) -> int:
     return sum(abs(a - b) for a, b in zip(p1, p2, strict=True))  # type: ignore
 
@@ -247,8 +301,8 @@ def point_subtract(p1: PointNd, p2: PointNd) -> PointNd:
     return tuple(a - b for a, b in zip(p1, p2, strict=True))  # type: ignore
 
 
-def point_add(p1: PointNd, p2: PointNd) -> PointNd:
-    return tuple(a + b for a, b in zip(p1, p2, strict=True))  # type: ignore
+def point_add(p1: PointNd, p2: PointNd, steps: int = 1) -> PointNd:
+    return tuple(a * steps + b * steps for a, b in zip(p1, p2, strict=True))  # type: ignore
 
 
 def sum_points(*points: Point) -> Point:
