@@ -302,7 +302,7 @@ def point_subtract(p1: PointNd, p2: PointNd) -> PointNd:
 
 
 def point_add(p1: PointNd, p2: PointNd, steps: int = 1) -> PointNd:
-    return tuple(a * steps + b * steps for a, b in zip(p1, p2, strict=True))  # type: ignore
+    return tuple(a + (steps * b) for a, b in zip(p1, p2, strict=True))  # type: ignore
 
 
 def sum_points(*points: Point) -> Point:

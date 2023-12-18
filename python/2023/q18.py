@@ -38,8 +38,7 @@ def part_two(raw: str) -> int:
         steps = int(color[2:7], 16)
         direction = color[7]
         num_points += steps
-        for _ in range(steps):
-            current = utils.point_add(current, DIRS[direction])
+        current = utils.point_add(current, DIRS[direction], steps)
         area_gen.send(current)
     area = next(area_gen)
     return utils.picks_theorem(num_points, area)

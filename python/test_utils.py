@@ -346,3 +346,11 @@ class TestShoelace:
             gen.send(point)
         area = next(gen)
         assert area == 3
+
+
+class TestPointAdd:
+    def test_add(self):
+        assert utils.point_add((1, 2), (3, 4)) == (4, 6)
+
+    def test_add_steps(self):
+        assert utils.point_add((1, 2), (3, 4), 2) == (7, 10)
