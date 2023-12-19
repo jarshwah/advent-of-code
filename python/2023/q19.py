@@ -55,6 +55,7 @@ def part_one(raw: str) -> int:
 
 
 def part_two(raw: str) -> int:
+    # return part_two_alt(raw)
     workflow_list, _ = utils.Input(raw).group("\n\n", "\n").strings
     workflows = {}
     for wf in workflow_list:
@@ -127,6 +128,50 @@ def part_two(raw: str) -> int:
                     # And continue by shrinking our lower bound to fit
                     parts[part_num] = (compare, high)
         queue.append((parts, last_workflow))
+    return combinations
+
+
+def part_two_alt(raw: str) -> int:
+    workflow_list, _ = utils.Input(raw).group("\n\n", "\n").strings
+    workflows = {}
+    for wf in workflow_list:
+        wf_name, wf_rule_list = wf.split("{")
+        *wf_rules, wf_end = wf_rule_list[:-1].split(",")
+        wf_parts = [parse(wf_rule_template, part).named for part in wf_rules]
+        workflows[wf_name] = wf_parts, wf_end
+
+    parts = {
+        "x": range(1, 4001),
+        "m": range(1, 4001),
+        "a": range(1, 4001),
+        "s": range(1, 4001),
+    }
+    return combos(parts, "in", workflows)
+
+
+def combos(parts: dict[str, range], current_workflow: str, workflows: dict) -> int:
+    if current_workflow == "R":
+        return 0
+    if current_workflow == "A":
+        return math.prod(rg.stop - rg.start for rg in parts.values())
+
+    combinations = 0
+    our_parts = parts.copy()
+    rules, last_workflow = workflows[current_workflow]
+    for rule in rules:
+        xmas, op, compare, new_workflow = rule.values()
+        match op:
+            case ">":
+                matched = range(compare + 1, our_parts[xmas].stop)
+                continue_with = range(our_parts[xmas].start, compare + 1)
+            case "<":
+                matched = range(our_parts[xmas].start, compare)
+                continue_with = range(compare, our_parts[xmas].stop)
+
+        our_parts[xmas] = matched
+        combinations += combos(our_parts, new_workflow, workflows)
+        our_parts[xmas] = continue_with
+    combinations += combos(our_parts, last_workflow, workflows)
     return combinations
 
 
