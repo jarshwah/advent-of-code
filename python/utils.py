@@ -441,6 +441,19 @@ class Grid(Generic[G]):
                 self[p] = self.pad_with
                 yield p
 
+    def get_neigbours_wrapping(
+        self, point: Point, diag: bool = False, directions: Sequence[Point] | None = None
+    ) -> Iterable[Point]:
+        height = self.height
+        width = self.width
+        if directions is None:
+            directions = self._directions_diag if diag else self._directions
+        for d in directions:
+            p = sum_points(point, d)
+            wrapped_p = (p[0] % height, p[1] % width)
+            if wrapped_p in self:
+                yield wrapped_p
+
     def search(
         self,
         comparison_func: Callable[[tuple[Point, G], list[tuple[Point, G]]], bool],
