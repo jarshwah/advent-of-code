@@ -10,12 +10,13 @@ DIRS = {
     "<": [utils.LEFT],
     "^": [utils.UP],
     "v": [utils.DOWN],
+    "#": [],
+    ".": utils.DIRECTIONS_4,
 }
 
 
 def part_one(raw: str) -> int:
     grid = utils.Input(raw).grid()
-    stepped_on: dict[utils.Point, int] = {}
     path_found = 0
     start = (0, 1)
     target = (grid.height - 1, grid.width - 2)
@@ -25,13 +26,9 @@ def part_one(raw: str) -> int:
         if curr in path:
             continue
         curr_tile = grid[curr]
-        if curr_tile == "#":
-            continue
         if curr == target:
             path_found = max(path_found, steps)
-        if curr in stepped_on and steps < stepped_on[curr]:
-            continue
-        directions = DIRS.get(curr_tile, utils.DIRECTIONS_4)
+        directions = DIRS.get(curr_tile)
         for nb in grid.get_neighbours(curr, directions=directions):
             queue.appendleft((nb, steps + 1, path | {curr}))
 
@@ -63,14 +60,20 @@ def to_graph(grid: utils.Grid) -> dict[utils.Point, set[utils.Point]]:
 
 def part_two(raw: str) -> int:
     grid = utils.Input(raw).grid()
+    path_found = 0
     graph = to_graph(grid)
     start = (0, 1)
     target = (grid.height - 1, grid.width - 2)
-    paths = list(nx.all_simple_paths(graph, source=start, target=target))
-    path_weight = 0
-    for path in paths:
-        path_weight = max(path_weight, nx.path_weight(graph, path, weight="weight"))
-    return path_weight
+    queue = deque([(start, 0, frozenset(set()))])
+    while queue:
+        curr, steps, path = queue.popleft()
+        if curr in path:
+            continue
+        if curr == target:
+            path_found = max(path_found, steps)
+        for nb, attrs in graph[curr].items():
+            queue.appendleft((nb, steps + attrs["weight"], frozenset(path | {curr})))
+    return path_found
 
 
 def test():
