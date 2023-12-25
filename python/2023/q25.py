@@ -9,10 +9,7 @@ import utils
 def part_one(raw: str) -> int:
     graph = nx.Graph()
     for line in utils.Input(raw).lines().strings:
-        try:
-            from_node, rest = line.split(":")
-        except Exception:
-            breakpoint(context=10)
+        from_node, rest = line.split(":")
         to_nodes = rest.split()
         for node in to_nodes:
             graph.add_edge(from_node, node)
