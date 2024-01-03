@@ -46,6 +46,27 @@ def part_one_alt(raw: str) -> int:
     return math.prod(map(len, nx.connected_components(graph)))
 
 
+def part_one_girvan_newman(raw: str) -> int:
+    graph = nx.Graph()
+    for line in utils.Input(raw).lines().strings:
+        from_node, rest = line.split(":")
+        to_nodes = rest.split()
+        for node in to_nodes:
+            graph.add_edge(from_node, node)
+
+    # Girvan-Newman says that you must re-calculate, but it's slow! Not re-calculating
+    # works on the given input, so we just do it once.
+    # for edge_cut in range(3):
+    #     most = max(nx.edge_betweenness_centrality(graph).items(), key=lambda x: x[1])
+    #     graph.remove_edges_from([most[0]])
+    central_3 = sorted(
+        nx.edge_betweenness_centrality(graph).items(), key=lambda x: x[1], reverse=True
+    )[:3]
+    # This is slower than min-edge-cut at 5.3 seconds!
+    graph.remove_edges_from([edge for edge, _ in central_3])
+    return math.prod(map(len, nx.connected_components(graph)))
+
+
 def test():
     test_input = """jqt: rhn xhk nvd
 rsh: frs pzl lsr
