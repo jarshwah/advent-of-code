@@ -626,6 +626,9 @@ class Puzzle:
                 if not report(2, t2, puzzle_runner.test_answers[1]) and fail_fast:
                     return
 
+            if not (p1 or p2):
+                return
+
             input_data = puzzle_runner.get_input(puzzle_runner.year, puzzle_runner.day)
             click.echo()
             if p1:
