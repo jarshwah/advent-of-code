@@ -1,4 +1,4 @@
-# advent-of-code
+# Advent Of Code
 
 Python implementations for [Advent Of Code](https://adventofcode.com/) (and some SQL).
 

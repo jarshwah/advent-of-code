@@ -6,9 +6,11 @@ from collections import deque
 from collections.abc import Callable, Iterable, Sequence
 from copy import deepcopy
 from functools import cached_property
-from typing import Generic, TypeVar
+from typing import Generic, Self, TypeVar
 
+import aocd
 import networkx as nx
+import rich_click as click
 from parse import parse
 
 G = TypeVar("G")
@@ -491,7 +493,7 @@ class Grid(Generic[G]):
         directed=True,
         is_connected_func: Callable[[Grid, Point, Point], bool] | None = None,
     ) -> nx.Graph:
-        graph = nx.DiGraph() if directed else nx.Graph()
+        graph: nx.Graph = nx.DiGraph() if directed else nx.Graph()
         for point in self:
             neighbours = self.get_neighbours(point, diag=diagonal)
             for nb in neighbours:
@@ -570,3 +572,67 @@ def rotations_90(point: Point3d) -> list[Point3d]:
         (-z, -x, y),
         (-z, -y, -x),
     ]
+
+
+@dataclasses.dataclass
+class Puzzle:
+    year: int
+    day: int
+    test_input: str = ""
+    test_answers: tuple[str, str] = ("", "")
+
+    def part_one(self, input: Input) -> str:
+        return ""
+
+    def part_two(self, input: Input) -> str:
+        return ""
+
+    def get_input(self, year: int, day: int) -> Input:
+        return Input(data=aocd.get_data(day=day, year=year))
+
+    def cli(self: Self) -> Callable[[], None]:
+        puzzle_runner = self
+
+        @click.command()
+        @click.option("--p1", "-1", is_flag=True, help="Run part one")
+        @click.option("--p2", "-2", is_flag=True, help="Run part two")
+        @click.option("--test", is_flag=True, help="Run tests")
+        @click.option(
+            "--fail-fast", "--ff", is_flag=True, help="Stop on first test failure (implies --test)"
+        )
+        def entrypoint(p1: bool, p2: bool, test: bool, fail_fast: bool):
+            if not (p1 or p2 or test):
+                # default, run it all
+                p1 = p2 = test = True
+
+            if test or fail_fast:
+                click.secho("Running tests...", fg="blue")
+
+                def report(test_number: int, result: str, expected: str) -> bool:
+                    if result != expected:
+                        click.secho(
+                            f"  {test_number}.  ❌ {result or '?'} != {expected}", fg="red"
+                        )
+                        return False
+                    click.secho(f"  {test_number}.  ✅ {result} == {expected}", fg="green")
+                    return True
+
+                test_puzzle = Input(data=puzzle_runner.test_input)
+                t1 = puzzle_runner.part_one(test_puzzle)
+                if not report(1, t1, puzzle_runner.test_answers[0]) and fail_fast:
+                    return
+
+                t2 = puzzle_runner.part_two(test_puzzle)
+                if not report(2, t2, puzzle_runner.test_answers[1]) and fail_fast:
+                    return
+
+            input_data = puzzle_runner.get_input(puzzle_runner.year, puzzle_runner.day)
+            click.echo()
+            if p1:
+                click.secho("Part 1: ", fg="blue", nl=False)
+                click.echo(puzzle_runner.part_one(input_data))
+            if p2:
+                click.secho("Part 2: ", fg="blue", nl=False)
+                click.echo(puzzle_runner.part_two(input_data))
+
+        return entrypoint()
