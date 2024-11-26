@@ -24,6 +24,10 @@
         "python.terminal.activateEnvInCurrentTerminal": true,
         "python.terminal.executeInFileDir": true,
         "python.terminal.activateEnvironment": true,
+        "python.analysis.autoFormatStrings": true,
+        "python.analysis.gotoDefinitionInStringLiteral": true,
+        "python.analysis.enablePytestSupport": true,
+        "python.analysis.persistAllIndices": true,
         "python.analysis.logLevel": "Information",
         "python.analysis.useLibraryCodeForTypes": true,
         "python.analysis.completeFunctionParens": true,
@@ -42,7 +46,7 @@
         "configurations": [
             {
                 "name": "Python: Current File",
-                "type": "python",
+                "type": "debugpy",
                 "request": "launch",
                 "program": "${file}",
                 "cwd": "${fileDirname}",

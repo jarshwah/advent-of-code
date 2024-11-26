@@ -1,5 +1,33 @@
+[project]
+name = "advent-of-code"
+version = "2024.0.0"
+description = "Jarshwah does Advent Of Code"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "advent-of-code-data>=2.0.4",
+    "browser-cookie3>=0.19.1",
+    "cython>=3.0.11",
+    "ipdb>=0.13.13",
+    "ipython>=8.29.0",
+    "matplotlib>=3.9.2",
+    "more-itertools>=10.5.0",
+    "mypy>=1.13.0",
+    "networkx>=3.4.2",
+    "numpy>=2.1.3",
+    "parse>=1.20.2",
+    "pre-commit>=4.0.1",
+    "pyparsing>=3.2.0",
+    "pytest>=8.3.3",
+    "pytest-timeout>=2.3.1",
+    "pytest-xdist>=3.6.1",
+    "ruff>=0.8.0",
+    "shapely>=2.0.6",
+    "z3-solver>=4.13.3.0",
+]
+
 [tool.pyright]
-pythonVersion = "3.12"
+pythonVersion = "3.13"
 include = ["src"]
 exclude = [
     "**/node_modules",
@@ -8,7 +36,7 @@ exclude = [
 ]
 
 [tool.ruff]
-target-version = "py312"
+target-version = "py313"
 line-length = 99
 extend-exclude = [
     ".DS_Store",
@@ -21,12 +49,12 @@ ignore = [
     "E701"
 ]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 "__init__.py" = [
     "F401",  # `foo` imported but unused
 ]
 
-[tool.ruff.isort]
+[tool.ruff.lint.isort]
 known-third-party = [
     "aocd",
 ]
