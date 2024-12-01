@@ -21,7 +21,7 @@ repos:
   hooks:
     - id: pytest
       name: pytest
-      entry: uvx pytest
+      entry: bash -c "cd python && uvx --with-requirements pyproject.toml pytest"
       language: system
       pass_filenames: false
       always_run: true
