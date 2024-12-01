@@ -47,6 +47,9 @@ class Input:
     def lines(self) -> InputList:
         return self.split("\n")
 
+    def columns(self) -> InputGroup:
+        return InputGroup(data=[InputList(data=col) for col in zip(*self.lines().split().data)])
+
     def split(self, sep: str | None = None) -> InputList:
         return InputList(data=[Input(data=token) for token in self.data.split(sep)])
 
@@ -94,6 +97,9 @@ class InputList:
     def split(self, sep: str | None = None) -> InputGroup:
         return InputGroup(data=[inp.split(sep) for inp in self.data])
 
+    def __iter__(self):
+        return self.data.__iter__()
+
 
 @dataclasses.dataclass
 class InputGroup:
@@ -123,6 +129,9 @@ class InputGroup:
 
     def grid_int(self) -> Grid[int]:
         return Grid(rows=((int(item) for item in row) for group in self.strings for row in group))
+
+    def __iter__(self):
+        return self.data.__iter__()
 
 
 def int_numbers(input_data: str, sep=None) -> list[int]:

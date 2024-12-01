@@ -34,6 +34,15 @@ class TestInput:
         lines = utils.Input(data).lines()
         assert lines.strings == ["abc", "123"]
 
+    def test_columns(self):
+        data = dedent(
+            """\
+            1   3
+            8   2
+            4   5"""
+        )
+        assert utils.Input(data).columns().numbers == [[1, 8, 4], [3, 2, 5]]
+
     def test_split(self):
         data = "abc,123"
         assert utils.Input(data).split(",").strings == ["abc", "123"]
