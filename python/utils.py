@@ -6,18 +6,17 @@ from collections import deque
 from collections.abc import Callable, Iterable, Sequence
 from copy import deepcopy
 from functools import cached_property
-from typing import Generic, Self, TypeVar
+from typing import Self
 
 import aocd
 import networkx as nx
+import parse  # type: ignore [import-untyped]
 import rich_click as click
-from parse import parse
 
-G = TypeVar("G")
-Point = tuple[float, float]
-Point3d = tuple[float, float, float]
-Point4d = tuple[float, float, float, float]
-PointNd = TypeVar("PointNd", bound=tuple[float, ...])
+type Point = tuple[int, int]
+type Point3d = tuple[int, int, int]
+type Point4d = tuple[int, int, int, int]
+type PointNd = tuple[int, ...]
 SENTINEL = object()
 
 
@@ -27,67 +26,127 @@ class Input:
 
     @property
     def string(self) -> str:
+        """Return the input data as a string"""
         return self.data
 
     @property
     def integer(self) -> int:
+        """Return the input data as an integer"""
         return int(self.data)
 
     @property
     def number(self) -> int:
+        """Return the input data as an integer"""
         return self.integer
 
     @property
     def float(self) -> float:
+        """Return the input data as a float"""
         return float(self.data)
 
-    def parse(self, parser: str):
-        return parse(parser, self.string)
+    def parse(self, parser: str) -> parse.Match | None:
+        """Parse the input data using the provided parser returning a Match or None"""
+        return parse.parse(parser, self.string)
 
     def lines(self) -> InputList:
+        """
+        Split the input data into lines separated by newlines.
+        """
         return self.split("\n")
 
     def columns(self) -> InputGroup:
+        """
+        Split the input data into lines then rotate into columns.
+        """
         return InputGroup(data=[InputList(data=col) for col in zip(*self.lines().split().data)])
 
     def split(self, sep: str | None = None) -> InputList:
+        """
+        Split the input data into lines separated by the provided separator.
+        """
         return InputList(data=[Input(data=token) for token in self.data.split(sep)])
 
     def group(self, group: str | None = "\n\n", sep: str | None = None) -> InputGroup:
+        """
+        Group the input data into multiple lists of lists separated by the provided group separator.
+
+        eg.
+
+            1234
+            5678
+
+            abcde
+            fghij
+
+        would be grouped into (with \n\n as the default group separator):
+            [[1234, 5678], [abcde, fghij]]
+
+
+        """
         return self.split(group).split(sep)
 
     def grid(self) -> Grid[str]:
+        """
+        Create a Grid from lines of input data.
+        """
         return Grid.from_string(self.data)
 
     def grid_int(self) -> Grid[int]:
+        """
+        Create a Grid of ints from lines of input data.
+        """
         return Grid.from_number_string(self.data)
 
 
 @dataclasses.dataclass
 class InputList:
-    data: list[Input]
+    """
+    A list of strings.
+
+    For example:
+
+    ["1", "2", "3"]
+
+    """
+
+    data: Sequence[Input]
 
     @property
-    def strings(self) -> list[str]:
+    def strings(self) -> Sequence[str]:
+        """
+        Return a list of strings, one for each line.
+        """
         return [inp.string for inp in self.data]
 
     @property
-    def integers(self) -> list[int]:
+    def integers(self) -> Sequence[int]:
+        """
+        Return a list of integers, one for each line.
+        """
         return [inp.integer for inp in self.data]
 
     @property
-    def numbers(self) -> list[int]:
+    def numbers(self) -> Sequence[int]:
+        """
+        Return a list of integers, one for each line.
+        """
         return self.integers
 
     @property
-    def floats(self) -> list[float]:
+    def floats(self) -> Sequence[float]:
+        """
+        Return a list of floats, one for each line.
+        """
         return [inp.float for inp in self.data]
 
-    def parse(self, *parsers: str):
-        results = []
+    def parse(self, *parsers: str) -> Sequence[parse.Match]:
+        """
+        Return a list of parsed results, the first parser than matches each lines is used.
+        """
+        results: list[parse.Match] = []
         for s in self.strings:
             for p in parsers:
-                if result := parse(p, s):
+                if result := parse.parse(p, s):
                     results.append(result)
                     break
             else:
@@ -95,6 +154,9 @@ class InputList:
         return results
 
     def split(self, sep: str | None = None) -> InputGroup:
+        """
+        Return a group by splitting each line by the provided separator.
+        """
         return InputGroup(data=[inp.split(sep) for inp in self.data])
 
     def __iter__(self):
@@ -103,63 +165,103 @@ class InputList:
 
 @dataclasses.dataclass
 class InputGroup:
-    data: list[InputList]
+    """
+    A list of lists.
+
+    For example:
+
+    [
+        ["1", "2", "3"],
+        ["4", "5", "6"],
+    ]
+    """
+
+    data: Sequence[InputList]
 
     @property
-    def strings(self) -> list[list[str]]:
+    def strings(self) -> Sequence[Sequence[str]]:
+        """
+        Return a list of lists of strings.
+        """
         return [inp.strings for inp in self.data]
 
     @property
-    def integers(self) -> list[list[int]]:
+    def integers(self) -> Sequence[Sequence[int]]:
+        """
+        Return a list of lists of integers.
+        """
         return [inp.integers for inp in self.data]
 
     @property
-    def numbers(self) -> list[list[int]]:
+    def numbers(self) -> Sequence[Sequence[int]]:
+        """
+        Alias for the integers property.
+        """
         return self.integers
 
     @property
-    def floats(self) -> list[list[float]]:
+    def floats(self) -> Sequence[Sequence[float]]:
+        """
+        Return a list of lists of floats.
+        """
         return [inp.floats for inp in self.data]
 
-    def parse(self, *parsers: str):
+    def parse(self, *parsers: str) -> Sequence[Sequence[parse.Match]]:
+        """
+        Parse the input data using the provided parsers for each line within the group.
+        """
         return [inp.parse(*parsers) for inp in self.data]
 
     def grid(self) -> Grid[str]:
+        """
+        Convert the input data to a grid of strings.
+        """
         return Grid(rows=(s for string in self.strings for s in string))
 
     def grid_int(self) -> Grid[int]:
+        """
+        Convert the input data to a grid of integers.
+        """
         return Grid(rows=((int(item) for item in row) for group in self.strings for row in group))
 
     def __iter__(self):
         return self.data.__iter__()
 
 
-def int_numbers(input_data: str, sep=None) -> list[int]:
+def int_numbers(input_data: str, sep=None) -> Sequence[int]:
+    """Transform a line of numbers into a list of integers"""
     if sep is None:
         return [int(num) for num in input_data.splitlines() if num.strip()]
     return [int(num) for num in input_data.split(sep) if num.strip()]
 
 
-def first(i: Iterable[G]) -> G:
-    """Goes boom if empty"""
+def first[T](i: Iterable[T]) -> T:
+    """Return the first item of the iterator or exception if empty"""
     return next(iter(i))
 
 
-def only(i: Iterable[G]) -> G:
-    """Goes boom if len != 1"""
+def only[T](i: Iterable[T]) -> T:
+    """Return the only item of the iterator or exception if not exactly one item"""
     consumed = list(i)
     if len(consumed) != 1:
         raise ValueError(f"i had {len(consumed)} values")
     return consumed[0]
 
 
-def sort_by_length(iterables: Iterable[Sequence[G]]) -> Iterable[Sequence[G]]:
+def sort_by_length[T](iterables: Iterable[Sequence[T]]) -> Iterable[Sequence[T]]:
+    """
+    Sort the iterable by length of the sequences.
+
+    eg: sort_by_length([[1, 2], [1, 2, 3], [1]]) == [[1], [1, 2], [1, 2, 3]]
+    """
     return sorted(iterables, key=len)
 
 
 def line_algorithm(start: Point, end: Point) -> Iterable[Point]:
     """
     Finds all points between `start` and `end` points.
+
+    A simple implementation of Bresenham's line drawing algorithm.
     """
     # attribution: https://github.com/encukou/bresenham
     x0, y0 = start
@@ -190,42 +292,58 @@ def line_algorithm(start: Point, end: Point) -> Iterable[Point]:
         D += 2 * dy
 
 
-def split_list(items: list) -> tuple[list, list]:
-    midpoint = len(items) // 2
-    return items[:midpoint], items[midpoint:]
-
-
-def partition(seq: Sequence[G], idx: int) -> tuple[Sequence[G], Sequence[G]]:
+def partition[T](seq: Sequence[T], idx: int) -> tuple[Sequence[T], Sequence[T]]:
+    """Split a sequence at the provided index"""
     return seq[:idx], seq[idx:]
 
 
-def partition_middle(seq: Sequence[G]) -> tuple[Sequence[G], Sequence[G]]:
+def partition_middle[T](seq: Sequence[T]) -> tuple[Sequence[T], Sequence[T]]:
+    """
+    Split a sequence in half.
+
+    If the list has an odd number of items, the first list will have one fewer item.
+    """
     midpoint = len(seq) // 2
     return seq[:midpoint], seq[midpoint:]
 
 
-def chunked(it: Iterable[G], n: int, fillvalue: G | None = None) -> Iterable[Iterable[G]]:
+def chunked[T](it: Iterable[T], n: int, fillvalue: T | None = None) -> Iterable[Iterable[T]]:
+    """
+    Split an iterable into chunks of size n, with the last chunk padded with fillvalue if necessary.
+
+    Use itertools.batched for a version that doesn't pad the last chunk.
+    """
     return itertools.zip_longest(*[iter(it)] * n, fillvalue=fillvalue)
 
 
-def transpose(rows: list[list[G]]) -> list[list[G]]:
+def transpose[T](rows: Sequence[Sequence[T]]) -> Sequence[Sequence[T]]:
+    """
+    Transpose a list of lists so rows become columns and columns become rows.
+
+    >>> transpose([[1, 2, 3], [4, 5, 6]])
+        [[1, 4], [2, 5], [3, 6]]
+
+    123  14
+    456  25
+         36
+    """
     return list(map(list, zip(*rows)))
 
 
-def rotate(rows: list[list[G]], rotations: int = 1) -> list[list[G]]:
+def rotate[T](rows: Sequence[Sequence[T]], rotations: int = 1) -> Sequence[Sequence[T]]:
+    """
+    Rotate a list of lists 90 degrees clockwise.
+
+    >>> rotate([[1, 2, 3], [4, 5, 6]], 1)
+        [[4, 1], [5, 2], [6, 3]]
+
+    123  41  654  36
+    456  52  321  25
+         63       14
+    """
     for _ in range(rotations % 4):
         rows = list(map(list, zip(*reversed(rows))))
     return rows
-
-
-def stepped_sum(start: int, end: int) -> int:
-    """
-    Compute the sum difference of integers between two numbers
-
-    ie: 2 -> 7
-        1 + 2 + 3 + 4 + 5 == 15
-    """
-    return triangle_number(abs(start - end))
 
 
 def triangle_number(n: int) -> int:
@@ -239,20 +357,9 @@ def triangle_number(n: int) -> int:
     return n * (n + 1) // 2
 
 
-def triange_number_2(n: int) -> int:
-    """
-    Compute the 2-triangle number
-
-    The triangular number of 7 is 49
-
-    1 + 3 + 5 + 7 + 9 + 11 + 13
-    """
-    return n**2
-
-
 def shoelace(points: Sequence[Point]) -> int:
     """
-    Find the area within a polgygon, excluding the boundary
+    Find the area within a polygon, excluding the boundary
     """
     return area_inside_boundary(points)
 
@@ -265,11 +372,16 @@ def picks_theorem(num_points: int, inside_area: int) -> int:
 
 
 def area_inside_boundary(points: Sequence[Point]) -> int:
+    """
+    Get the area of a polygon inside a boundary.
+
+    AKA the shoelace theorem.
+    """
     return (
         abs(
             sum(
                 x1 * y2 - x2 * y1
-                for (x1, y1), (x2, y2) in itertools.pairwise(points + [points[0]])
+                for (x1, y1), (x2, y2) in itertools.pairwise(list(points) + [points[0]])
             )
         )
         // 2
@@ -277,6 +389,11 @@ def area_inside_boundary(points: Sequence[Point]) -> int:
 
 
 def area_including_boundary(points: Sequence[Point]) -> int:
+    """
+    Get the area of a polygon including the boundary.
+
+    Combines the shoelace and picks theorems.
+    """
     return picks_theorem(len(points), shoelace(points))
 
 
@@ -305,18 +422,44 @@ def shoelace_iter(point: Point) -> Iterable[int]:
 
 
 def manhattan(p1: PointNd, p2: PointNd) -> int:
+    """
+    Find the manhattan distance between two points.
+
+    Uses straight line distance between two points in an N-dimensional space.
+
+    >>> manhattan( (0,0), (10,10) )
+    20
+    """
     return sum(abs(a - b) for a, b in zip(p1, p2, strict=True))  # type: ignore
 
 
 def point_subtract(p1: PointNd, p2: PointNd) -> PointNd:
+    """
+    Subtract p2 from p1.
+
+    >>> point_subtract( (10, 10), (2, 2) )
+    (8, 8)
+    """
     return tuple(a - b for a, b in zip(p1, p2, strict=True))  # type: ignore
 
 
 def point_add(p1: PointNd, p2: PointNd, steps: int = 1) -> PointNd:
+    """
+    Add p2 to p1.
+
+    >>> point_add( (10, 10), (2, 2) )
+    (12, 12)
+    """
     return tuple(a + (steps * b) for a, b in zip(p1, p2, strict=True))  # type: ignore
 
 
 def sum_points(*points: Point) -> Point:
+    """
+    Sum a list of points.
+
+    >>> sum_points( (10, 10), (2, 2), (3, 3) )
+    (15, 15)
+    """
     return sum(p[0] for p in points), sum(p[1] for p in points)
 
 
@@ -330,8 +473,8 @@ UPLEFT = sum_points(UP, LEFT)
 UPRIGHT = sum_points(UP, RIGHT)
 DOWNLEFT = sum_points(DOWN, LEFT)
 DOWNRIGHT = sum_points(DOWN, RIGHT)
-DIRECTIONS_4: list[Point] = [UP, RIGHT, DOWN, LEFT]
-DIRECTIONS_8: list[Point] = [
+DIRECTIONS_4: Sequence[Point] = [UP, RIGHT, DOWN, LEFT]
+DIRECTIONS_8: Sequence[Point] = [
     UPLEFT,
     UP,
     UPRIGHT,
@@ -341,7 +484,7 @@ DIRECTIONS_8: list[Point] = [
     DOWNLEFT,
     LEFT,
 ]
-DIRECTIONS_9: list[Point] = [
+DIRECTIONS_9: Sequence[Point] = [
     UPLEFT,
     UP,
     UPRIGHT,
@@ -355,22 +498,44 @@ DIRECTIONS_9: list[Point] = [
 
 
 def turn_right(direction: Point) -> Point:
+    """
+    Turn right for the given 4-directional point.
+
+    >>> turn_right( DOWN ) == LEFT
+    True
+    """
     return DIRECTIONS_4[(DIRECTIONS_4.index(direction) + 1) % len(DIRECTIONS_4)]
 
 
 def turn_left(direction: Point) -> Point:
+    """
+    Turn left for the given 4-directional point.
+
+    >>> turn_left( DOWN ) == RIGHT
+    True
+    """
     return DIRECTIONS_4[(DIRECTIONS_4.index(direction) - 1) % len(DIRECTIONS_4)]
 
 
-def neighbours(point: Point, directions: list[Point]) -> list[Point]:
+def neighbours(point: Point, directions: Sequence[Point]) -> Sequence[Point]:
+    """
+    Get the neighbours of a point in the given directions.
+
+    >>> neighbours( (3, 3), DIRECTIONS_4)
+    [(2, 3), (3, 4), (4, 3), (3, 2)]
+    """
     return [(point[0] + d[0], point[1] + d[1]) for d in directions]
 
 
 @dataclasses.dataclass
-class Grid(Generic[G]):
-    points: dict[Point, G]
+class Grid[T]:
+    """
+    Models a grid of (row, column) points with a value at each point.
+    """
 
-    def __init__(self, rows: Iterable[Iterable[G]], pad_with: G | None = None):
+    points: dict[Point, T]
+
+    def __init__(self, rows: Iterable[Iterable[T]], pad_with: T | None = None):
         self.points = {}
         self.pad_with = pad_with
         for r, row in enumerate(rows):
@@ -381,6 +546,9 @@ class Grid(Generic[G]):
     def from_number_string(
         cls, data: str, separator=None, pad_with: int | None = None
     ) -> Grid[int]:
+        """
+        Build a grid from a string of numbers, each row separated by a newline.
+        """
         if separator:
             return Grid(
                 rows=((int(n) for n in row.split(separator)) for row in data.splitlines()),
@@ -390,6 +558,9 @@ class Grid(Generic[G]):
 
     @classmethod
     def from_string(cls, data: str, separator=None, pad_with: str | None = None) -> Grid[str]:
+        """
+        Build a grid from a string, each row separated by a newline.
+        """
         if separator:
             return Grid(
                 rows=((n for n in row.split(separator)) for row in data.splitlines()),
@@ -397,51 +568,73 @@ class Grid(Generic[G]):
             )
         return Grid(rows=((n for n in row) for row in data.splitlines()), pad_with=pad_with)
 
-    def get(self, key: Point, default: G | None = None) -> G | None:
+    def get(self, key: Point, default: T | None = None) -> T | None:
         return self.points.get(key, default)
 
     def __len__(self) -> int:
+        """Number of points"""
         return self.points.__len__()
 
     def __iter__(self):
+        """Iterate over the points"""
         return self.points.__iter__()
 
-    def __contains__(self, key: G) -> bool:
+    def __contains__(self, key: T) -> bool:
+        """Check if a point is in the grid"""
         return key in self.points
 
-    def __getitem__(self, index: Point) -> G:
+    def __getitem__(self, index: Point) -> T:
+        """Get the value at a point if it exists or exception"""
         return self.points[index]
 
-    def __setitem__(self, index: Point, value: G):
+    def __setitem__(self, index: Point, value: T):
         self.points[index] = value
 
-    def rows(self) -> Iterable[Iterable[G]]:
+    def rows(self) -> Iterable[Sequence[T]]:
+        """Iterate over the rows of the grid"""
         for r in range(self.height):
             yield [self[r, c] for c in range(self.width)]
 
-    def cols(self) -> Iterable[Iterable[G]]:
+    def cols(self) -> Iterable[Sequence[T]]:
+        """Iterate over the columns of the grid"""
         for c in range(self.width):
             yield [self[r, c] for r in range(self.height)]
 
     @cached_property
     def width(self) -> int:
+        """
+        How wide the grid is.
+
+        Assumes the grid is complete.
+        """
         return max(self)[1] + 1
 
     @cached_property
     def height(self) -> int:
+        """
+        How tall the grid is.
+
+        Assumes the grid is complete.
+        """
         return max(self)[0] + 1
 
     @property
-    def _directions(self) -> list[Point]:
+    def _directions(self) -> Sequence[Point]:
         return DIRECTIONS_4
 
     @property
-    def _directions_diag(self) -> list[Point]:
+    def _directions_diag(self) -> Sequence[Point]:
         return DIRECTIONS_8
 
     def get_neighbours(
         self, point: Point, diag: bool = False, directions: Sequence[Point] | None = None
     ) -> Iterable[Point]:
+        """
+        Get the neighbours of a point.
+
+        If directions is provided, only return the neighbours in those directions.
+        If diag is True, return diagonal neighbours as well as 4-directional neighbours.
+        """
         if directions is None:
             directions = self._directions_diag if diag else self._directions
         for d in directions:
@@ -455,6 +648,9 @@ class Grid(Generic[G]):
     def get_neigbours_wrapping(
         self, point: Point, diag: bool = False, directions: Sequence[Point] | None = None
     ) -> Iterable[Point]:
+        """
+        Get the neighbours of a point, wrapping around the grid if necessary.
+        """
         height = self.height
         width = self.width
         if directions is None:
@@ -467,9 +663,14 @@ class Grid(Generic[G]):
 
     def search(
         self,
-        comparison_func: Callable[[tuple[Point, G], list[tuple[Point, G]]], bool],
+        comparison_func: Callable[[tuple[Point, T], Sequence[tuple[Point, T]]], bool],
         diagonal: bool = False,
-    ) -> Iterable[tuple[Point, G]]:
+    ) -> Iterable[tuple[Point, T]]:
+        """
+        For each point in the grid, check if it meets the comparison function with its neighbours.
+
+        Yields (point, matching_neighbour) pairs.
+        """
         for point in self.points.keys():
             neighbours = [(n, self.points[n]) for n in self.get_neighbours(point, diag=diagonal)]
             if comparison_func((point, self.points[point]), neighbours):
@@ -477,11 +678,14 @@ class Grid(Generic[G]):
 
     def collect_recursive(
         self,
-        points: Iterable[Point],
-        comparison_func: Callable[[tuple[Point, G], list[tuple[Point, G]]], bool],
+        start: Point,
+        comparison_func: Callable[[tuple[Point, T], list[tuple[Point, T]]], bool],
         diagonal: bool = False,
-    ) -> Iterable[tuple[Point, G]]:
-        queue = deque(list(points))
+    ) -> Iterable[tuple[Point, T]]:
+        """
+        Recursively collect all points that meet the comparison function from a starting point.
+        """
+        queue = deque([start])
         seen = set()
         found = set()
         while queue:
@@ -502,6 +706,11 @@ class Grid(Generic[G]):
         directed=True,
         is_connected_func: Callable[[Grid, Point, Point], bool] | None = None,
     ) -> nx.Graph:
+        """
+        Build a graph from the grid.
+
+        Edges are created between neighbouring points that match the is_connected_func.
+        """
         graph: nx.Graph = nx.DiGraph() if directed else nx.Graph()
         for point in self:
             neighbours = self.get_neighbours(point, diag=diagonal)
@@ -514,10 +723,22 @@ class Grid(Generic[G]):
         return graph
 
     def replicate(self, right: int, down: int) -> Grid:
+        """
+        Grow the grid by replicating it right and down factors.
+
+        0 and 1 are the same grid.
+
+        123     123123
+        456     456456
+                123123
+                456456
+        """
+        assert (
+            right > 1 or down > 1
+        ), "Replication must be greater than 1 in at least one direction"
         grid: Grid = Grid([])
-        size = max(self)
-        length_r = size[0] + 1
-        length_c = size[1] + 1
+        length_r = self.width
+        length_c = self.height
         grid = deepcopy(self)
         for ri in range(length_r):
             for ci in range(length_c):
@@ -527,17 +748,29 @@ class Grid(Generic[G]):
         return grid
 
     def rotate(self, rotations: int = 1) -> Grid:
+        """
+        Rotate the grid 90 degrees clockwise.
+        """
         return Grid(rows=rotate(list(self.rows()), rotations=rotations))
 
     def transpose(self) -> Grid:
+        """
+        Transpose the grid, so that rows become columns and columns become rows.
+        """
         return Grid(rows=transpose(list(self.rows())))
 
-    def print(self, missing: G | str = "?"):
+    def print(self, missing: T | str = "?"):
+        """
+        Print the grid to the console.
+        """
         for row in self.strings(missing):
             print("".join(row))
         print()
 
-    def strings(self, missing: G | str = "?") -> list[str]:
+    def strings(self, missing: T | str = "?") -> Sequence[str]:
+        """
+        Return the grid as a Sequence of strings.
+        """
         rmin = min(self)[0]
         rmax = max(self)[0]
         cmin = min(node[1] for node in self)
@@ -549,6 +782,9 @@ class Grid(Generic[G]):
         ]
 
     def hash_key(self) -> str:
+        """
+        Make a hash key out of the content of the grid, so that it's hashable.
+        """
         return "".join(self.strings())
 
 
