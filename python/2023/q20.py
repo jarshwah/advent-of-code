@@ -18,8 +18,7 @@ class Gate:
     memory: Counter[bool] = dataclasses.field(default_factory=Counter)
     outputs: Sequence[str] = dataclasses.field(default_factory=list)
 
-    def receive(self, input: Pulse) -> Sequence[Pulse]:
-        ...
+    def receive(self, input: Pulse) -> Sequence[Pulse]: ...
 
     def __eq__(self, other: Gate) -> bool:
         return self.name == other.name
