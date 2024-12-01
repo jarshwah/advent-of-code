@@ -605,9 +605,13 @@ class Puzzle:
         @click.command()
         @click.option("--p1", "-1", is_flag=True, help="Run part one")
         @click.option("--p2", "-2", is_flag=True, help="Run part two")
-        @click.option("--test", is_flag=True, help="Run tests")
+        @click.option("--test", "-t", is_flag=True, help="Run tests")
         @click.option(
-            "--fail-fast", "--ff", is_flag=True, help="Stop on first test failure (implies --test)"
+            "--fail-fast",
+            "--ff",
+            "-f",
+            is_flag=True,
+            help="Stop on first test failure (implies --test)",
         )
         def entrypoint(p1: bool, p2: bool, test: bool, fail_fast: bool):
             if not (p1 or p2 or test):

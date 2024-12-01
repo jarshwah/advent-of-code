@@ -4,18 +4,17 @@ import utils
 class Puzzle(utils.Puzzle):
     def part_one(self, input: utils.Input) -> str:
         """
-        Find the distance between sorted pairs.
+        Find the distance between sorted pairs from columns.
         """
-        left, right = map(sorted, zip(*input.lines().split().numbers))
-        distance = sum(abs(a - b) for a, b in zip(left, right))
-        return str(distance)
+        left, right = map(sorted, input.columns().numbers)
+        return str(sum(abs(a - b) for a, b in zip(left, right)))
 
     def part_two(self, input: utils.Input) -> str:
         """
         Find the similarity between sorted first column, summing left by the
         count of matches in right.
         """
-        left, right = map(sorted, zip(*input.lines().split().numbers))
+        left, right = map(sorted, input.columns().numbers)
         similarity = sum(ln * right.count(ln) for ln in left)
         return str(similarity)
 
