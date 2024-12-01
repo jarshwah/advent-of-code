@@ -21,7 +21,7 @@ repos:
   hooks:
     - id: pytest
       name: pytest
-      entry: pytest
+      entry: uvx pytest
       language: system
       pass_filenames: false
       always_run: true
