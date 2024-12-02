@@ -31,7 +31,7 @@ class Puzzle(utils.Puzzle):
         reports = input.lines().split().numbers
         valid = 0
         for report in reports:
-            if is_safe(report, 1, 3) or any(
+            if any(
                 is_safe(list(report[:i]) + list(report[i + 1 :]), 1, 3) for i in range(len(report))
             ):
                 valid += 1
