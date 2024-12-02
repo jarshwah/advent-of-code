@@ -12,10 +12,9 @@ def is_safe(nums: Sequence[int], low: int, high: int) -> bool:
     ie [1, 2, 3, 2, 1] is not safe with low=1, high=3
     """
     diffs = [left - right for left, right in zip(nums, nums[1:])]
-    all_increasing = all(d < 0 for d in diffs)
-    all_decreasing = all(d > 0 for d in diffs)
+    same_direction = all(d < 0 for d in diffs) or all(d > 0 for d in diffs)
     within_tolerance = all(low <= abs(d) <= high for d in diffs)
-    return any((all_increasing, all_decreasing)) and within_tolerance
+    return same_direction and within_tolerance
 
 
 class Puzzle(utils.Puzzle):
