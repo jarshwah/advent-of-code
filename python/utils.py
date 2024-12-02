@@ -829,10 +829,10 @@ class Puzzle:
     test_input: str = ""
     test_answers: tuple[str, str] = ("", "")
 
-    def part_one(self, input: Input) -> str:
+    def part_one(self, input: Input) -> str | int:
         return ""
 
-    def part_two(self, input: Input) -> str:
+    def part_two(self, input: Input) -> str | int:
         return ""
 
     def get_input(self, year: int, day: int) -> Input:
@@ -870,11 +870,11 @@ class Puzzle:
                     return True
 
                 test_puzzle = Input(data=puzzle_runner.test_input)
-                t1 = puzzle_runner.part_one(test_puzzle)
+                t1 = str(puzzle_runner.part_one(test_puzzle))
                 if not report(1, t1, puzzle_runner.test_answers[0]) and fail_fast:
                     return
 
-                t2 = puzzle_runner.part_two(test_puzzle)
+                t2 = str(puzzle_runner.part_two(test_puzzle))
                 if not report(2, t2, puzzle_runner.test_answers[1]) and fail_fast:
                     return
 

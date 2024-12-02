@@ -2,14 +2,14 @@ import utils
 
 
 class Puzzle(utils.Puzzle):
-    def part_one(self, input: utils.Input) -> str:
+    def part_one(self, input: utils.Input) -> str | int:
         """
         Find the distance between sorted pairs from columns.
         """
         left, right = map(sorted, input.columns().numbers)
         return str(sum(abs(a - b) for a, b in zip(left, right)))
 
-    def part_two(self, input: utils.Input) -> str:
+    def part_two(self, input: utils.Input) -> str | int:
         """
         Find the similarity between sorted first column, summing left by the
         count of matches in right.

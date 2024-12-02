@@ -6,10 +6,10 @@ import utils
 
 
 class Puzzle(utils.Puzzle):
-    def part_one(self, input: utils.Input) -> str:
+    def part_one(self, input: utils.Input) -> str | int:
         return ""
 
-    def part_two(self, input: utils.Input) -> str:
+    def part_two(self, input: utils.Input) -> str | int:
         return ""
 
 
