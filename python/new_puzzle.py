@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
 def create(day: int, year: int) -> None:
     here = pathlib.Path(__file__).parent
-    year_dir = here / str(year)
+    year_dir = here / f"_{year}"
     if not year_dir.exists():
         raise ValueError(f"We do not yet have a {year} for puzzles.")
     puzzle_file = year_dir / f"q{day:02d}.py"
