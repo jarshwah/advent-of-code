@@ -19,23 +19,20 @@ def is_safe(nums: Sequence[int], low: int, high: int) -> bool:
 
 
 class Puzzle(utils.Puzzle):
-    def part_one(self, input: utils.Input) -> str:
+    def part_one(self, input: utils.Input) -> str | int:
         """Find all safe reports."""
         reports = input.lines().split().numbers
-        valid = sum(is_safe(report, 1, 3) for report in reports)
-        return str(valid)
+        return sum(is_safe(report, 1, 3) for report in reports)
 
-    def part_two(self, input: utils.Input) -> str:
+    def part_two(self, input: utils.Input) -> str | int:
         """Find all safe reports with an optional missing number."""
         reports = input.lines().split().numbers
-        valid = sum(
+        return sum(
             any(
                 is_safe(list(report[:i]) + list(report[i + 1 :]), 1, 3) for i in range(len(report))
             )
             for report in reports
         )
-
-        return str(valid)
 
 
 if __name__ == "__main__":

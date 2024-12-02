@@ -7,7 +7,7 @@ class Puzzle(utils.Puzzle):
         Find the distance between sorted pairs from columns.
         """
         left, right = map(sorted, input.columns().numbers)
-        return str(sum(abs(a - b) for a, b in zip(left, right)))
+        return sum(abs(a - b) for a, b in zip(left, right))
 
     def part_two(self, input: utils.Input) -> str | int:
         """
@@ -15,8 +15,7 @@ class Puzzle(utils.Puzzle):
         count of matches in right.
         """
         left, right = map(sorted, input.columns().numbers)
-        similarity = sum(ln * right.count(ln) for ln in left)
-        return str(similarity)
+        return sum(ln * right.count(ln) for ln in left)
 
 
 if __name__ == "__main__":
