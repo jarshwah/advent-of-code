@@ -14,9 +14,8 @@ def is_safe(nums: Sequence[int], low: int, high: int) -> bool:
     diffs = [left - right for left, right in zip(nums, nums[1:])]
     all_increasing = all(d < 0 for d in diffs)
     all_decreasing = all(d > 0 for d in diffs)
-    if any((all_increasing, all_decreasing)):
-        return all(low <= abs(d) <= high for d in diffs)
-    return False
+    within_tolerance = all(low <= abs(d) <= high for d in diffs)
+    return any((all_increasing, all_decreasing)) and within_tolerance
 
 
 class Puzzle(utils.Puzzle):
