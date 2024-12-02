@@ -29,12 +29,12 @@ class Puzzle(utils.Puzzle):
     def part_two(self, input: utils.Input) -> str:
         """Find all safe reports with an optional missing number."""
         reports = input.lines().split().numbers
-        valid = 0
-        for report in reports:
-            if any(
+        valid = sum(
+            any(
                 is_safe(list(report[:i]) + list(report[i + 1 :]), 1, 3) for i in range(len(report))
-            ):
-                valid += 1
+            )
+            for report in reports
+        )
 
         return str(valid)
 
