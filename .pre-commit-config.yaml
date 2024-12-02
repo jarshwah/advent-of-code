@@ -25,3 +25,10 @@ repos:
       language: system
       pass_filenames: false
       always_run: true
+
+    - id: mypy
+      name: mypy
+      entry: bash -c "cd python && uvx --with-requirements pyproject.toml mypy ."
+      language: system
+      pass_filenames: false
+      always_run: true

@@ -6,11 +6,11 @@ from collections import deque
 from collections.abc import Callable, Iterable, Sequence
 from copy import deepcopy
 from functools import cached_property
-from typing import Self
+from typing import Generator, Self
 
 import aocd
 import networkx as nx
-import parse  # type: ignore [import-untyped]
+import parse
 import rich_click as click
 
 type Point = tuple[int, int]
@@ -159,7 +159,7 @@ class InputList:
         """
         return InputGroup(data=[inp.split(sep) for inp in self.data])
 
-    def __iter__(self):
+    def __iter__(self) -> Iterable[Input]:
         return self.data.__iter__()
 
 
@@ -224,11 +224,11 @@ class InputGroup:
         """
         return Grid(rows=((int(item) for item in row) for group in self.strings for row in group))
 
-    def __iter__(self):
+    def __iter__(self) -> Iterable[InputList]:
         return self.data.__iter__()
 
 
-def int_numbers(input_data: str, sep=None) -> Sequence[int]:
+def int_numbers(input_data: str, sep: str | None = None) -> Sequence[int]:
     """Transform a line of numbers into a list of integers"""
     if sep is None:
         return [int(num) for num in input_data.splitlines() if num.strip()]
@@ -397,7 +397,7 @@ def area_including_boundary(points: Sequence[Point]) -> int:
     return picks_theorem(len(points), shoelace(points))
 
 
-def shoelace_iter(point: Point) -> Iterable[int]:
+def shoelace_iter(point: Point) -> Generator[int, Point, int]:
     """
     Compute the shoelace area iteratively.
 
@@ -408,16 +408,17 @@ def shoelace_iter(point: Point) -> Iterable[int]:
         ...    area_gen.send(point)
         >>> area = next(area_gen)
     """
+    current: Point | None
     area = 0
     first = point
     prev = point
     while True:
         current = yield (area)
         if current is None:
-            break
+            break  # type: ignore [unreachable]
         area += prev[0] * current[1] - prev[1] * current[0]
         prev = current
-    area += prev[0] * first[1] - prev[1] * first[0]
+    area += prev[0] * first[1] - prev[1] * first[0]  # type: ignore [unreachable]
     yield abs(area) // 2
 
 
@@ -430,7 +431,7 @@ def manhattan(p1: PointNd, p2: PointNd) -> int:
     >>> manhattan( (0,0), (10,10) )
     20
     """
-    return sum(abs(a - b) for a, b in zip(p1, p2, strict=True))  # type: ignore
+    return sum(abs(a - b) for a, b in zip(p1, p2, strict=True))
 
 
 def point_subtract(p1: PointNd, p2: PointNd) -> PointNd:
@@ -440,7 +441,7 @@ def point_subtract(p1: PointNd, p2: PointNd) -> PointNd:
     >>> point_subtract( (10, 10), (2, 2) )
     (8, 8)
     """
-    return tuple(a - b for a, b in zip(p1, p2, strict=True))  # type: ignore
+    return tuple(a - b for a, b in zip(p1, p2, strict=True))
 
 
 def point_add(p1: PointNd, p2: PointNd, steps: int = 1) -> PointNd:
@@ -450,7 +451,7 @@ def point_add(p1: PointNd, p2: PointNd, steps: int = 1) -> PointNd:
     >>> point_add( (10, 10), (2, 2) )
     (12, 12)
     """
-    return tuple(a + (steps * b) for a, b in zip(p1, p2, strict=True))  # type: ignore
+    return tuple(a + (steps * b) for a, b in zip(p1, p2, strict=True))
 
 
 def sum_points(*points: Point) -> Point:
@@ -544,7 +545,7 @@ class Grid[T]:
 
     @classmethod
     def from_number_string(
-        cls, data: str, separator=None, pad_with: int | None = None
+        cls, data: str, separator: str | None = None, pad_with: int | None = None
     ) -> Grid[int]:
         """
         Build a grid from a string of numbers, each row separated by a newline.
@@ -557,7 +558,9 @@ class Grid[T]:
         return Grid(rows=((int(n) for n in row) for row in data.splitlines()), pad_with=pad_with)
 
     @classmethod
-    def from_string(cls, data: str, separator=None, pad_with: str | None = None) -> Grid[str]:
+    def from_string(
+        cls, data: str, separator: str | None = None, pad_with: str | None = None
+    ) -> Grid[str]:
         """
         Build a grid from a string, each row separated by a newline.
         """
@@ -575,11 +578,11 @@ class Grid[T]:
         """Number of points"""
         return self.points.__len__()
 
-    def __iter__(self):
+    def __iter__(self) -> Iterable[Point]:
         """Iterate over the points"""
         return self.points.__iter__()
 
-    def __contains__(self, key: T) -> bool:
+    def __contains__(self, key: Point) -> bool:
         """Check if a point is in the grid"""
         return key in self.points
 
@@ -587,7 +590,7 @@ class Grid[T]:
         """Get the value at a point if it exists or exception"""
         return self.points[index]
 
-    def __setitem__(self, index: Point, value: T):
+    def __setitem__(self, index: Point, value: T) -> None:
         self.points[index] = value
 
     def rows(self) -> Iterable[Sequence[T]]:
@@ -607,7 +610,7 @@ class Grid[T]:
 
         Assumes the grid is complete.
         """
-        return max(self)[1] + 1
+        return max(self.points)[1] + 1
 
     @cached_property
     def height(self) -> int:
@@ -616,7 +619,7 @@ class Grid[T]:
 
         Assumes the grid is complete.
         """
-        return max(self)[0] + 1
+        return max(self.points)[0] + 1
 
     @property
     def _directions(self) -> Sequence[Point]:
@@ -701,18 +704,18 @@ class Grid[T]:
 
     def to_graph(
         self,
-        diagonal=False,
-        weighted=True,
-        directed=True,
-        is_connected_func: Callable[[Grid, Point, Point], bool] | None = None,
-    ) -> nx.Graph:
+        diagonal: bool = False,
+        weighted: bool = True,
+        directed: bool = True,
+        is_connected_func: Callable[[Grid[T], Point, Point], bool] | None = None,
+    ) -> nx.Graph[Point]:
         """
         Build a graph from the grid.
 
         Edges are created between neighbouring points that match the is_connected_func.
         """
-        graph: nx.Graph = nx.DiGraph() if directed else nx.Graph()
-        for point in self:
+        graph: nx.Graph[Point] = nx.DiGraph() if directed else nx.Graph()
+        for point in self.__iter__():
             neighbours = self.get_neighbours(point, diag=diagonal)
             for nb in neighbours:
                 if is_connected_func is None or is_connected_func(self, point, nb):
@@ -722,7 +725,7 @@ class Grid[T]:
                         graph.add_edge(point, nb)
         return graph
 
-    def replicate(self, right: int, down: int) -> Grid:
+    def replicate(self, right: int, down: int) -> Grid[T]:
         """
         Grow the grid by replicating it right and down factors.
 
@@ -736,7 +739,7 @@ class Grid[T]:
         assert (
             right > 1 or down > 1
         ), "Replication must be greater than 1 in at least one direction"
-        grid: Grid = Grid([])
+        grid: Grid[T] = Grid([])
         length_r = self.width
         length_c = self.height
         grid = deepcopy(self)
@@ -747,19 +750,19 @@ class Grid[T]:
                         grid[length_r * newri + ri, length_c * newci + ci] = self[ri, ci]
         return grid
 
-    def rotate(self, rotations: int = 1) -> Grid:
+    def rotate(self, rotations: int = 1) -> Grid[T]:
         """
         Rotate the grid 90 degrees clockwise.
         """
         return Grid(rows=rotate(list(self.rows()), rotations=rotations))
 
-    def transpose(self) -> Grid:
+    def transpose(self) -> Grid[T]:
         """
         Transpose the grid, so that rows become columns and columns become rows.
         """
         return Grid(rows=transpose(list(self.rows())))
 
-    def print(self, missing: T | str = "?"):
+    def print(self, missing: T | str = "?") -> None:
         """
         Print the grid to the console.
         """
@@ -771,10 +774,10 @@ class Grid[T]:
         """
         Return the grid as a Sequence of strings.
         """
-        rmin = min(self)[0]
-        rmax = max(self)[0]
-        cmin = min(node[1] for node in self)
-        cmax = max(node[1] for node in self)
+        rmin = min(self.points)[0]
+        rmax = max(self.points)[0]
+        cmin = min(node[1] for node in self.points)
+        cmax = max(node[1] for node in self.points)
 
         return [
             "".join(str(self.points.get((r, c), missing)) for c in range(cmin, cmax + 1))
@@ -849,7 +852,7 @@ class Puzzle:
             is_flag=True,
             help="Stop on first test failure (implies --test)",
         )
-        def entrypoint(p1: bool, p2: bool, test: bool, fail_fast: bool):
+        def entrypoint(p1: bool, p2: bool, test: bool, fail_fast: bool) -> None:
             if not (p1 or p2 or test):
                 # default, run it all
                 p1 = p2 = test = True
@@ -887,4 +890,4 @@ class Puzzle:
                 click.secho("Part 2: ", fg="blue", nl=False)
                 click.echo(puzzle_runner.part_two(input_data))
 
-        return entrypoint()
+        return entrypoint()  # type: ignore [no-any-return]

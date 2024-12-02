@@ -39,6 +39,28 @@ exclude = [
     "**/__pycache__",
 ]
 
+[tool.mypy]
+python_version = "3.13"
+strict = true
+ignore_missing_imports = true
+explicit_package_bases = true
+show_column_numbers = true
+show_error_codes = true
+show_traceback = true
+warn_unreachable = true
+warn_redundant_casts = true
+warn_unused_configs = true
+warn_unused_ignores = true
+exclude = [
+    "_2020",
+    "_2021",
+    "_2022",
+    "_2023",
+    "test_utils",
+    "_2024/utils"
+]
+
+
 [tool.ruff]
 target-version = "py313"
 line-length = 99
