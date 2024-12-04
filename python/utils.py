@@ -434,24 +434,26 @@ def manhattan(p1: PointNd, p2: PointNd) -> int:
     return sum(abs(a - b) for a, b in zip(p1, p2, strict=True))
 
 
-def point_subtract(p1: PointNd, p2: PointNd) -> PointNd:
+def point_subtract[T: PointNd](p1: T, p2: T) -> T:
     """
     Subtract p2 from p1.
 
     >>> point_subtract( (10, 10), (2, 2) )
     (8, 8)
     """
-    return tuple(a - b for a, b in zip(p1, p2, strict=True))
+    # We know the lengths will be the same, so ignore the type check on return value
+    return tuple(a - b for a, b in zip(p1, p2, strict=True))  # type: ignore [return-value]
 
 
-def point_add(p1: PointNd, p2: PointNd, steps: int = 1) -> PointNd:
+def point_add[T: PointNd](p1: T, p2: T, steps: int = 1) -> T:
     """
     Add p2 to p1.
 
     >>> point_add( (10, 10), (2, 2) )
     (12, 12)
     """
-    return tuple(a + (steps * b) for a, b in zip(p1, p2, strict=True))
+    # We know the lengths will be the same, so ignore the type check on return value
+    return tuple(a + (steps * b) for a, b in zip(p1, p2, strict=True))  # type: ignore [return-value]
 
 
 def sum_points(*points: Point) -> Point:
@@ -647,6 +649,9 @@ class Grid[T]:
             elif self.pad_with is not None:
                 self[p] = self.pad_with
                 yield p
+
+    # alias for get_neighbours
+    neighbours = get_neighbours
 
     def get_neigbours_wrapping(
         self, point: Point, diag: bool = False, directions: Sequence[Point] | None = None
