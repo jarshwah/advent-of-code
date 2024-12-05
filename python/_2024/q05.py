@@ -4,11 +4,8 @@ from functools import cmp_to_key
 import utils
 
 
-def in_order(update: tuple[int, ...], priorities: dict[int, list[int]]) -> bool:
-    for order, pg in enumerate(update):
-        if any(dep for dep in priorities[pg] if dep in update[order:]):
-            return False
-    return True
+def in_order(update: tuple[int, ...], priorities: dict[int, set[int]]) -> bool:
+    return all(not priorities[pg].intersection(update[order:]) for order, pg in enumerate(update))
 
 
 class Puzzle(utils.Puzzle):
@@ -22,9 +19,9 @@ class Puzzle(utils.Puzzle):
         updates = [tuple(map(int, update.split(","))) for update in update_list]
 
         # Adjacency list is all numbers left of a given number in the priority list.
-        priorities = defaultdict(list)
+        priorities = defaultdict(set)
         for rule in rules:
-            priorities[rule[1]].append(rule[0])
+            priorities[rule[1]].add(rule[0])
 
         result = 0
         for update in updates:
@@ -40,18 +37,18 @@ class Puzzle(utils.Puzzle):
         rule_list, update_list = input.group().strings
         rules = [tuple(map(int, rule.split("|"))) for rule in rule_list]
         updates = [tuple(map(int, update.split(","))) for update in update_list]
-        priorities = defaultdict(list)
+        priorities = defaultdict(set)
         for rule in rules:
-            priorities[rule[1]].append(rule[0])
+            priorities[rule[1]].add(rule[0])
 
         def sorter(a: int, b: int) -> int:
             """An element comes first if it is not a dependency of the other."""
-            return a if b in priorities[a] else -1
+            return 1 if b in priorities[a] else -1
 
         result = 0
         key = cmp_to_key(sorter)
-        for update in (update for update in updates if not in_order(update, priorities)):
-            ordered = sorted(update, key=key)
+        for unordered in (update for update in updates if not in_order(update, priorities)):
+            ordered = sorted(unordered, key=key)
             result += ordered[len(ordered) // 2]
         return result
 
