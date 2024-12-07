@@ -669,6 +669,15 @@ class Grid[T]:
             if wrapped_p in self:
                 yield wrapped_p
 
+    def find(self, value: T) -> Point:
+        """
+        Find the first point with the given value.
+        """
+        for point, v in self.points.items():
+            if v == value:
+                return point
+        raise ValueError(f"{value} not found in grid")
+
     def search(
         self,
         comparison_func: Callable[[tuple[Point, T], Sequence[tuple[Point, T]]], bool],
