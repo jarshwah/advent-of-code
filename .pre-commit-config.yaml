@@ -9,7 +9,10 @@ repos:
   -   id: check-yaml
   -   id: debug-statements
   -   id: end-of-file-fixer
+      exclude: .example$
   -   id: trailing-whitespace
+      exclude: .example$
+
 
 - repo: https://github.com/astral-sh/ruff-pre-commit
   # Ruff version.
