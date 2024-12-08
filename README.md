@@ -1,6 +1,8 @@
 # Advent Of Code
 
-Python implementations for [Advent Of Code](https://adventofcode.com/) (and some SQL).
+Python implementations for [Advent Of Code](https://adventofcode.com/).
+
+With some other languages, SQL for now, sprinkled throughout.
 
 I use AOC as an opportunity to use the latest and greatest python features as well
 as learning new libraries that I don't use in my day to day.
@@ -14,22 +16,42 @@ utils are symlinked into each year's folder.
 The structure of most problems follows the pattern:
 
 ```python
-def part_one(data: str):
-    ...
+import utils
 
-def part_two(data: str):
-    ...
 
-def test():
-    test_input = """ ... """
-    assert part_one(test_input) == ...
-    assert part_two(test_input) == ...
+class Puzzle(utils.Puzzle):
+    def part_one(self, input: utils.Input) -> str | int:
+        ...
+
+    def part_two(self, input: utils.Input) -> str | int:
+        ...
+
 
 if __name__ == "__main__":
-    test()
-    data = aocd.get_data(day=1, year=2022)
-    print(part_one(data))
-    print(part_two(data))
+    runner = Puzzle(
+        year=2024,
+        day=1,
+        test_answers=("1", "2"),
+        test_input="""copied test input""",
+    )
+    runner.cli()
+```
+
+Which can be generated via:
+
+```bash
+$ cd python
+$ uv run new_puzzle.py 1
+```
+
+There are a number of flags for running tests, specific parts, and alternate solutions.
+
+```bash
+$ uv run _2024/q01.py -1  # Run part one only
+$ uv run _2024/q01.py -2  # Run part two
+$ uv run _2024/q01.py -t  # Run tests only
+$ uv run _2024/q01.py -a  # Run alternate solutions if they exist
+$ uv run _2024/q01.py -12tfa  # Enable all flags at once
 ```
 
 The `aocd` library (advent-of-code-data) fetches the specific input for my account
