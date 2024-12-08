@@ -3,7 +3,7 @@ from __future__ import annotations
 import dataclasses
 import itertools
 from collections import deque
-from collections.abc import Callable, Iterable, Sequence
+from collections.abc import Callable, Iterable, Iterator, Sequence
 from copy import deepcopy
 from functools import cached_property
 from typing import Generator, Self
@@ -580,7 +580,7 @@ class Grid[T]:
         """Number of points"""
         return self.points.__len__()
 
-    def __iter__(self) -> Iterable[Point]:
+    def __iter__(self) -> Iterator[Point]:
         """Iterate over the points"""
         return self.points.__iter__()
 
