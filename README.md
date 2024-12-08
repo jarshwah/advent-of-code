@@ -1,5 +1,7 @@
 # Advent Of Code
 
+![build](https://github.com/jarshwah/advent-of-code/actions/workflows/pre-commit.yml/badge.svg)
+
 Python implementations for [Advent Of Code](https://adventofcode.com/).
 
 With some other languages, SQL for now, sprinkled throughout.
