@@ -69,7 +69,7 @@ class Puzzle(utils.Puzzle):
         for size, file_num, is_free in zip(nums, range(0, len(nums)), cycle([False, True])):
             if not is_free:
                 DATA_MAP.append((size, fp, file_num // 2))
-            else:
+            elif size > 0:
                 FREE_MAP.append((size, fp))
             fp += size
 
@@ -81,16 +81,18 @@ class Puzzle(utils.Puzzle):
                     for idx, (free_size, free_fp) in enumerate(FREE_MAP)
                     if free_size >= size and free_fp <= fp
                 )
-                DISK[free_fp : free_fp + size] = [val] * size
-                if free_size == size:
-                    # Remove the free space so we don't check it again
-                    FREE_MAP.pop(free_map_idx)
-                else:
-                    # Shrink the free space if there's some left
-                    FREE_MAP[free_map_idx] = (free_size - size, free_fp + size)
             except StopIteration:
                 # No free space large enough, leave it where it was
                 DISK[fp : fp + size] = [val] * size
+                continue
+
+            DISK[free_fp : free_fp + size] = [val] * size
+            if free_size == size:
+                # Remove the free space so we don't check it again
+                FREE_MAP.pop(free_map_idx)
+            else:
+                # Shrink the free space if there's some left
+                FREE_MAP[free_map_idx] = (free_size - size, free_fp + size)
 
         return checksum(DISK)
 
