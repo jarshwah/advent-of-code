@@ -57,5 +57,26 @@
                 }
             }
         ]
+    },
+    "tasks": {
+        "version": "2.0.0",
+        "inputs": [
+            {
+                "id": "day_number",
+                "description": "The day to create a puzzle",
+                "type": "promptString",
+            },
+        ],
+        "tasks": [
+            {
+                "label": "New Problem",
+                "command": "uv run new_puzzle.py ${input:day_number}",
+                "type": "shell",
+                "options": {
+                    "cwd": "python"
+                },
+                "problemMatcher": []
+            }
+        ]
     }
 }
