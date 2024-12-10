@@ -1,5 +1,5 @@
-import itertools
 import operator
+from collections import deque
 from collections.abc import Callable, Sequence
 
 import utils
@@ -44,15 +44,14 @@ def check_equation(check: int, values: Sequence[int], *ops: Callable[[int, int],
 
     Operators are applied left to right rather than via precedence.
     """
-    operations = itertools.product(ops, repeat=len(values) - 1)
-    for op_set in operations:
-        result = values[0]
-        for op, value in zip(op_set, values[1:]):
-            result = op(result, value)
-            if result > check:
-                break
-        if result == check:
-            return result
+    queue = deque([(values[0], values[1:])])
+    while queue:
+        result, values = queue.popleft()
+        if not values:
+            if result == check:
+                return result
+            continue
+        queue.extendleft((op(result, values[0]), values[1:]) for op in ops)
     return 0
 
 
