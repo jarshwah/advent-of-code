@@ -843,6 +843,7 @@ class Puzzle:
     test_input: str = ""
     test_input_2: str = ""
     test_answers: tuple[str, str] = ("", "")
+    both: bool = False
 
     def part_one(self, input: Input) -> str | int:
         return ""
@@ -855,6 +856,9 @@ class Puzzle:
 
     def part_two_alt(self, input: Input) -> str | int:
         return self.part_two(input)
+
+    def both_parts(self, input: Input) -> tuple[str | int, str | int]:
+        return "", ""
 
     def get_input(self, year: int, day: int) -> Input:
         return Input(data=aocd.get_data(day=day, year=year))
@@ -894,25 +898,44 @@ class Puzzle:
                     return True
 
                 test_puzzle = Input(data=puzzle_runner.test_input)
-                t1 = str(part_1(test_puzzle))
-                if not report(1, t1, puzzle_runner.test_answers[0]) and fail_fast:
-                    return
+                if puzzle_runner.both:
+                    t1, t2 = puzzle_runner.both_parts(test_puzzle)
+                    if (
+                        not report(1, str(t1), puzzle_runner.test_answers[0])
+                        or not report(2, str(t2), puzzle_runner.test_answers[1])
+                        and fail_fast
+                    ):
+                        return
+                else:
+                    t1 = str(part_1(test_puzzle))
+                    if not report(1, t1, puzzle_runner.test_answers[0]) and fail_fast:
+                        return
 
-                test_puzzle = Input(data=puzzle_runner.test_input_2 or puzzle_runner.test_input)
-                t2 = str(part_2(test_puzzle))
-                if not report(2, t2, puzzle_runner.test_answers[1]) and fail_fast:
-                    return
+                    test_puzzle = Input(
+                        data=puzzle_runner.test_input_2 or puzzle_runner.test_input
+                    )
+                    t2 = str(part_2(test_puzzle))
+                    if not report(2, t2, puzzle_runner.test_answers[1]) and fail_fast:
+                        return
 
-            if not (p1 or p2):
+            if not (p1 or p2 or puzzle_runner.both):
                 return
 
             input_data = puzzle_runner.get_input(puzzle_runner.year, puzzle_runner.day)
             click.echo()
-            if p1:
-                click.secho(f"Part 1{'a' if alt else ''}: ", fg="blue", nl=False)
-                click.echo(part_1(input_data))
-            if p2:
-                click.secho(f"Part 2{'a' if alt else ''}: ", fg="blue", nl=False)
-                click.echo(part_2(input_data))
+            a1: int | str = click.style("Skipped", fg="yellow")
+            a2 = a1
+            if puzzle_runner.both:
+                a1, a2 = puzzle_runner.both_parts(input_data)
+            else:
+                if p1:
+                    a1 = part_1(input_data)
+                if p2:
+                    a2 = part_2(input_data)
+            alt_str = "a" if alt else ""
+            click.secho(f"Part 1{alt_str}: ", fg="blue", nl=False)
+            click.echo(a1)
+            click.secho(f"Part 2{alt_str}: ", fg="blue", nl=False)
+            click.echo(a2)
 
         return entrypoint()  # type: ignore [no-any-return]
