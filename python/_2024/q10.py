@@ -28,18 +28,20 @@ def trail_rating(
     grid: utils.Grid[int],
     curr_position: utils.Point,
     scores: dict[utils.Point, int],
+    uniq: bool = False,
 ) -> int:
     """
     Returns the number of paths to 9's reachable from the current position.
     """
+    if curr_position in scores:
+        return 0 if uniq else scores[curr_position]
+
     if grid[curr_position] == 9:
+        scores[curr_position] = 1
         return 1
 
-    if curr_position in scores:
-        return scores[curr_position]
-
     nbs = [nb for nb in grid.get_neighbours(curr_position) if grid[nb] == grid[curr_position] + 1]
-    scores[curr_position] = sum(trail_rating(grid, nb, scores) for nb in nbs)
+    scores[curr_position] = sum(trail_rating(grid, nb, scores, uniq) for nb in nbs)
     return scores[curr_position]
 
 
@@ -52,6 +54,14 @@ class Puzzle(utils.Puzzle):
         trailheads = [point for point in grid if grid[point] == 0]
         scores: dict[utils.Point, set[utils.Point]] = {}
         return sum(len(trail_score(grid, th, scores)) for th in trailheads)
+
+    def part_one_alt(self, input: utils.Input) -> str | int:
+        """
+        Uses the same logic as part two, but with a unique flag to exclude duplicate paths.
+        """
+        grid = input.grid_int()
+        trailheads = [point for point in grid if grid[point] == 0]
+        return sum(trail_rating(grid, th, {}, uniq=True) for th in trailheads)
 
     def part_two(self, input: utils.Input) -> str | int:
         """

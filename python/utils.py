@@ -886,12 +886,11 @@ class Puzzle:
                 click.secho("Running tests...", fg="blue")
 
                 def report(test_number: int, result: str, expected: str) -> bool:
+                    label = f"  {test_number}{'a' if alt else ''}."
                     if result != expected:
-                        click.secho(
-                            f"  {test_number}.  ❌ {result or '?'} != {expected}", fg="red"
-                        )
+                        click.secho(f"{label}  ❌ {result or '?'} != {expected}", fg="red")
                         return False
-                    click.secho(f"  {test_number}.  ✅ {result} == {expected}", fg="green")
+                    click.secho(f"{label}  ✅ {result} == {expected}", fg="green")
                     return True
 
                 test_puzzle = Input(data=puzzle_runner.test_input)
@@ -910,10 +909,10 @@ class Puzzle:
             input_data = puzzle_runner.get_input(puzzle_runner.year, puzzle_runner.day)
             click.echo()
             if p1:
-                click.secho("Part 1: ", fg="blue", nl=False)
+                click.secho(f"Part 1{'a' if alt else ''}: ", fg="blue", nl=False)
                 click.echo(part_1(input_data))
             if p2:
-                click.secho("Part 2: ", fg="blue", nl=False)
+                click.secho(f"Part 2{'a' if alt else ''}: ", fg="blue", nl=False)
                 click.echo(part_2(input_data))
 
         return entrypoint()  # type: ignore [no-any-return]
