@@ -10,7 +10,7 @@ def concat(left: int, right: int) -> int:
 
 
 class Puzzle(utils.Puzzle):
-    def part_one(self, input: utils.Input) -> str | int:
+    def both_parts(self, input: utils.Input) -> tuple[str | int, str | int]:
         """
         Sum together the valid equations.
 
@@ -18,21 +18,18 @@ class Puzzle(utils.Puzzle):
         the number on the left.
 
         Operators are applied left to right rather than via precedence.
-        """
-        summed = 0
-        for sr, se in input.group("\n", ":").strings:
-            check = int(sr)
-            values = list(map(int, se.split()))
-            summed += check_equation(check, values, operator.add, operator.mul)
-        return summed
 
-    def part_two(self, input: utils.Input) -> str | int:
-        summed = 0
+        Part 2 additionally includes the CONCAT operator and is a superset of Part 1.
+        """
+        p1 = p2 = 0
         for sr, se in input.group("\n", ":").strings:
             check = int(sr)
             values = list(map(int, se.split()))
-            summed += check_equation(check, values, operator.add, operator.mul, concat)
-        return summed
+            if check_equation(check, values, operator.add, operator.mul):
+                p1 += check
+            elif check_equation(check, values, operator.add, operator.mul, concat):
+                p2 += check
+        return p1, p2 + p1
 
 
 def check_equation(check: int, values: Sequence[int], *ops: Callable[[int, int], int]) -> int:
@@ -59,6 +56,7 @@ if __name__ == "__main__":
     runner = Puzzle(
         year=2024,
         day=7,
+        both=True,
         test_answers=("3749", "11387"),
         test_input="""190: 10 19
 3267: 81 40 27

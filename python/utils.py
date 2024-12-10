@@ -925,7 +925,7 @@ class Puzzle:
             click.echo()
             a1: int | str = click.style("Skipped", fg="yellow")
             a2 = a1
-            if puzzle_runner.both:
+            if puzzle_runner.both and (p1 or p2):
                 a1, a2 = puzzle_runner.both_parts(input_data)
             else:
                 if p1:
