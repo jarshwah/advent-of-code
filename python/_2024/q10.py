@@ -5,33 +5,16 @@ import utils
 sys.setrecursionlimit(10000)
 
 
-def trail_score(
-    grid: utils.Grid[int],
-    curr_position: utils.Point,
-    scores: dict[utils.Point, set[utils.Point]],
-) -> set[utils.Point]:
-    """
-    Returns a set of all the 9's reachable from the current position.
-    """
-    if grid[curr_position] == 9:
-        return {curr_position}
-
-    if curr_position in scores:
-        return scores[curr_position]
-
-    nbs = [nb for nb in grid.get_neighbours(curr_position) if grid[nb] == grid[curr_position] + 1]
-    scores[curr_position] = set.union(set(), *(trail_score(grid, nb, scores) for nb in nbs))
-    return scores[curr_position]
-
-
-def trail_rating(
+def score_trail(
     grid: utils.Grid[int],
     curr_position: utils.Point,
     scores: dict[utils.Point, int],
     uniq: bool = False,
 ) -> int:
     """
-    Returns the number of paths to 9's reachable from the current position.
+    Returns the number of paths to 9's reachable from a 0.
+
+    When uniq is True, only return the first path to a 9 reachable from a 0.
     """
     if curr_position in scores:
         return 0 if uniq else scores[curr_position]
@@ -41,7 +24,7 @@ def trail_rating(
         return 1
 
     nbs = [nb for nb in grid.get_neighbours(curr_position) if grid[nb] == grid[curr_position] + 1]
-    scores[curr_position] = sum(trail_rating(grid, nb, scores, uniq) for nb in nbs)
+    scores[curr_position] = sum(score_trail(grid, nb, scores, uniq) for nb in nbs)
     return scores[curr_position]
 
 
@@ -52,16 +35,7 @@ class Puzzle(utils.Puzzle):
         """
         grid = input.grid_int()
         trailheads = [point for point in grid if grid[point] == 0]
-        scores: dict[utils.Point, set[utils.Point]] = {}
-        return sum(len(trail_score(grid, th, scores)) for th in trailheads)
-
-    def part_one_alt(self, input: utils.Input) -> str | int:
-        """
-        Uses the same logic as part two, but with a unique flag to exclude duplicate paths.
-        """
-        grid = input.grid_int()
-        trailheads = [point for point in grid if grid[point] == 0]
-        return sum(trail_rating(grid, th, {}, uniq=True) for th in trailheads)
+        return sum(score_trail(grid, th, {}, uniq=True) for th in trailheads)
 
     def part_two(self, input: utils.Input) -> str | int:
         """
@@ -70,7 +44,7 @@ class Puzzle(utils.Puzzle):
         grid = input.grid_int()
         trailheads = [point for point in grid if grid[point] == 0]
         scores: dict[utils.Point, int] = {}
-        return sum(trail_rating(grid, th, scores) for th in trailheads)
+        return sum(score_trail(grid, th, scores) for th in trailheads)
 
 
 if __name__ == "__main__":
