@@ -693,6 +693,29 @@ class Grid[T]:
             if comparison_func((point, self.points[point]), neighbours):
                 yield point, self.points[point]
 
+    def collect_while(
+        self,
+        start: Point,
+        compare: Callable[[Grid[T], Point, Point], bool],
+        diagonal: bool = False,
+    ) -> Iterable[Point]:
+        """
+        Collect all unique points that meet the comparison function from a starting point.
+        """
+        queue = deque([start])
+        seen = set()
+        found = {start}
+        while queue:
+            p = queue.popleft()
+            if p in seen:
+                continue
+            seen.add(p)
+            for nb in self.get_neighbours(p, diag=diagonal):
+                if compare(self, p, nb):
+                    found.add(nb)
+                    queue.append(nb)
+        return found
+
     def collect_recursive(
         self,
         start: Point,
