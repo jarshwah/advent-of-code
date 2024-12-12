@@ -3,7 +3,7 @@ from __future__ import annotations
 import dataclasses
 import itertools
 from collections import deque
-from collections.abc import Callable, Iterable, Iterator, Sequence
+from collections.abc import Callable, Collection, Iterable, Iterator, Sequence
 from copy import deepcopy
 from functools import cached_property
 from typing import Generator, Self
@@ -528,6 +528,99 @@ def neighbours(point: Point, directions: Sequence[Point]) -> Sequence[Point]:
     [(2, 3), (3, 4), (4, 3), (3, 2)]
     """
     return [(point[0] + d[0], point[1] + d[1]) for d in directions]
+
+
+def internal_corners(group: set[Point]) -> Collection[Point]:
+    """
+    Given a group of points, find the internal corners.
+
+    An internal corner is a missing diagonal surrounded by 3 points.
+
+                X .
+                . .
+    """
+    UL, UP, UR, R, DR, D, DL, L = DIRECTIONS_8
+    corners = []
+    add = point_add
+    for p in group:
+        if add(p, L) in group and add(p, UP) in group and (C := add(p, UL)) not in group:
+            # X .
+            # . .
+            corners.append(C)
+        if add(p, UP) in group and add(p, R) in group and (C := add(p, UR)) not in group:
+            # . X
+            # . .
+            corners.append(C)
+        if add(p, R) in group and add(p, D) in group and (C := add(p, DR)) not in group:
+            # . .
+            # . X
+            corners.append(C)
+        if add(p, D) in group and add(p, L) in group and (C := add(p, DL)) not in group:
+            # . .
+            # X .
+            corners.append(C)
+    return corners
+
+
+def external_corners(group: set[Point]) -> Sequence[Point]:
+    """
+    Given a group of points, find the external corners.
+
+    A point in an external corner will be in the return value N times if it represents N corners.
+
+    An external corner is a point missing neighbours in two successive directions.
+
+          ? 1     . is the point being checked (and returned as a corner)
+        - . ?     ? are the sides being checked
+          |       1 is the corner being checked
+    """
+    U, R, D, L = DIRECTIONS_4
+    corners = []
+    add = point_add
+    for p in group:
+        if add(p, U) not in group and add(p, R) not in group:
+            #   ? X
+            # - . ?
+            #   |
+            corners.append(p)
+        if add(p, R) not in group and add(p, D) not in group:
+            # X .
+            corners.append(p)
+        if add(p, D) not in group and add(p, L) not in group:
+            # .
+            # X
+            corners.append(p)
+        if add(p, L) not in group and add(p, U) not in group:
+            # .
+            # X
+            corners.append(p)
+    return corners
+
+
+def all_corners(group: set[Point]) -> Collection[Point]:
+    """
+    Get all corners of a group of points.
+    Assumes the group is a connected set.
+
+    eg: 6 corners:
+
+        11..
+        .11.
+        .1.
+
+    """
+    return list(external_corners(group)) + list(internal_corners(group))
+
+
+def num_sides_of_group(group: set[Point]) -> int:
+    """
+    Get the number of sides of a group of points.
+
+    The number of sides is equal to the number of external corners.
+
+    Assumes the group is a connected set.
+    """
+    return len(all_corners(group))
 
 
 @dataclasses.dataclass
