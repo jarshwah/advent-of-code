@@ -701,6 +701,8 @@ class Grid[T]:
     ) -> Iterable[Point]:
         """
         Collect all unique points that meet the comparison function from a starting point.
+
+        This is equivalent to a flood fill.
         """
         queue = deque([start])
         seen = set()
@@ -715,6 +717,8 @@ class Grid[T]:
                     found.add(nb)
                     queue.append(nb)
         return found
+
+    flood_fill = collect_while
 
     def collect_recursive(
         self,
