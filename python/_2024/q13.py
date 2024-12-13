@@ -1,6 +1,42 @@
+from collections.abc import Sequence
+from typing import cast
+
 import z3
 
 import utils
+
+
+def how_many_tokens(
+    game: tuple[dict[str, int], dict[str, int], dict[str, int]], press_limit: int, scale: int
+) -> int:
+    """
+    Fewest tokens needed to win all possible prizes.
+
+    Scale PX and PY by 10000000000000 and remove the max 100 press constraint.
+    """
+    A, B, P = game
+    solver = z3.Optimize()
+    ZA = z3.Int("ZA")
+    ZB = z3.Int("ZB")
+    solver.add(
+        (ZA * A["x"]) + (ZB * B["x"]) == P["x"] + scale,
+        (ZA * A["y"]) + (ZB * B["y"]) == P["y"] + scale,
+        0 <= ZA,
+        0 <= ZB,
+    )
+    if press_limit:
+        solver.add(ZA <= press_limit)
+        solver.add(ZB <= press_limit)
+
+    # solver.minimize(ZA * 3 + ZB)
+    # minimize tanks performance on part 1 and correct answer without.
+    if solver.check() == z3.sat:
+        model = solver.model()
+        a_presses = int(model[ZA].as_long())
+        b_presses = int(model[ZB].as_long())
+        tokens = a_presses * 3 + b_presses
+        return tokens
+    return 0
 
 
 class Puzzle(utils.Puzzle):
@@ -21,34 +57,13 @@ class Puzzle(utils.Puzzle):
 
         Max presses per button is 100
         """
-        games = input.group("\n\n", "\n").parse(
-            "Button {}: X+{x:d}, Y+{y:d}", "Prize: X={x:d}, Y={y:d}"
+        games = cast(
+            Sequence[tuple[dict[str, int], dict[str, int], dict[str, int]]],
+            input.group("\n\n", "\n").parse(
+                "Button {}: X+{x:d}, Y+{y:d}", "Prize: X={x:d}, Y={y:d}"
+            ),
         )
-        ans = 0
-        for game_num, (A, B, P) in enumerate(games):
-            AX, AY = A["x"], A["y"]
-            BX, BY = B["x"], B["y"]
-            PX, PY = P["x"], P["y"]
-            solver = z3.Optimize()
-            ZA = z3.Int("ZA")
-            ZB = z3.Int("ZB")
-            solver.add(
-                (ZA * AX) + (ZB * BX) == PX,
-                (ZA * AY) + (ZB * BY) == PY,
-                0 <= ZA,
-                ZA <= 100,
-                0 <= ZB,
-                ZB <= 100,
-            )
-            # solver.minimize(ZA * 3 + ZB)  -> tanks performance, still right answer
-            if solver.check() == z3.sat:
-                model = solver.model()
-                a_presses = model[ZA].as_long()
-                b_presses = model[ZB].as_long()
-                tokens = a_presses * 3 + b_presses
-                ans += tokens
-
-        return ans
+        return sum((how_many_tokens(game, press_limit=100, scale=0) for game in games), 0)
 
     def part_two(self, input: utils.Input) -> str | int:
         """
@@ -56,32 +71,14 @@ class Puzzle(utils.Puzzle):
 
         Scale PX and PY by 10000000000000 and remove the max 100 press constraint.
         """
-        games = input.group("\n\n", "\n").parse(
-            "Button {}: X+{x:d}, Y+{y:d}", "Prize: X={x:d}, Y={y:d}"
+        games = cast(
+            Sequence[tuple[dict[str, int], dict[str, int], dict[str, int]]],
+            input.group("\n\n", "\n").parse(
+                "Button {}: X+{x:d}, Y+{y:d}", "Prize: X={x:d}, Y={y:d}"
+            ),
         )
-        ans = 0
-        for game_num, (A, B, P) in enumerate(games):
-            AX, AY = A["x"], A["y"]
-            BX, BY = B["x"], B["y"]
-            PX, PY = P["x"] + 10000000000000, P["y"] + 10000000000000
-            solver = z3.Optimize()
-            ZA = z3.Int("ZA")
-            ZB = z3.Int("ZB")
-            solver.add(
-                (ZA * AX) + (ZB * BX) == PX,
-                (ZA * AY) + (ZB * BY) == PY,
-                0 <= ZA,
-                0 <= ZB,
-            )
-            solver.minimize(ZA * 3 + ZB)
-            if solver.check() == z3.sat:
-                model = solver.model()
-                a_presses = model[ZA].as_long()
-                b_presses = model[ZB].as_long()
-                tokens = a_presses * 3 + b_presses
-                ans += tokens
 
-        return ans
+        return sum(how_many_tokens(game, press_limit=0, scale=10000000000000) for game in games)
 
 
 if __name__ == "__main__":
