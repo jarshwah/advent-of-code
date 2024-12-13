@@ -1,5 +1,7 @@
 from textwrap import dedent
 
+import pytest
+
 from . import utils
 
 
@@ -19,6 +21,10 @@ class TestInput:
     def test_float(self):
         data = "1.23"
         assert utils.Input(data).float == 1.23
+
+    def test_scan_ints(self):
+        data = "1 2 3"
+        assert utils.Input(data).scan_ints() == [1, 2, 3]
 
     def test_parse(self):
         data = "oh hi there"
@@ -131,6 +137,10 @@ class TestInputList:
         )
         assert utils.Input(data).lines().floats == [1.23, 4.56]
 
+    def test_scan_ints(self):
+        data = "1 2 3\n4 5 something 6"
+        assert utils.Input(data).split("\n").scan_ints() == [[1, 2, 3], [4, 5, 6]]
+
     def test_parse(self):
         data = dedent(
             """\
@@ -185,6 +195,13 @@ class TestInputGroup:
             0.12"""
         )
         assert utils.Input(data).group().floats == [[1.23, 4.56], [7.89, 0.12]]
+
+    def test_scan_ints(self):
+        data = "1 2 3\n4 5 6\n\n7 8 9\n10 11 12"
+        assert utils.Input(data).group("\n\n", "\n").scan_ints() == [
+            [[1, 2, 3], [4, 5, 6]],
+            [[7, 8, 9], [10, 11, 12]],
+        ]
 
     def test_parse(self):
         data = dedent(
@@ -372,3 +389,20 @@ class TestPointAdd:
 
     def test_add_steps(self):
         assert utils.point_add((1, 2), (3, 4), 2) == (7, 10)
+
+
+class TestScanInts:
+    @pytest.mark.parametrize(
+        "data,expected",
+        [
+            ("abc", []),
+            ("123", [123]),
+            ("-123", [-123]),
+            ("1 2 3", [1, 2, 3]),
+            ("1 -2 3", [1, -2, 3]),
+            ("Some 1 numbers 2 found 3", [1, 2, 3]),
+            ("Button A: 3 Button C: 5 And some more nonsense 7", [3, 5, 7]),
+        ],
+    )
+    def test_numbers_found(self, data: str, expected: list[int]):
+        assert utils.scan_ints(data) == expected

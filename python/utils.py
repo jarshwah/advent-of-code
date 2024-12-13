@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import dataclasses
 import itertools
+import re
 from collections import deque
 from collections.abc import Callable, Collection, Iterable, Iterator, Sequence
 from copy import deepcopy
@@ -38,6 +39,9 @@ class Input:
     def number(self) -> int:
         """Return the input data as an integer"""
         return self.integer
+
+    def scan_ints(self) -> Sequence[int]:
+        return scan_ints(self.data)
 
     @property
     def float(self) -> float:
@@ -139,6 +143,9 @@ class InputList:
         """
         return [inp.float for inp in self.data]
 
+    def scan_ints(self) -> Sequence[Sequence[int]]:
+        return [inp.scan_ints() for inp in self.data]
+
     def parse(self, *parsers: str) -> Sequence[parse.Match]:
         """
         Return a list of parsed results, the first parser than matches each lines is used.
@@ -206,6 +213,9 @@ class InputGroup:
         """
         return [inp.floats for inp in self.data]
 
+    def scan_ints(self) -> Sequence[Sequence[Sequence[int]]]:
+        return [inp.scan_ints() for inp in self.data]
+
     def parse(self, *parsers: str) -> Sequence[Sequence[parse.Match]]:
         """
         Parse the input data using the provided parsers for each line within the group.
@@ -226,6 +236,13 @@ class InputGroup:
 
     def __iter__(self) -> Iterable[InputList]:
         return self.data.__iter__()
+
+
+SCANNER = re.compile(r"-?[0-9]+")
+
+
+def scan_ints(data: str) -> Sequence[int]:
+    return list(map(int, SCANNER.findall(data)))
 
 
 def int_numbers(input_data: str, sep: str | None = None) -> Sequence[int]:
