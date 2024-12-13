@@ -252,6 +252,11 @@ def int_numbers(input_data: str, sep: str | None = None) -> Sequence[int]:
     return [int(num) for num in input_data.split(sep) if num.strip()]
 
 
+def flatten[T](iterable: Iterable[Iterable[T]]) -> Sequence[T]:
+    """Flatten an iterable of iterables into a single list"""
+    return [item for sublist in iterable for item in sublist]
+
+
 def first[T](i: Iterable[T]) -> T:
     """Return the first item of the iterator or exception if empty"""
     return next(iter(i))

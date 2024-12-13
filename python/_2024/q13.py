@@ -1,26 +1,23 @@
 from collections.abc import Sequence
-from typing import cast
 
 import z3
 
 import utils
 
 
-def how_many_tokens(
-    game: tuple[dict[str, int], dict[str, int], dict[str, int]], press_limit: int, scale: int
-) -> int:
+def how_many_tokens(game: Sequence[Sequence[int]], press_limit: int, scale: int) -> int:
     """
     Fewest tokens needed to win all possible prizes.
 
     Scale PX and PY by 10000000000000 and remove the max 100 press constraint.
     """
-    A, B, P = game
+    AX, AY, BX, BY, PX, PY = utils.flatten(game)
     solver = z3.Optimize()
     ZA = z3.Int("ZA")
     ZB = z3.Int("ZB")
     solver.add(
-        (ZA * A["x"]) + (ZB * B["x"]) == P["x"] + scale,
-        (ZA * A["y"]) + (ZB * B["y"]) == P["y"] + scale,
+        (ZA * AX) + (ZB * BX) == PX + scale,
+        (ZA * AY) + (ZB * BY) == PY + scale,
         0 <= ZA,
         0 <= ZB,
     )
@@ -57,12 +54,7 @@ class Puzzle(utils.Puzzle):
 
         Max presses per button is 100
         """
-        games = cast(
-            Sequence[tuple[dict[str, int], dict[str, int], dict[str, int]]],
-            input.group("\n\n", "\n").parse(
-                "Button {}: X+{x:d}, Y+{y:d}", "Prize: X={x:d}, Y={y:d}"
-            ),
-        )
+        games = input.group("\n\n", "\n").scan_ints()
         return sum((how_many_tokens(game, press_limit=100, scale=0) for game in games), 0)
 
     def part_two(self, input: utils.Input) -> str | int:
@@ -71,13 +63,7 @@ class Puzzle(utils.Puzzle):
 
         Scale PX and PY by 10000000000000 and remove the max 100 press constraint.
         """
-        games = cast(
-            Sequence[tuple[dict[str, int], dict[str, int], dict[str, int]]],
-            input.group("\n\n", "\n").parse(
-                "Button {}: X+{x:d}, Y+{y:d}", "Prize: X={x:d}, Y={y:d}"
-            ),
-        )
-
+        games = input.group("\n\n", "\n").scan_ints()
         return sum(how_many_tokens(game, press_limit=0, scale=10000000000000) for game in games)
 
 
