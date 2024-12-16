@@ -5,7 +5,7 @@ import z3
 import utils
 
 
-def how_many_tokens(game: Sequence[Sequence[int]], press_limit: int, scale: int) -> int:
+def how_many_tokens(game: Sequence[Sequence[int]], scale: int) -> int:
     """
     Fewest tokens needed to win all possible prizes.
 
@@ -13,26 +13,14 @@ def how_many_tokens(game: Sequence[Sequence[int]], press_limit: int, scale: int)
     """
     AX, AY, BX, BY, PX, PY = utils.flatten(game)
     solver = z3.Optimize()
-    ZA = z3.Int("ZA")
-    ZB = z3.Int("ZB")
+    ZA, ZB = z3.Ints("ZA ZB")
     solver.add(
-        (ZA * AX) + (ZB * BX) == PX + scale,
-        (ZA * AY) + (ZB * BY) == PY + scale,
-        0 <= ZA,
-        0 <= ZB,
+        ZA * AX + ZB * BX == PX + scale,
+        ZA * AY + ZB * BY == PY + scale,
     )
-    if press_limit:
-        solver.add(ZA <= press_limit)
-        solver.add(ZB <= press_limit)
-
-    # solver.minimize(ZA * 3 + ZB)
-    # minimize tanks performance on part 1 and correct answer without.
     if solver.check() == z3.sat:
         model = solver.model()
-        a_presses = int(model[ZA].as_long())
-        b_presses = int(model[ZB].as_long())
-        tokens = a_presses * 3 + b_presses
-        return tokens
+        return int(model[ZA].as_long()) * 3 + int(model[ZB].as_long())
     return 0
 
 
@@ -51,20 +39,18 @@ class Puzzle(utils.Puzzle):
     def part_one(self, input: utils.Input) -> str | int:
         """
         Fewest tokens needed to win all possible prizes.
-
-        Max presses per button is 100
         """
         games = input.group("\n\n", "\n").scan_ints()
-        return sum((how_many_tokens(game, press_limit=100, scale=0) for game in games), 0)
+        return sum(how_many_tokens(game, scale=0) for game in games)
 
     def part_two(self, input: utils.Input) -> str | int:
         """
         Fewest tokens needed to win all possible prizes.
 
-        Scale PX and PY by 10000000000000 and remove the max 100 press constraint.
+        Scale PX and PY by 10000000000000.
         """
         games = input.group("\n\n", "\n").scan_ints()
-        return sum(how_many_tokens(game, press_limit=0, scale=10000000000000) for game in games)
+        return sum(how_many_tokens(game, scale=10000000000000) for game in games)
 
 
 if __name__ == "__main__":
