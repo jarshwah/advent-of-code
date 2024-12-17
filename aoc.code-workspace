@@ -34,6 +34,11 @@
         "python.analysis.diagnosticMode": "openFilesOnly",
         "python.analysis.inlayHints.functionReturnTypes": false,
         "python.analysis.inlayHints.variableTypes": false,
+        "python.analysis.include": ["python"],
+        "python.analysis.exclude": [
+            "**/.*",
+            ".venv/"
+        ],
         "python.testing.unittestEnabled": false,
         "python.testing.pytestEnabled": true,
         "python.testing.pytestArgs": ["python"],
@@ -49,6 +54,19 @@
                 "type": "debugpy",
                 "request": "launch",
                 "program": "${file}",
+                "cwd": "${fileDirname}",
+                "console": "integratedTerminal",
+                "env": {
+                    "PYTHONPATH": "python",
+                    "PYDEVD_CONTAINER_RANDOM_ACCESS_MAX_ITEMS": "10000"
+                }
+            },
+            {
+                "name": "AOC: Part 2",
+                "type": "debugpy",
+                "request": "launch",
+                "program": "${file}",
+                "args": ["-2"],
                 "cwd": "${fileDirname}",
                 "console": "integratedTerminal",
                 "env": {
