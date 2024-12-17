@@ -9,7 +9,6 @@ class Computer:
     register_b: int
     register_c: int
     instructions: list[int]
-    output: list[int]
     pointer: int = 0
     halt_early: bool = False
 
@@ -25,49 +24,58 @@ class Computer:
         raise ValueError(f"Invalid operand: {operand}")
 
     def run(self) -> list[int]:
+        output = []
         while self.pointer < len(self.instructions):
             opcode = self.instructions[self.pointer]
             literal = self.instructions[self.pointer + 1]
             combo = self.get_combo_operand(literal)
-            match opcode:
-                case 0:
-                    self.register_a //= 2**combo
-                case 1:
-                    self.register_b ^= literal
-                case 2:
-                    self.register_b = combo % 8
-                case 3 if self.register_a == 0:
-                    pass
-                case 3 if self.register_a != 0:
-                    self.pointer = literal
-                    continue
-                case 4:
-                    self.register_b ^= self.register_c
-                case 5:
-                    self.output.append(combo % 8)
-                    if self.halt_early and self.output != self.instructions[: len(self.output)]:
-                        return self.output
-                case 6:
-                    self.register_b = self.register_a // (2**combo)
-                case 7:
-                    self.register_c = self.register_a // (2**combo)
             self.pointer += 2
-        return self.output
+            # fmt: off
+            match opcode:
+                case 0: self.register_a //= 2**combo
+                case 1: self.register_b ^= literal
+                case 2: self.register_b = combo % 8
+                case 3 if self.register_a == 0: pass
+                case 3 if self.register_a != 0: self.pointer = literal
+                case 4: self.register_b ^= self.register_c
+                case 5: output.append(combo % 8)
+                case 6: self.register_b = self.register_a // (2**combo)
+                case 7: self.register_c = self.register_a // (2**combo)
+            # fmt: on
+            if self.halt_early and output != self.instructions[: len(output)]:
+                return output
+        return output
+
+    def run_two(self) -> list[int]:
+        """
+        Decompiled - runs a little faster, but only on my input.
+        """
+        out = []
+        A, B, C = self.register_a, self.register_b, self.register_c
+        while True:
+            B = (A % 8) ^ 3
+            C = A // (2**B)
+            B = B ^ 5
+            A = A // (2**3)
+            B = B ^ C
+            out.append(B % 8)
+            if A == 0:
+                return out
 
 
 class Puzzle(utils.Puzzle):
     def part_one(self, input: utils.Input) -> str | int:
         ([ra], [rb], [rc]), [instructions] = input.group(sep="\n").scan_ints()
-        computer = Computer(ra, rb, rc, list(instructions), [])
-        computer.run()
-        return ",".join(str(s) for s in computer.output)
+        computer = Computer(ra, rb, rc, list(instructions))
+        output = computer.run()
+        return ",".join(str(s) for s in output)
 
     def part_two(self, input: utils.Input) -> str | int:
         ([ra], [rb], [rc]), [instructions] = input.group(sep="\n").scan_ints()
         instructions = list(instructions)
         ra = 0 if input.data == self.test_input_2 else 216549845000000
         while True:
-            computer = Computer(ra, rb, rc, instructions, [], halt_early=True)
+            computer = Computer(ra, rb, rc, instructions, halt_early=True)
             output = computer.run()
             if output == instructions:
                 return ra
