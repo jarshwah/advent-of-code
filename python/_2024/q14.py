@@ -96,8 +96,6 @@ def quadrant_scores(robots: Robots, bounds: Bounds) -> QuadrantScore:
     scores = [0, 0, 0, 0]
 
     for robot in robots:
-        if robot.x == mid_x or robot.y == mid_y:
-            continue
         if robot.x < mid_x:
             if robot.y < mid_y:
                 scores[0] += 1
