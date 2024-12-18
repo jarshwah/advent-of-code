@@ -1046,6 +1046,7 @@ class Puzzle:
     test_input_2: str = ""
     test_answers: tuple[str, str] = ("", "")
     both: bool = False
+    testing: bool = False
 
     def part_one(self, input: Input) -> str | int:
         return ""
@@ -1089,6 +1090,7 @@ class Puzzle:
             part_2 = puzzle_runner.part_two_alt if alt else puzzle_runner.part_two
 
             if test or fail_fast:
+                puzzle_runner.testing = True
                 click.secho("Running tests...", fg="blue")
 
                 def report(test_number: int, result: str, expected: str) -> bool:
@@ -1117,6 +1119,9 @@ class Puzzle:
                     t2 = str(part_2(test_puzzle))
                     if not report(2, t2, puzzle_runner.test_answers[1]) and fail_fast:
                         return
+
+            # Undo the test flag.
+            puzzle_runner.testing = False
 
             if not (p1 or p2 or puzzle_runner.both):
                 return
