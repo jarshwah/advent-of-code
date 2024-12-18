@@ -488,6 +488,26 @@ def sum_points(*points: Point) -> Point:
     return sum(p[0] for p in points), sum(p[1] for p in points)
 
 
+def move(position: Point, direction: Point) -> Point:
+    """
+    Move a point in a direction.
+
+    >>> move((10, 10), RIGHT)
+    (10, 11)
+    """
+    return point_add(position, direction)
+
+
+def moves(position: Point, direction: str) -> Point:
+    """
+    Move a point in a direction.
+
+    >>> moves((10, 10), ">")
+    (10, 11)
+    """
+    return move(position, DIRECTIONS_ASCII[direction])
+
+
 # Represented as ROW, COLUMN (or y,x)
 CENTER = (0, 0)
 UP = (-1, 0)
@@ -520,6 +540,12 @@ DIRECTIONS_9: Sequence[Point] = [
     DOWN,
     DOWNRIGHT,
 ]
+DIRECTIONS_ASCII: dict[str, Point] = {
+    "^": UP,
+    "v": DOWN,
+    "<": LEFT,
+    ">": RIGHT,
+}
 
 
 def turn_right(direction: Point) -> Point:
@@ -892,9 +918,7 @@ class Grid[T]:
                 123123
                 456456
         """
-        assert (
-            right > 1 or down > 1
-        ), "Replication must be greater than 1 in at least one direction"
+        assert right > 1 or down > 1, "Replication must be greater than 1 in at least one direction"
         grid: Grid[T] = Grid([])
         length_r = self.width
         length_c = self.height
@@ -1053,9 +1077,7 @@ class Puzzle:
                     if not report(1, t1, puzzle_runner.test_answers[0]) and fail_fast:
                         return
 
-                    test_puzzle = Input(
-                        data=puzzle_runner.test_input_2 or puzzle_runner.test_input
-                    )
+                    test_puzzle = Input(data=puzzle_runner.test_input_2 or puzzle_runner.test_input)
                     t2 = str(part_2(test_puzzle))
                     if not report(2, t2, puzzle_runner.test_answers[1]) and fail_fast:
                         return
