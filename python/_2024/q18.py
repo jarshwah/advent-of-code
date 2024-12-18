@@ -1,4 +1,3 @@
-import heapq
 from copy import deepcopy
 from typing import cast
 
@@ -35,23 +34,7 @@ class Puzzle(utils.Puzzle):
 
         start = (0, 0)
         target = (size - 1, size - 1)
-        dist = utils.manhattan(start, target)
-        heap: list[tuple[int, int, Point]] = []
-        seen: dict[Point, int] = {}
-        heapq.heappush(heap, (dist, 0, start))
-        while heap:
-            _, t, position = heapq.heappop(heap)
-            if position == target:
-                seen[target] = min(seen.get(target, int(1e9)), t)
-                continue
-            if grid[position] == "#":
-                continue
-            if position in seen and seen[position] <= t:
-                continue
-            seen[position] = t
-            for new_position in grid.get_neighbours(position):
-                heapq.heappush(heap, (utils.manhattan(new_position, target), t + 1, new_position))
-        return seen[target]
+        return utils.dijkstra_best_score(grid, start, target, unmovable="#")[target]
 
     def part_two(self, input: utils.Input) -> str | int:
         """
@@ -62,6 +45,8 @@ class Puzzle(utils.Puzzle):
         size = 7 if is_test else 71
         search_from = 12 if is_test else 1024
         empty_grid = utils.Grid(rows=[["." for _ in range(size)] for _ in range(size)])
+        start = (0, 0)
+        target = (size - 1, size - 1)
 
         def build_grid(t: int) -> utils.Grid[str]:
             new_grid = deepcopy(empty_grid)
@@ -71,26 +56,7 @@ class Puzzle(utils.Puzzle):
 
         def reachable(t: int) -> bool:
             grid = build_grid(t)
-            start = (0, 0)
-            target = (size - 1, size - 1)
-            dist = utils.manhattan(start, target)
-            heap: list[tuple[int, int, Point]] = []
-            seen: dict[Point, int] = {}
-            heapq.heappush(heap, (dist, 0, start))
-            while heap:
-                _, t, position = heapq.heappop(heap)
-                if position == target:
-                    return True
-                if grid[position] == "#":
-                    continue
-                if position in seen and seen[position] <= t:
-                    continue
-                seen[position] = t
-                for new_position in grid.get_neighbours(position):
-                    heapq.heappush(
-                        heap, (utils.manhattan(new_position, target), t + 1, new_position)
-                    )
-            return False
+            return target in utils.dijkstra_best_score(grid, start, target, unmovable="#")
 
         # Binary search for the first unreachable
         min_search = search_from

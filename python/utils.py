@@ -671,6 +671,42 @@ def num_sides_of_group(group: set[Point]) -> int:
     return len(all_corners(group))
 
 
+def dijkstra_best_score[T](
+    grid: Grid[T],
+    start: Point,
+    target: Point,
+    direction: Point = UP,
+    unmovable: T | None = None,
+) -> dict[Point, int]:
+    """
+    Find the best score to reach the target from the start.
+
+    Returns a dictionary of the best score to reach each point from the start.
+    """
+    import heapq
+
+    type Steps = int
+    type Current = Point
+
+    heap: list[tuple[Steps, Current]] = []
+    # add whatever other vars I might need to track like the Path
+    heapq.heappush(heap, (0, start))
+    seen: dict[Point, Steps] = {}
+    while heap:
+        num_steps, position = heapq.heappop(heap)
+        if position == target:
+            seen[position] = min(seen.get(position, int(1e9)), num_steps)
+            continue
+        if grid[position] == unmovable:
+            continue
+        if position in seen and seen[position] <= num_steps:
+            continue
+        seen[position] = num_steps
+        for new_position in grid.get_neighbours(position):
+            heapq.heappush(heap, (num_steps + 1, new_position))
+    return seen
+
+
 @dataclasses.dataclass
 class Grid[T]:
     """
