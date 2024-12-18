@@ -27,9 +27,7 @@ class Puzzle(utils.Puzzle):
         """Find all safe reports with an optional missing number."""
         reports = input.lines().split().numbers
         return sum(
-            any(
-                is_safe(list(report[:i]) + list(report[i + 1 :]), 1, 3) for i in range(len(report))
-            )
+            any(is_safe(list(report[:i]) + list(report[i + 1 :]), 1, 3) for i in range(len(report)))
             for report in reports
         )
 
