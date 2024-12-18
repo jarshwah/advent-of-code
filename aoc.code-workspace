@@ -62,11 +62,37 @@
                 }
             },
             {
+                "name": "AOC: Part 1",
+                "type": "debugpy",
+                "request": "launch",
+                "program": "${file}",
+                "args": ["-1"],
+                "cwd": "${fileDirname}",
+                "console": "integratedTerminal",
+                "env": {
+                    "PYTHONPATH": "python",
+                    "PYDEVD_CONTAINER_RANDOM_ACCESS_MAX_ITEMS": "10000"
+                }
+            },
+            {
                 "name": "AOC: Part 2",
                 "type": "debugpy",
                 "request": "launch",
                 "program": "${file}",
                 "args": ["-2"],
+                "cwd": "${fileDirname}",
+                "console": "integratedTerminal",
+                "env": {
+                    "PYTHONPATH": "python",
+                    "PYDEVD_CONTAINER_RANDOM_ACCESS_MAX_ITEMS": "10000"
+                }
+            },
+            {
+                "name": "AOC: Test",
+                "type": "debugpy",
+                "request": "launch",
+                "program": "${file}",
+                "args": ["-t"],
                 "cwd": "${fileDirname}",
                 "console": "integratedTerminal",
                 "env": {
