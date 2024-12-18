@@ -30,9 +30,7 @@ class Directory:
 
     @cached_property
     def size(self) -> int:
-        return sum(f.size for f in self.files.values()) + sum(
-            d.size for d in self.subdirs.values()
-        )
+        return sum(f.size for f in self.files.values()) + sum(d.size for d in self.subdirs.values())
 
     def tree(self) -> t.Iterable[Directory]:
         yield self

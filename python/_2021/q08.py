@@ -36,9 +36,7 @@ def solve(row: tuple[list[str], list[str]]) -> int:
     # 5 is length 5 and fully contained within 6
     d5 = set(utils.only(c for c in flashes if len(c) == 5 and not set(c) - d6))
     # 3 is length 5, but not 5, and fully contained within 9
-    d3 = set(
-        utils.only(c for c in flashes if len(c) == 5 and not set(c) - d9 and not set(c) == d5)
-    )
+    d3 = set(utils.only(c for c in flashes if len(c) == 5 and not set(c) - d9 and not set(c) == d5))
     # 2 is length 5 and not 3 or 5
     d2 = set(utils.only(c for c in flashes if len(c) == 5 and set(c) not in [d3, d5]))
 
