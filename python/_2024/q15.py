@@ -22,39 +22,8 @@ class Puzzle(utils.Puzzle):
         grid_map, instructions = input.group(sep="\n").strings
         moves = "".join(instructions)
         grid = utils.Grid(rows=grid_map)
-        robot = grid.find("@")
-        for move in moves:
-            # grid.print()
-            new_robot = utils.moves(robot, move)
-            if grid[new_robot] == "#":
-                continue
-            if grid[new_robot] == ".":
-                grid[robot] = "."
-                grid[new_robot] = "@"
-                robot = new_robot
-                continue
-
-            # it's a box! can we push it.. recursively?
-            path = [new_robot]
-            while True:
-                new_box = utils.moves(path[-1], move)
-                if grid[new_box] == "#":
-                    path = []
-                    break
-                if grid[new_box] == ".":
-                    path.append(new_box)
-                    break
-                path.append(new_box)
-
-            if not path:
-                # Couldn't push them, we hit a wall
-                continue
-
-            grid[robot] = "."
-            grid[new_robot] = "@"
-            grid[path[-1]] = "O"
-            robot = new_robot
-        return score(grid)
+        self.push_boxes(grid, moves)
+        return score(grid, "O")
 
     def part_two(self, input: utils.Input) -> str | int:
         """
@@ -68,6 +37,10 @@ class Puzzle(utils.Puzzle):
                 row.replace("#", "##").replace("O", "[]").replace(".", "..").replace("@", "@.")
             )
         grid = utils.Grid(rows=expanded_map)
+        self.push_boxes(grid, moves)
+        return score(grid, "[")
+
+    def push_boxes(self, grid: utils.Grid[str], moves: str) -> None:
         robot = grid.find("@")
         for move in moves:
             path: list[set[Point]] = [{robot}]
@@ -98,6 +71,8 @@ class Puzzle(utils.Puzzle):
                         neighbor = utils.moves(new_box, "<")
                         if neighbor not in frontier:
                             next_path.add(neighbor)
+                    if grid[new_box] == "O":
+                        next_path.add(new_box)
 
                 if not path:
                     break
@@ -124,7 +99,6 @@ class Puzzle(utils.Puzzle):
                     grid[robot] = "."
                     robot = utils.moves(path[0].pop(), move)
                 break
-        return score(grid, "[")
 
 
 if __name__ == "__main__":
