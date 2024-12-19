@@ -12,11 +12,11 @@ class Puzzle(utils.Puzzle):
         def check_pattern(design: str) -> int:
             if not design:
                 return 1
-            matches = 0
-            for pattern in available:
-                if design.startswith(pattern):
-                    matches += check_pattern(design[len(pattern) :])
-            return matches
+            return sum(
+                check_pattern(design[len(pattern) :])
+                for pattern in available
+                if design.startswith(pattern)
+            )
 
         matches = 0
         match_count = 0
