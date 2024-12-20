@@ -456,6 +456,10 @@ def manhattan(p1: PointNd, p2: PointNd) -> int:
     return sum(abs(a - b) for a, b in zip(p1, p2, strict=True))
 
 
+def manhattan_2d(p1: Point, p2: Point) -> int:
+    return abs(p1[0] - p2[0]) + abs(p1[1] - p2[1])
+
+
 def point_subtract[T: PointNd](p1: T, p2: T) -> T:
     """
     Subtract p2 from p1.
