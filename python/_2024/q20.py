@@ -3,6 +3,21 @@ from collections import Counter
 
 import utils
 
+type Point = utils.Point
+type Steps = int
+
+
+def how_many_shortcuts(best: dict[Point, Steps], max_steps: int, saving_goal: int) -> int:
+    cheats: Counter[int] = Counter()
+    for found, other in itertools.combinations(best, 2):
+        dist = utils.manhattan_2d(found, other)
+        if not (1 < dist <= max_steps):
+            continue
+        saving = abs(best[other] - best[found]) - dist
+        if saving >= saving_goal:
+            cheats[saving] += 1
+    return sum(cheats.values())
+
 
 class Puzzle(utils.Puzzle):
     """
@@ -17,15 +32,8 @@ class Puzzle(utils.Puzzle):
         grid = input.grid()
         start = grid.find("S")
         end = grid.find("E")
-        cheats: Counter[int] = Counter()
         best = utils.dijkstra_best_score(grid, start, end, unmovable="#")
-        for found, other in itertools.combinations(best, 2):
-            if utils.manhattan_2d(found, other) != 2:
-                continue
-            saving = abs(best[other] - best[found]) - 1
-            if saving >= saving_goal:
-                cheats[saving] += 1
-        return sum(cheats.values())
+        return how_many_shortcuts(best, 2, saving_goal)
 
     def part_two(self, input: utils.Input) -> str | int:
         """
@@ -35,16 +43,8 @@ class Puzzle(utils.Puzzle):
         grid = input.grid()
         start = grid.find("S")
         end = grid.find("E")
-        cheats: Counter[int] = Counter()
         best = utils.dijkstra_best_score(grid, start, end, unmovable="#")
-        for found, other in itertools.combinations(best, 2):
-            dist = utils.manhattan_2d(found, other)
-            if not (1 < dist <= 20):
-                continue
-            saving = abs(best[other] - best[found]) - dist
-            if saving >= saving_goal:
-                cheats[saving] += 1
-        return sum(cheats.values())
+        return how_many_shortcuts(best, 20, saving_goal)
 
 
 if __name__ == "__main__":
