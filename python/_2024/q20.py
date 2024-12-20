@@ -1,5 +1,4 @@
 import itertools
-from collections import Counter
 
 import utils
 
@@ -8,49 +7,44 @@ type Steps = int
 
 
 def how_many_shortcuts(best: dict[Point, Steps], max_steps: int, saving_goal: int) -> int:
-    cheats: Counter[int] = Counter()
+    ans = 0
     for found, other in itertools.combinations(best, 2):
         dist = utils.manhattan_2d(found, other)
         if not (1 < dist <= max_steps):
             continue
         saving = abs(best[other] - best[found]) - dist
         if saving >= saving_goal:
-            cheats[saving] += 1
-    return sum(cheats.values())
+            ans += 1
+    return ans
 
 
 class Puzzle(utils.Puzzle):
     """
     Race from start to finish. What's the best score?
+
+    How many unique cheats are there?
     """
 
-    def part_one(self, input: utils.Input) -> str | int:
+    def both_parts(self, input: utils.Input) -> tuple[str | int, str | int]:
         """
-        How many shortcuts can you take with wallhacks for 2 steps?
-        """
-        saving_goal = 2 if self.testing else 100
-        grid = input.grid()
-        start = grid.find("S")
-        end = grid.find("E")
-        best = utils.dijkstra_best_score(grid, start, end, unmovable="#")
-        return how_many_shortcuts(best, 2, saving_goal)
+        Part 1: Skip through a single wall (2 steps).
 
-    def part_two(self, input: utils.Input) -> str | int:
+        Part 2: Skip through up to 19 walls (20 steps).
         """
-        How many shortcuts can you take with wallhacks for 20 steps?
-        """
-        saving_goal = 50 if self.testing else 100
         grid = input.grid()
         start = grid.find("S")
         end = grid.find("E")
         best = utils.dijkstra_best_score(grid, start, end, unmovable="#")
-        return how_many_shortcuts(best, 20, saving_goal)
+        p1 = how_many_shortcuts(best, 2, saving_goal=2 if self.testing else 100)
+        p2 = how_many_shortcuts(best, 20, saving_goal=50 if self.testing else 100)
+        return p1, p2
 
 
 if __name__ == "__main__":
     runner = Puzzle(
         year=2024,
         day=20,
+        both=True,
         test_answers=("44", "285"),
         test_input="""###############
 #...#...#.....#
