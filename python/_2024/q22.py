@@ -29,22 +29,20 @@ class Puzzle(utils.Puzzle):
             m3 = next(m2)
             m4 = next(m3)
             seq = deque(
-                [m1 % 10 - monkey % 10, m2 % 10 - m1 % 10, m3 % 10 - m2 % 10, m4 % 10 - m3 % 10]
+                [m1 % 10 - monkey % 10, m2 % 10 - m1 % 10, m3 % 10 - m2 % 10, m4 % 10 - m3 % 10],
+                maxlen=4,
             )
             seen: dict[PriceChange, int] = {tuple(seq): m4 % 10}
             monkey = m4
-            price = monkey % 10
             for _ in range(2000 - 4):
                 next_monkey = next(monkey)
                 next_price = next_monkey % 10
-                seq.popleft()
-                seq.append(next_price - price)
+                seq.append(next_price - monkey % 10)
                 key = tuple(seq)
                 if key not in seen:
                     # Only store the first time we see a sequence for each monkey
                     seen[key] = next_price
                 monkey = next_monkey
-                price = next_price
             for key, value in seen.items():
                 sequences[key] += value
             secrets += monkey
