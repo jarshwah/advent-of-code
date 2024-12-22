@@ -12,9 +12,7 @@ def how_many_shortcuts(best: dict[Point, Steps], max_steps: int, saving_goal: in
         dist = utils.manhattan_2d(found, other)
         if not (1 < dist <= max_steps):
             continue
-        saving = abs(best[other] - best[found]) - dist
-        if saving >= saving_goal:
-            ans += 1
+        ans += abs(best[other] - best[found]) - dist >= saving_goal
     return ans
 
 
