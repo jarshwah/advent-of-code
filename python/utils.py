@@ -512,6 +512,10 @@ def moves(position: Point, direction: str) -> Point:
     return move(position, DIRECTIONS_ASCII[direction])
 
 
+def moved(from_position: Point, to_position: Point) -> str:
+    return DIRECTIONS_ASCII_REVERSE[point_subtract(to_position, from_position)]
+
+
 # Represented as ROW, COLUMN (or y,x)
 CENTER = (0, 0)
 UP = (-1, 0)
@@ -550,6 +554,7 @@ DIRECTIONS_ASCII: dict[str, Point] = {
     "<": LEFT,
     ">": RIGHT,
 }
+DIRECTIONS_ASCII_REVERSE = {v: k for k, v in DIRECTIONS_ASCII.items()}
 
 
 def turn_right(direction: Point) -> Point:
