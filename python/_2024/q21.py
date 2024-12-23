@@ -72,15 +72,20 @@ def get_paths(grid: utils.Grid[str]) -> AdjacencyMatrix:
 
 
 class Puzzle(utils.Puzzle):
-    keygrid = get_keygrid()
-    dirgrid = get_dirgrid()
-    keygraph = get_paths(keygrid)
-    dirgraph = get_paths(dirgrid)
+    def both_parts(self, input: utils.Input) -> tuple[str | int, str | int]:
+        """
+        Robots controlling robots controlling robots.
 
-    def part_one(self, input: utils.Input) -> str | int:
-        KPATH = self.keygraph
-        DPATH = self.dirgraph
+        Press buttons to reorient the next robot in the chain to enter the codes.
+
+        Part 1: 1 keypad, 2 directional robots, 1 directional human.
+        Part 2: 1 keypad, 24 directional robots, 1 directional human.
+
+        Minimise the number of human button pushes to enter the code.
+        """
         codes = input.lines().strings
+        keypaths = get_paths(get_keygrid())
+        dirpaths = get_paths(get_dirgrid())
 
         @cache
         def press_number(start_from: str, go_to: str, panel_num: int, keypad: bool) -> int:
@@ -92,7 +97,7 @@ class Puzzle(utils.Puzzle):
                 # We can press A again to hit the same button.
                 return 1
 
-            paths = KPATH[start_from][go_to] if keypad else DPATH[start_from][go_to]
+            paths = keypaths[start_from][go_to] if keypad else dirpaths[start_from][go_to]
             presses: list[int] = []
             for path in paths:
                 cost = 0
@@ -101,51 +106,19 @@ class Puzzle(utils.Puzzle):
                 presses.append(cost)
             return min(presses)
 
-        ans = 0
+        p1 = p2 = 0
         for code in codes:
-            num = 0
             for start_from, go_to in zip("A" + code, code):
-                num += press_number(start_from, go_to, 3, True)
-            ans += num * int(code[:3])
-        return ans
-
-    def part_two(self, input: utils.Input) -> str | int:
-        KPATH = self.keygraph
-        DPATH = self.dirgraph
-        codes = input.lines().strings
-
-        @cache
-        def press_number(start_from: str, go_to: str, panel_num: int, keypad: bool) -> int:
-            if panel_num == 0:
-                # We can press any button in 1 move as a human
-                return 1
-
-            if start_from == go_to:
-                # We can press A again to hit the same button.
-                return 1
-
-            paths = KPATH[start_from][go_to] if keypad else DPATH[start_from][go_to]
-            presses: list[int] = []
-            for path in paths:
-                cost = 0
-                for sf, gt in zip("A" + path, path + "A"):
-                    cost += press_number(sf, gt, panel_num - 1, False)
-                presses.append(cost)
-            return min(presses)
-
-        ans = 0
-        for code in codes:
-            num = 0
-            for start_from, go_to in zip("A" + code, code):
-                num += press_number(start_from, go_to, 26, True)
-            ans += num * int(code[:3])
-        return ans
+                p1 += press_number(start_from, go_to, 3, True) * int(code[:3])
+                p2 += press_number(start_from, go_to, 26, True) * int(code[:3])
+        return p1, p2
 
 
 if __name__ == "__main__":
     runner = Puzzle(
         year=2024,
         day=21,
+        both=True,
         test_answers=("126384", "154115708116294"),
         test_input="""029A
 980A
