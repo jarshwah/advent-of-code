@@ -10,21 +10,16 @@ class Puzzle(utils.Puzzle):
         locks = set()
         for group in groups:
             lines = group.splitlines()
-            if lines[0] == "#####":
-                # locks
-                pins = []
-                cols = utils.rotate(lines[1:])
-                for col in cols:
-                    pins.append(col.count("."))
-                locks.add(tuple(pins))
-            else:
-                # keys
-                cols = utils.rotate(lines[0:-1])
-                pins = []
-                for col in cols:
-                    pins.append(col.count("#"))
-                keys.add(tuple(pins))
-        return sum(1 for key in keys for lock in locks if all(ky < lk for ky, lk in zip(key, lock)))
+            cols = utils.rotate(lines)
+            slots = tuple(col.count("#") for col in cols)
+            locks.add(slots) if cols[0][0].startswith("#") else keys.add(slots)
+        height = len(cols[0])
+        return sum(
+            1
+            for key in keys
+            for lock in locks
+            if all(ky + lk <= height for ky, lk in zip(key, lock))
+        )
 
     def part_two(self, input: utils.Input) -> str | int:
         return "no-answer"
