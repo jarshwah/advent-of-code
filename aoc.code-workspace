@@ -110,11 +110,25 @@
                 "description": "The day to create a puzzle",
                 "type": "promptString",
             },
+            {
+                "id": "year_number",
+                "description": "The year of puzzles",
+                "type": "promptString",
+            },
         ],
         "tasks": [
             {
                 "label": "New Problem",
                 "command": "uv run new_puzzle.py ${input:day_number}",
+                "type": "shell",
+                "options": {
+                    "cwd": "python"
+                },
+                "problemMatcher": []
+            },
+            {
+                "label": "New Problem (YEAR)",
+                "command": "uv run new_puzzle.py ${input:day_number} --year ${input:year_number}",
                 "type": "shell",
                 "options": {
                     "cwd": "python"
