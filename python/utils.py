@@ -555,6 +555,12 @@ DIRECTIONS_ASCII: dict[str, Point] = {
     ">": RIGHT,
 }
 DIRECTIONS_ASCII_REVERSE = {v: k for k, v in DIRECTIONS_ASCII.items()}
+DIRECTIONS_LETTERS: dict[str, Point] = {
+    "L": LEFT,
+    "R": RIGHT,
+    "D": DOWN,
+    "U": UP,
+}
 
 
 def turn_right(direction: Point) -> Point:
