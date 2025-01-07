@@ -1104,6 +1104,9 @@ class Puzzle:
 
                 def report(test_number: int, result: str, expected: str) -> bool:
                     label = f"  {test_number}{'a' if alt else ''}."
+                    if expected == "no-answer":
+                        click.secho(f"{label}  🦘 No Test Answer Available", fg="yellow")
+                        return True
                     if result != expected:
                         click.secho(f"{label}  ❌ {result or '?'} != {expected}", fg="red")
                         return False
