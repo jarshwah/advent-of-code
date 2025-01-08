@@ -9,9 +9,9 @@ class TestInstructionAdd:
         inst = intcode.InstructionAdd.build(
             ptr=0, modes=[intcode.ParamMode.POSITION, intcode.ParamMode.POSITION]
         )
-        mem = intcode.Memory([intcode.OpCode.ADD, 3, 4, 1, 7])
-        inst.visit(mem)
-        assert mem.read(1) == 8
+        ic = IntCode([intcode.OpCode.ADD, 3, 4, 1, 7])
+        inst.visit(ic)
+        assert ic.memory.read(1) == 8
 
 
 class TestInstructionMul:
@@ -19,9 +19,9 @@ class TestInstructionMul:
         inst = intcode.InstructionMul.build(
             ptr=0, modes=[intcode.ParamMode.POSITION, intcode.ParamMode.POSITION]
         )
-        mem = intcode.Memory([intcode.OpCode.ADD, 3, 4, 1, 7])
-        inst.visit(mem)
-        assert mem.read(1) == 7
+        ic = IntCode([intcode.OpCode.ADD, 3, 4, 1, 7])
+        inst.visit(ic)
+        assert ic.memory.read(1) == 7
 
 
 class TestInstructionHalt:
@@ -29,9 +29,9 @@ class TestInstructionHalt:
         inst = intcode.InstructionHalt.build(
             ptr=0, modes=[intcode.ParamMode.POSITION, intcode.ParamMode.POSITION]
         )
-        mem = intcode.Memory([intcode.OpCode.HALT, 3, 4, 1, 7])
+        ic = intcode.IntCode([intcode.OpCode.HALT, 3, 4, 1, 7])
         with pytest.raises(intcode.Halt):
-            inst.visit(mem)
+            inst.visit(ic)
 
 
 def test_add():
@@ -77,9 +77,70 @@ def test_badopcode():
         ([2, 4, 4, 5, 99, 0], [2, 4, 4, 5, 99, 9801]),
         ([2, 3, 0, 3, 99], [2, 3, 0, 6, 99]),
         ([1002, 4, 3, 4, 33], [1002, 4, 3, 4, 99]),
+        ([1101, 100, -1, 4, 0], [1101, 100, -1, 4, 99]),
     ],
 )
 def test_run(incodes: list[int], outcodes: list[int]):
     program = IntCode(incodes)
     program.run()
     assert program._memory == outcodes
+
+
+class TestIntCode:
+    def test_outputs_input(self):
+        """Day 5: program outputs the input"""
+        program = IntCode([3, 0, 4, 0, 99], input=[-4])
+        program.run()
+        assert program.output == [-4]
+
+    @pytest.mark.parametrize(
+        "mem,input,result",
+        [
+            # eq 8 - 1
+            ([3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8], [8], [1]),
+            ([3, 3, 1108, -1, 8, 3, 4, 3, 99], [8], [1]),
+            # eq 8 - 0
+            ([3, 9, 8, 9, 10, 9, 4, 9, 99, -1, 8], [6], [0]),
+            ([3, 3, 1108, -1, 8, 3, 4, 3, 99], [6], [0]),
+            # lt 8 - 1
+            ([3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8], [7], [1]),
+            ([3, 3, 1107, -1, 8, 3, 4, 3, 99], [7], [1]),
+            # lt 8 - 0
+            ([3, 9, 7, 9, 10, 9, 4, 9, 99, -1, 8], [8], [0]),
+            ([3, 3, 1107, -1, 8, 3, 4, 3, 99], [8], [0]),
+        ],
+    )
+    def test_input_eq_lt(self, mem, input, result):
+        program = IntCode(mem, input=input)
+        program.run()
+        assert program.output == result
+
+    @pytest.mark.parametrize(
+        "mem,input,result",
+        [
+            ([3, 12, 6, 12, 15, 1, 13, 14, 13, 4, 13, 99, -1, 0, 1, 9], [0], [0]),
+            ([3, 3, 1105, -1, 9, 1101, 0, 0, 12, 4, 12, 99, 1], [0], [0]),
+            ([3, 12, 6, 12, 15, 1, 13, 14, 13, 4, 13, 99, -1, 0, 1, 9], [5], [1]),
+            ([3, 3, 1105, -1, 9, 1101, 0, 0, 12, 4, 12, 99, 1], [5], [1]),
+        ],
+    )
+    def test_jmp(self, mem, input, result):
+        program = IntCode(mem, input=input)
+        program.run()
+        assert program.output == result
+
+    def test_day5(self):
+        # fmt: off
+        mem = [3, 21, 1008, 21, 8, 20, 1005, 20, 22, 107, 8, 21, 20, 1006, 20, 31, 1106, 0, 36, 98, 0, 0, 1002, 21, 125, 20, 4, 20, 1105, 1, 46, 104, 999, 1105, 1, 46, 1101, 1000, 1, 20, 4, 20, 1105, 1, 46, 98, 99]
+        # fmt: on
+        program = IntCode(mem, input=[7])
+        program.run()
+        assert program.output == [999]
+
+        program = IntCode(mem, input=[8])
+        program.run()
+        assert program.output == [1000]
+
+        program = IntCode(mem, input=[9])
+        program.run()
+        assert program.output == [1001]

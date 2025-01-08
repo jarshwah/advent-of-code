@@ -1,6 +1,5 @@
 import itertools
-from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import IntEnum, unique
 from functools import cached_property
 from typing import Iterable, Self, assert_never
@@ -22,7 +21,6 @@ class InvalidParam(Exception):
     pass
 
 
-type Operation = Callable[[int, int], int]
 type Pointer = int
 
 
@@ -51,6 +49,12 @@ class Memory:
 class OpCode(IntEnum):
     ADD = 1
     MUL = 2
+    INPUT = 3
+    OUTPUT = 4
+    JMP1 = 5
+    JMP0 = 6
+    LT = 7
+    EQ = 8
     HALT = 99
 
 
@@ -89,7 +93,7 @@ class Instruction:
     def __len__(self) -> int:
         return self.arity + 1
 
-    def visit(self, memory: Memory) -> None:
+    def visit(self, intcode: "IntCode") -> int:
         raise NotImplementedError
 
     @classmethod
@@ -111,36 +115,114 @@ class InstructionAdd(Instruction):
     opcode: OpCode = OpCode.ADD
     arity: int = 3
 
-    def visit(self, memory: Memory) -> None:
+    def visit(self, intcode: "IntCode") -> int:
+        memory = intcode.memory
         p1 = memory.read(self.params[0].resolve(memory))
         p2 = memory.read(self.params[1].resolve(memory))
         p3 = self.params[2].resolve(memory)
         memory.write(p3, p1 + p2)
+        return intcode.ptr + 4
 
 
 class InstructionMul(Instruction):
     opcode: OpCode = OpCode.MUL
     arity: int = 3
 
-    def visit(self, memory: Memory) -> None:
+    def visit(self, intcode: "IntCode") -> int:
+        memory = intcode.memory
         p1 = memory.read(self.params[0].resolve(memory))
         p2 = memory.read(self.params[1].resolve(memory))
         p3 = self.params[2].resolve(memory)
         memory.write(p3, p1 * p2)
+        return intcode.ptr + 4
 
 
 class InstructionHalt(Instruction):
     opcode: OpCode = OpCode.HALT
     arity: int = 0
 
-    def visit(self, memory: Memory) -> None:
+    def visit(self, intcode: "IntCode") -> int:
         raise Halt
+
+
+class InstructionInput(Instruction):
+    opcode: OpCode = OpCode.INPUT
+    arity: int = 1
+
+    def visit(self, intcode: "IntCode") -> int:
+        memory = intcode.memory
+        p1 = self.params[0].resolve(memory)
+        memory.write(p1, intcode.input.pop(0))
+        return intcode.ptr + 2
+
+
+class InstructionOutput(Instruction):
+    opcode: OpCode = OpCode.OUTPUT
+    arity: int = 1
+
+    def visit(self, intcode: "IntCode") -> int:
+        memory = intcode.memory
+        p1 = memory.read(self.params[0].resolve(memory))
+        intcode.output.append(p1)
+        return intcode.ptr + 2
+
+
+class InstructionJmp1(Instruction):
+    opcode: OpCode = OpCode.JMP1
+    arity: int = 2
+
+    def visit(self, intcode: "IntCode") -> int:
+        memory = intcode.memory
+        p1 = memory.read(self.params[0].resolve(memory))
+        if p1 != 0:
+            return memory.read(self.params[1].resolve(memory))
+        return intcode.ptr + 3
+
+
+class InstructionJmp0(Instruction):
+    opcode: OpCode = OpCode.JMP0
+    arity: int = 2
+
+    def visit(self, intcode: "IntCode") -> int:
+        memory = intcode.memory
+        p1 = memory.read(self.params[0].resolve(memory))
+        if p1 == 0:
+            return memory.read(self.params[1].resolve(memory))
+        return intcode.ptr + 3
+
+
+class InstructionLt(Instruction):
+    opcode: OpCode = OpCode.LT
+    arity: int = 3
+
+    def visit(self, intcode: "IntCode") -> int:
+        memory = intcode.memory
+        p1 = memory.read(self.params[0].resolve(memory))
+        p2 = memory.read(self.params[1].resolve(memory))
+        p3 = self.params[2].resolve(memory)
+        memory.write(p3, int(p1 < p2))
+        return intcode.ptr + 4
+
+
+class InstructionEq(Instruction):
+    opcode: OpCode = OpCode.EQ
+    arity: int = 3
+
+    def visit(self, intcode: "IntCode") -> int:
+        memory = intcode.memory
+        p1 = memory.read(self.params[0].resolve(memory))
+        p2 = memory.read(self.params[1].resolve(memory))
+        p3 = self.params[2].resolve(memory)
+        memory.write(p3, int(p1 == p2))
+        return intcode.ptr + 4
 
 
 @dataclass
 class IntCode:
     _memory: list[int]
     ptr: Pointer = 0
+    input: list[int] = field(default_factory=list)
+    output: list[int] = field(default_factory=list)
 
     @cached_property
     def memory(self) -> Memory:
@@ -159,6 +241,18 @@ class IntCode:
                 return InstructionMul.build(*args)
             case OpCode.HALT:
                 return InstructionHalt.build(*args)
+            case OpCode.INPUT:
+                return InstructionInput.build(*args)
+            case OpCode.OUTPUT:
+                return InstructionOutput.build(*args)
+            case OpCode.JMP1:
+                return InstructionJmp1.build(*args)
+            case OpCode.JMP0:
+                return InstructionJmp0.build(*args)
+            case OpCode.LT:
+                return InstructionLt.build(*args)
+            case OpCode.EQ:
+                return InstructionEq.build(*args)
             case _:
                 raise BadOpcode(f"{opcode=} {ptr=}")
 
@@ -172,9 +266,4 @@ class IntCode:
 
     def next(self) -> None:
         inst = self.decode_instruction(self.ptr)
-        inst.visit(self.memory)
-        self.advance(len(inst))
-
-    def advance(self, n: int) -> None:
-        """Advance pointer n steps."""
-        self.ptr += n
+        self.ptr = inst.visit(self)
