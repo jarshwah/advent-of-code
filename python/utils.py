@@ -1062,6 +1062,7 @@ class Puzzle:
     test_answers: tuple[str, str] = ("", "")
     both: bool = False
     testing: bool = False
+    no_tests: bool = False
 
     def part_one(self, input: Input) -> str | int:
         return ""
@@ -1104,7 +1105,9 @@ class Puzzle:
             part_1 = puzzle_runner.part_one_alt if alt else puzzle_runner.part_one
             part_2 = puzzle_runner.part_two_alt if alt else puzzle_runner.part_two
 
-            if test or fail_fast:
+            if (test or fail_fast) and not puzzle_runner.no_tests:
+                click.secho("Skipping tests...", fg="blue")
+            elif test or fail_fast:
                 puzzle_runner.testing = True
                 click.secho("Running tests...", fg="blue")
 

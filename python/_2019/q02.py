@@ -14,7 +14,7 @@ class Puzzle(utils.Puzzle):
             program[2] = 2
         code = intcode.IntCode(program)
         code.run()
-        return int(code.ref(0))
+        return int(code.memory.read(0))
 
     def part_two(self, input: utils.Input) -> str | int:
         target = 19690720
@@ -27,7 +27,7 @@ class Puzzle(utils.Puzzle):
                 code = intcode.IntCode(program)
                 with suppress(intcode.BadOpcode, intcode.SegFault):
                     code.run()
-                    if code.ref(0) == target:
+                    if code.memory.read(0) == target:
                         return 100 * noun + verb
         return -1
 
