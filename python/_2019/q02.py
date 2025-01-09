@@ -6,6 +6,8 @@ import utils
 
 
 class Puzzle(utils.Puzzle):
+    """--- Day 2: 1202 Program Alarm ---"""
+
     def part_one(self, input: utils.Input) -> str | int:
         program = list(input.split(",").integers)
         if not self.testing:
