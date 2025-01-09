@@ -1,7 +1,7 @@
 import itertools
 from dataclasses import dataclass, field
 from enum import IntEnum, unique
-from functools import cached_property
+from functools import cache, cached_property
 from typing import Iterable, Self, assert_never
 
 
@@ -234,27 +234,7 @@ class IntCode:
         raw_modes = raw[2:]
         modes = (ParamMode(int(mode)) for mode in raw_modes)
         args = (ptr, modes)
-        match opcode:
-            case OpCode.ADD:
-                return InstructionAdd.build(*args)
-            case OpCode.MUL:
-                return InstructionMul.build(*args)
-            case OpCode.HALT:
-                return InstructionHalt.build(*args)
-            case OpCode.INPUT:
-                return InstructionInput.build(*args)
-            case OpCode.OUTPUT:
-                return InstructionOutput.build(*args)
-            case OpCode.JMP1:
-                return InstructionJmp1.build(*args)
-            case OpCode.JMP0:
-                return InstructionJmp0.build(*args)
-            case OpCode.LT:
-                return InstructionLt.build(*args)
-            case OpCode.EQ:
-                return InstructionEq.build(*args)
-            case _:
-                raise BadOpcode(f"{opcode=} {ptr=}")
+        return get_instruction_type(opcode).build(*args)
 
     def run(self) -> None:
         """Run all instructions until the program halts"""
@@ -267,3 +247,11 @@ class IntCode:
     def next(self) -> None:
         inst = self.decode_instruction(self.ptr)
         self.ptr = inst.visit(self)
+
+
+@cache
+def get_instruction_type(opcode: int) -> type[Instruction]:
+    for inst in Instruction.__subclasses__():
+        if inst.opcode == opcode:
+            return inst
+    raise BadOpcode(f"{opcode=}")
