@@ -27,7 +27,7 @@ class Puzzle(utils.Puzzle):
                 program = original[:]
                 program[1:3] = noun, verb
                 code = intcode.IntCode(program)
-                with suppress(intcode.BadOpcode, intcode.SegFault):
+                with suppress(intcode.BadOpcode, intcode.SegFault, intcode.NoInput):
                     code.run()
                     if code.memory.read(0) == target:
                         return 100 * noun + verb

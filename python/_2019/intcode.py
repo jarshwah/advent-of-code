@@ -1,4 +1,7 @@
+import contextlib
 import itertools
+from collections import deque
+from collections.abc import Callable, Iterator
 from dataclasses import dataclass, field
 from enum import IntEnum, unique
 from functools import cache, cached_property
@@ -18,6 +21,10 @@ class SegFault(Exception):
 
 
 class InvalidParam(Exception):
+    pass
+
+
+class NoInput(Exception):
     pass
 
 
@@ -152,7 +159,9 @@ class InstructionInput(Instruction):
     def visit(self, intcode: "IntCode") -> int:
         memory = intcode.memory
         p1 = self.params[0].resolve(memory)
-        memory.write(p1, intcode.input.pop(0))
+        with intcode.executing():
+            # GIL to prevent re-entrant queries when requesting input.
+            memory.write(p1, next(intcode.input))
         return intcode.ptr + 2
 
 
@@ -163,7 +172,9 @@ class InstructionOutput(Instruction):
     def visit(self, intcode: "IntCode") -> int:
         memory = intcode.memory
         p1 = memory.read(self.params[0].resolve(memory))
-        intcode.output.append(p1)
+        with intcode.executing():
+            # GIL to prevent re-entrant queries when writing output.
+            intcode.output.write(p1)
         return intcode.ptr + 2
 
 
@@ -218,11 +229,49 @@ class InstructionEq(Instruction):
 
 
 @dataclass
+class Pipe:
+    """
+    An [I]nput[O]utput Pipe.
+
+    Callbacks can be registered to run when output is written or input is requested.
+    """
+
+    _queue: deque[int] = field(default_factory=lambda: deque([]))
+    _fill_pipe: Callable[[], None] = field(default_factory=lambda: lambda: None, repr=False)
+    _pipe_filled: Callable[[], None] = field(default_factory=lambda: lambda: None, repr=False)
+
+    @classmethod
+    def create(cls, input: list[int]) -> Self:
+        return cls(_queue=deque(input))
+
+    def __next__(self) -> int:
+        if not self._queue:
+            self._fill_pipe()  # request input
+            if not self._queue:
+                raise NoInput
+        return self._queue.popleft()
+
+    def write(self, value: int) -> None:
+        self._queue.append(value)
+        self._pipe_filled()
+
+    def dump(self) -> list[int]:
+        return list(self._queue)
+
+
+@dataclass
 class IntCode:
-    _memory: list[int]
+    _memory: list[int] = field(repr=False)
     ptr: Pointer = 0
-    input: list[int] = field(default_factory=list)
-    output: list[int] = field(default_factory=list)
+    input: Pipe = field(default_factory=Pipe)
+    output: Pipe = field(default_factory=Pipe)
+    _halted: bool = False
+    _executing: bool = False
+    name: str = ""
+
+    def __post_init__(self) -> None:
+        self.output._fill_pipe = self.run
+        self.input._pipe_filled = self.run
 
     @cached_property
     def memory(self) -> Memory:
@@ -238,15 +287,35 @@ class IntCode:
 
     def run(self) -> None:
         """Run all instructions until the program halts"""
+        if self._halted or self._executing:
+            return
+
         while True:
             try:
                 self.next()
             except Halt:
+                self._halted = True
+                return
+            except NoInput:
+                # Pause, allowing resumption when input is provided.
                 return
 
     def next(self) -> None:
         inst = self.decode_instruction(self.ptr)
         self.ptr = inst.visit(self)
+
+    @contextlib.contextmanager
+    def executing(self) -> Iterator[None]:
+        """Mark the interpreter as executing to prevent re-entrant calls"""
+        try:
+            self._executing = True
+            yield
+        finally:
+            self._executing = False
+
+    def connect_input(self, other: "IntCode") -> None:
+        self.input = other.output
+        self.input._pipe_filled = self.run
 
 
 @cache
@@ -255,3 +324,15 @@ def get_instruction_type(opcode: int) -> type[Instruction]:
         if inst.opcode == opcode:
             return inst
     raise BadOpcode(f"{opcode=}")
+
+
+def chain_intcode_io(*intcodes: IntCode, loop: bool = False) -> None:
+    """
+    Chain intcode outputs to inputs.
+
+    Optionally link the final output to the first input when loop is True.
+    """
+    for r1, r2 in zip(intcodes, intcodes[1:]):
+        r2.connect_input(r1)
+    if loop:
+        intcodes[0].connect_input(intcodes[-1])
