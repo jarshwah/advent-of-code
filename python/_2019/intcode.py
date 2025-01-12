@@ -68,6 +68,7 @@ class OpCode(IntEnum):
     JMP0 = 6
     LT = 7
     EQ = 8
+    RELBASE = 9
     HALT = 99
 
 
@@ -75,6 +76,7 @@ class OpCode(IntEnum):
 class ParamMode(IntEnum):
     POSITION = 0
     IMMEDIATE = 1
+    RELATIVE = 2
 
 
 @dataclass
@@ -82,13 +84,16 @@ class Param:
     pointer: Pointer
     mode: ParamMode
 
-    def resolve(self, memory: Memory) -> int:
+    def resolve(self, memory: Memory, relative_base: int) -> int:
         match self.mode:
             case ParamMode.POSITION:
                 return memory.read(self.pointer)
 
             case ParamMode.IMMEDIATE:
                 return self.pointer
+
+            case ParamMode.RELATIVE:
+                return memory.read(self.pointer) + relative_base
 
             case _:
                 assert_never(self.mode)
@@ -130,9 +135,9 @@ class InstructionAdd(Instruction):
 
     def visit(self, intcode: "IntCode") -> int:
         memory = intcode.memory
-        p1 = memory.read(self.params[0].resolve(memory))
-        p2 = memory.read(self.params[1].resolve(memory))
-        p3 = self.params[2].resolve(memory)
+        p1 = memory.read(self.params[0].resolve(memory, intcode.relative_base))
+        p2 = memory.read(self.params[1].resolve(memory, intcode.relative_base))
+        p3 = self.params[2].resolve(memory, intcode.relative_base)
         memory.write(p3, p1 + p2)
         return intcode.ptr + 4
 
@@ -143,9 +148,9 @@ class InstructionMul(Instruction):
 
     def visit(self, intcode: "IntCode") -> int:
         memory = intcode.memory
-        p1 = memory.read(self.params[0].resolve(memory))
-        p2 = memory.read(self.params[1].resolve(memory))
-        p3 = self.params[2].resolve(memory)
+        p1 = memory.read(self.params[0].resolve(memory, intcode.relative_base))
+        p2 = memory.read(self.params[1].resolve(memory, intcode.relative_base))
+        p3 = self.params[2].resolve(memory, intcode.relative_base)
         memory.write(p3, p1 * p2)
         return intcode.ptr + 4
 
@@ -164,7 +169,7 @@ class InstructionInput(Instruction):
 
     def visit(self, intcode: "IntCode") -> int:
         memory = intcode.memory
-        p1 = self.params[0].resolve(memory)
+        p1 = self.params[0].resolve(memory, intcode.relative_base)
         memory.write(p1, next(intcode.input))
         return intcode.ptr + 2
 
@@ -175,7 +180,7 @@ class InstructionOutput(Instruction):
 
     def visit(self, intcode: "IntCode") -> int:
         memory = intcode.memory
-        p1 = memory.read(self.params[0].resolve(memory))
+        p1 = memory.read(self.params[0].resolve(memory, intcode.relative_base))
         intcode.output.write(p1)
         return intcode.ptr + 2
 
@@ -186,9 +191,9 @@ class InstructionJmp1(Instruction):
 
     def visit(self, intcode: "IntCode") -> int:
         memory = intcode.memory
-        p1 = memory.read(self.params[0].resolve(memory))
+        p1 = memory.read(self.params[0].resolve(memory, intcode.relative_base))
         if p1 != 0:
-            return memory.read(self.params[1].resolve(memory))
+            return memory.read(self.params[1].resolve(memory, intcode.relative_base))
         return intcode.ptr + 3
 
 
@@ -198,9 +203,9 @@ class InstructionJmp0(Instruction):
 
     def visit(self, intcode: "IntCode") -> int:
         memory = intcode.memory
-        p1 = memory.read(self.params[0].resolve(memory))
+        p1 = memory.read(self.params[0].resolve(memory, intcode.relative_base))
         if p1 == 0:
-            return memory.read(self.params[1].resolve(memory))
+            return memory.read(self.params[1].resolve(memory, intcode.relative_base))
         return intcode.ptr + 3
 
 
@@ -210,9 +215,9 @@ class InstructionLt(Instruction):
 
     def visit(self, intcode: "IntCode") -> int:
         memory = intcode.memory
-        p1 = memory.read(self.params[0].resolve(memory))
-        p2 = memory.read(self.params[1].resolve(memory))
-        p3 = self.params[2].resolve(memory)
+        p1 = memory.read(self.params[0].resolve(memory, intcode.relative_base))
+        p2 = memory.read(self.params[1].resolve(memory, intcode.relative_base))
+        p3 = self.params[2].resolve(memory, intcode.relative_base)
         memory.write(p3, int(p1 < p2))
         return intcode.ptr + 4
 
@@ -223,11 +228,22 @@ class InstructionEq(Instruction):
 
     def visit(self, intcode: "IntCode") -> int:
         memory = intcode.memory
-        p1 = memory.read(self.params[0].resolve(memory))
-        p2 = memory.read(self.params[1].resolve(memory))
-        p3 = self.params[2].resolve(memory)
+        p1 = memory.read(self.params[0].resolve(memory, intcode.relative_base))
+        p2 = memory.read(self.params[1].resolve(memory, intcode.relative_base))
+        p3 = self.params[2].resolve(memory, intcode.relative_base)
         memory.write(p3, int(p1 == p2))
         return intcode.ptr + 4
+
+
+class InstructionRelBase(Instruction):
+    opcode: OpCode = OpCode.RELBASE
+    arity: int = 1
+
+    def visit(self, intcode: "IntCode") -> int:
+        memory = intcode.memory
+        p1 = memory.read(self.params[0].resolve(memory, intcode.relative_base))
+        intcode.relative_base += p1
+        return intcode.ptr + 2
 
 
 @dataclass
@@ -269,6 +285,7 @@ class IntCode:
     output: Pipe = field(default_factory=Pipe)
     _halted: bool = False
     _executing: bool = False
+    relative_base: int = 0
     name: str = ""
 
     def __post_init__(self) -> None:
