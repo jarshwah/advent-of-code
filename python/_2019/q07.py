@@ -16,8 +16,7 @@ class Puzzle(utils.Puzzle):
                 runner = intcode.IntCode(program[::])
                 runner.input.write(wombo[ith])
                 runner.input.write(output)
-                runner.run()
-                output = runner.output.dump()[-1]
+                output = runner.run()[-1]
             best = max(best, output)
         return best
 

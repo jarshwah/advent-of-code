@@ -5,7 +5,7 @@ from collections.abc import Callable, Iterator
 from dataclasses import dataclass, field
 from enum import IntEnum, unique
 from functools import cache, cached_property
-from typing import Iterable, Self, assert_never
+from typing import Any, Iterable, Self, assert_never
 
 
 class Halt(Exception):
@@ -159,9 +159,7 @@ class InstructionInput(Instruction):
     def visit(self, intcode: "IntCode") -> int:
         memory = intcode.memory
         p1 = self.params[0].resolve(memory)
-        with intcode.executing():
-            # GIL to prevent re-entrant queries when requesting input.
-            memory.write(p1, next(intcode.input))
+        memory.write(p1, next(intcode.input))
         return intcode.ptr + 2
 
 
@@ -172,9 +170,7 @@ class InstructionOutput(Instruction):
     def visit(self, intcode: "IntCode") -> int:
         memory = intcode.memory
         p1 = memory.read(self.params[0].resolve(memory))
-        with intcode.executing():
-            # GIL to prevent re-entrant queries when writing output.
-            intcode.output.write(p1)
+        intcode.output.write(p1)
         return intcode.ptr + 2
 
 
@@ -237,8 +233,8 @@ class Pipe:
     """
 
     _queue: deque[int] = field(default_factory=lambda: deque([]))
-    _fill_pipe: Callable[[], None] = field(default_factory=lambda: lambda: None, repr=False)
-    _pipe_filled: Callable[[], None] = field(default_factory=lambda: lambda: None, repr=False)
+    _fill_pipe: Callable[[], Any] = field(default_factory=lambda: lambda: None, repr=False)
+    _pipe_filled: Callable[[], Any] = field(default_factory=lambda: lambda: None, repr=False)
 
     @classmethod
     def create(cls, input: list[int]) -> Self:
@@ -285,24 +281,25 @@ class IntCode:
         args = (ptr, modes)
         return get_instruction_type(opcode).build(*args)
 
-    def run(self) -> None:
+    def run(self) -> list[int]:
         """Run all instructions until the program halts"""
         if self._halted or self._executing:
-            return
+            return self.output.dump()
 
         while True:
             try:
                 self.next()
             except Halt:
                 self._halted = True
-                return
+                return self.output.dump()
             except NoInput:
                 # Pause, allowing resumption when input is provided.
-                return
+                return []
 
     def next(self) -> None:
         inst = self.decode_instruction(self.ptr)
-        self.ptr = inst.visit(self)
+        with self.executing():
+            self.ptr = inst.visit(self)
 
     @contextlib.contextmanager
     def executing(self) -> Iterator[None]:

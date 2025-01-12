@@ -9,14 +9,12 @@ class Puzzle(utils.Puzzle):
     def part_one(self, input: utils.Input) -> str | int:
         program = intcode.IntCode(input.split(",").numbers)
         program.input.write(1)
-        program.run()
-        return int(program.output.dump()[-1])
+        return int(program.run()[-1])
 
     def part_two(self, input: utils.Input) -> str | int:
         program = intcode.IntCode(input.split(",").numbers)
         program.input.write(5)
-        program.run()
-        return int(program.output.dump()[-1])
+        return int(program.run()[-1])
 
 
 if __name__ == "__main__":
