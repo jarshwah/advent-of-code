@@ -6,6 +6,8 @@ import utils
 
 
 class Puzzle(utils.Puzzle):
+    """--- Day 8: Space Image Format ---"""
+
     def part_one(self, input: utils.Input) -> str | int:
         W = 25
         H = 6

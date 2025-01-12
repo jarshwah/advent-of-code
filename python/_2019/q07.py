@@ -6,6 +6,8 @@ import utils
 
 
 class Puzzle(utils.Puzzle):
+    """--- Day 7: Amplification Circuit ---"""
+
     def part_one(self, input: utils.Input) -> str | int:
         program = input.split(",").numbers
         phase_settings = [0, 1, 2, 3, 4]

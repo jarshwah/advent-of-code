@@ -4,6 +4,8 @@ import utils
 
 
 class Puzzle(utils.Puzzle):
+    """--- Day 9: Sensor Boost ---"""
+
     def part_one(self, input: utils.Input) -> str | int:
         program = input.split(",").numbers
         interpreter = intcode.IntCode(program)
