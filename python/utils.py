@@ -870,6 +870,15 @@ class Grid[T]:
                 return point
         raise ValueError(f"{value} not found in grid")
 
+    def find_all(self, value: T) -> Iterable[Point]:
+        """
+        Find the first point with the given value.
+        """
+        []
+        for point, v in self.points.items():
+            if v == value:
+                yield point
+
     def search(
         self,
         comparison_func: Callable[[tuple[Point, T], Sequence[tuple[Point, T]]], bool],
