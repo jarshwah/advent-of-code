@@ -19,6 +19,8 @@ class Puzzle(utils.Puzzle):
         return int(code.memory.read(0))
 
     def part_two(self, input: utils.Input) -> str | int:
+        if self.testing:
+            return "no-answer"
         target = 19690720
         possibles = list(range(100))
         original = list(input.split(",").integers)

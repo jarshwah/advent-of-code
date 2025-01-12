@@ -33,13 +33,13 @@ type Pointer = int
 
 @dataclass
 class Memory:
-    mem: list[int]
+    mem: dict[int, int]
 
     def read(self, ptr: Pointer) -> int:
-        try:
-            return self.mem[ptr]
-        except IndexError as ex:
-            raise SegFault(f"Read: {ptr=} >= {self.size=}") from ex
+        if ptr < 0:
+            raise SegFault(f"Read: {ptr=} < 0")
+
+        return self.mem.setdefault(ptr, 0)
 
     def write(self, ptr: Pointer, val: int) -> None:
         try:
@@ -50,6 +50,12 @@ class Memory:
     @property
     def size(self) -> int:
         return len(self.mem)
+
+    def dump(self) -> list[int]:
+        mem = []
+        for key in sorted(self.mem.keys()):
+            mem.append(self.mem[key])
+        return mem
 
 
 @unique
@@ -271,7 +277,7 @@ class IntCode:
 
     @cached_property
     def memory(self) -> Memory:
-        return Memory(self._memory)
+        return Memory({idx: mem for idx, mem in enumerate(self._memory)})
 
     def decode_instruction(self, ptr: Pointer) -> Instruction:
         raw = str(self.memory.read(ptr))[::-1]

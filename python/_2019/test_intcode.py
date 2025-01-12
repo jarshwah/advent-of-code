@@ -83,7 +83,7 @@ def test_badopcode():
 def test_run(incodes: list[int], outcodes: list[int]):
     program = IntCode(incodes)
     program.run()
-    assert program._memory == outcodes
+    assert program.memory.dump() == outcodes
 
 
 class TestIntCode:
@@ -205,3 +205,17 @@ class TestIntCode:
         r2.input.write(7)  # stdin
         r2.run()  # 7 * 2 back to output
         assert r2.output.dump() == [14]
+
+
+class TestMemory:
+    def test_read_negative(self):
+        with pytest.raises(intcode.SegFault):
+            intcode.Memory({0: 0, 1: 1}).read(-4)
+
+    def test_read_high(self):
+        memory = intcode.Memory({0: 0, 1: 1})
+        assert memory.read(99999) == 0
+
+    def test_read_existing(self):
+        memory = intcode.Memory({0: 0, 1: 1})
+        assert memory.read(1) == 1
