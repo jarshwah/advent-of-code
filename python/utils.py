@@ -275,6 +275,25 @@ def only[T](i: Iterable[T]) -> T:
     return consumed[0]
 
 
+def binary_search(low: int, high: int, condition: Callable[[int], bool]) -> int:
+    """
+    Use binary search to find the target matching the condition.
+    """
+
+    found = low - 1
+    while True:
+        if low == high:
+            break
+        search = (low + high) // 2
+        ok = condition(search)
+        if ok:
+            low = search + 1
+            found = search
+        else:
+            high = search
+    return found
+
+
 def sort_by_length[T](iterables: Iterable[Sequence[T]]) -> Iterable[Sequence[T]]:
     """
     Sort the iterable by length of the sequences.
