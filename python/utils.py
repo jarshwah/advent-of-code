@@ -5,20 +5,25 @@ import itertools
 import re
 from collections import deque
 from collections.abc import Callable, Collection, Iterable, Iterator, Sequence
+from contextlib import contextmanager
 from copy import deepcopy
 from functools import cached_property
-from typing import Generator, Self
+from typing import Generator, Self, TypeVar
 
 import aocd
 import networkx as nx
 import parse
 import rich_click as click
+from rich import live, panel
 
 type Point = tuple[int, int]
 type Point3d = tuple[int, int, int]
 type Point4d = tuple[int, int, int, int]
 type PointNd = tuple[int, ...]
 SENTINEL = object()
+
+
+A = TypeVar("A")
 
 
 @dataclasses.dataclass
@@ -729,6 +734,7 @@ class Grid[T]:
     """
 
     points: dict[Point, T]
+    _animating: bool = False
 
     def __init__(self, rows: Iterable[Iterable[T]], pad_with: T | None = None):
         self.points = {}
@@ -736,6 +742,7 @@ class Grid[T]:
         for r, row in enumerate(rows):
             for c, item in enumerate(row):
                 self.points[(r, c)] = item
+        self._animating = False
 
     @classmethod
     def from_number_string(
@@ -1024,11 +1031,53 @@ class Grid[T]:
             for r in range(rmin, rmax + 1)
         ]
 
+    @contextmanager
+    def animate(self, on: bool = True) -> Iterator[GridAnimator]:
+        animator = GridAnimator(on)
+        with animator.animate(self):
+            yield animator
+
     def hash_key(self) -> str:
         """
         Make a hash key out of the content of the grid, so that it's hashable.
         """
         return "".join(self.strings())
+
+
+class NotAnimating(Exception):
+    pass
+
+
+class GridAnimator:
+    def __init__(self, on: bool = True) -> None:
+        self.animating = on
+        self.renderer: live.Live | None = None
+        self.header: str | None = None
+
+    def set_header(self, header: str) -> None:
+        self.header = header
+
+    @contextmanager
+    def animate(self, grid: Grid[A]) -> Iterator[Self]:
+        if self.animating:
+            with live.Live(self._get_content(grid), auto_refresh=False) as renderer:
+                self.renderer = renderer
+                yield self
+            self.renderer = None
+        else:
+            yield self
+
+    def update(self, grid: Grid[A], header: str | None = None) -> None:
+        if not self.renderer:
+            raise NotAnimating
+        self.renderer.update(self._get_content(grid), refresh=True)
+
+    def _get_content(self, grid: Grid[A]) -> panel.Panel:
+        s = ""
+        for row in grid.strings():
+            s += row
+            s += "\n"
+        return panel.Panel.fit(s, title=self.header)
 
 
 def rotations_90(point: Point3d) -> list[Point3d]:
