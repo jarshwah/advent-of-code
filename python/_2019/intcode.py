@@ -4,7 +4,7 @@ from collections import deque
 from collections.abc import Callable, Iterator
 from dataclasses import dataclass, field
 from enum import IntEnum, unique
-from functools import cache, cached_property
+from functools import cache
 from typing import Any, Iterable, Self, assert_never
 
 
@@ -279,7 +279,7 @@ class Pipe:
 
 @dataclass
 class IntCode:
-    _memory: list[int] = field(repr=False)
+    _program: list[int] = field(repr=False)
     ptr: Pointer = 0
     input: Pipe = field(default_factory=Pipe)
     output: Pipe = field(default_factory=Pipe)
@@ -287,14 +287,16 @@ class IntCode:
     _executing: bool = False
     relative_base: int = 0
     name: str = ""
+    _memory: Memory = field(init=False)
 
     def __post_init__(self) -> None:
+        self._memory = Memory({idx: mem for idx, mem in enumerate(self._program)})
         self.output._fill_pipe = self.run
         self.input._pipe_filled = self.run
 
-    @cached_property
+    @property
     def memory(self) -> Memory:
-        return Memory({idx: mem for idx, mem in enumerate(self._memory)})
+        return self._memory
 
     def decode_instruction(self, ptr: Pointer) -> Instruction:
         raw = str(self.memory.read(ptr))[::-1]
