@@ -2,6 +2,7 @@ import contextlib
 import itertools
 from collections import deque
 from collections.abc import Callable, Iterator
+from copy import deepcopy
 from dataclasses import dataclass, field
 from enum import IntEnum, unique
 from functools import cache
@@ -338,6 +339,12 @@ class IntCode:
     def connect_input(self, other: "IntCode") -> None:
         self.input = other.output
         self.input._pipe_filled = self.run
+
+    def fork(self) -> Self:
+        forked = deepcopy(self)
+        forked.output._fill_pipe = forked.run
+        forked.input._pipe_filled = forked.run
+        return forked
 
 
 @cache
