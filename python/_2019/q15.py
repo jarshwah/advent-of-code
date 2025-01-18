@@ -89,9 +89,9 @@ class Puzzle(utils.Puzzle):
 
             if animate:
                 for wall_point in grid.find_all(Tile.WALL):
-                    grid[wall_point] = f"[bold purple4]{Tile.WALL.value}[/bold purple4]"
+                    grid[wall_point] = utils.Color.BLUE_VIOLET.colorize(Tile.WALL)
                 for step in path_to_oxygen:
-                    grid[step] = f"[bold blue]{Tile.DROID.value}[/bold blue]"
+                    grid[step] = utils.Color.YELLOW_BRIGHT.colorize(Tile.DROID)
                     animator.update(grid, header="FINDING OXYGEN")
                     time.sleep(15 / steps_to_oxygen)
 
@@ -101,7 +101,7 @@ class Puzzle(utils.Puzzle):
 
                 for t in sorted(oxygen_fill_steps.keys()):
                     for pt in oxygen_fill_steps[t]:
-                        grid[pt] = f"[bold yellow]{Tile.OXYGEN_SYSTEM.value}[/bold yellow]"
+                        grid[pt] = utils.Color.GREEN.colorize(Tile.OXYGEN_SYSTEM)
                     animator.update(grid, header="OXYGENATING")
                     time.sleep(15 / time_to_fill)
 

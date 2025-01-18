@@ -1173,28 +1173,21 @@ def rotations_90(point: Point3d) -> list[Point3d]:
 
 
 class Color(StrEnum):
-    RESET = "\033[0m"
-
-    DEFAULT = "\033[39m"
-    BLACK = "\033[30m"
-    RED = "\033[31m"
-    GREEN = "\033[32m"
-    YELLOW = "\033[33m"
-    BLUE = "\033[34m"
-    MAGENTA = "\033[35m"
-    CYAN = "\033[36m"
-    LIGHTGRAY = "\033[37m"
-    DARKGRAY = "\033[90m"
-    LIGHTRED = "\033[91m"
-    LIGHTGREEN = "\033[92m"
-    LIGHTYELLOW = "\033[93m"
-    LIGHTBLUE = "\033[94m"
-    LIGHTMAGENTA = "\033[95m"
-    LIGHTCYAN = "\033[96m"
-    WHITE = "\033[97m"
+    BLACK = "black"
+    WHITE = "white"
+    RED = "red"
+    RED_BRIGHT = "bright_red"
+    GREEN = "green"
+    GREEN_BRIGHT = "bright_green"
+    YELLOW = "yellow"
+    YELLOW_BRIGHT = "bright_yellow"
+    BLUE = "blue"
+    BLUE_BRIGHT = "blue1"  # #0000ff
+    BLUE_VIOLET = "blue_violet"  # #5f00ff
+    PURPLE_4 = "purple_4"  # #5f00af
 
     def colorize(self, text: str) -> str:
-        return f"{self.value}{text}"
+        return f"[bold {self.value}]{text}[/bold {self.value}]"
 
 
 @dataclasses.dataclass
