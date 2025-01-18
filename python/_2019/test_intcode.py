@@ -220,6 +220,30 @@ class TestIntCode:
     def test_day_9(self, mem, result):
         assert IntCode(mem).run() == result
 
+    def test_fork(self):
+        program = IntCode([11105, 1, 4, 0, 99], input=Pipe.create([-4]))
+        forked = program.fork()
+
+        assert program._program is not forked._program
+        assert program.memory is not forked.memory
+        assert program.input is not forked.input
+        assert program.output is not forked.output
+
+        program.memory.write(3, 7)
+        program.output.write(10)
+        program.run()
+        next(program.input)
+        assert program.input.dump() == []
+        assert program._halted
+        assert program.ptr == 4
+
+        # Memory was unaltered
+        assert forked.memory.dump() == [11105, 1, 4, 0, 99]
+        assert forked._program == [11105, 1, 4, 0, 99]
+        assert forked.ptr == 0
+        assert forked.input.dump() == [-4]
+        assert forked.output.dump() == []
+
 
 class TestMemory:
     def test_read_negative(self):
