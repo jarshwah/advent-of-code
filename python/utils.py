@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import contextlib
 import dataclasses
 import itertools
 import re
@@ -7,6 +8,7 @@ from collections import deque
 from collections.abc import Callable, Collection, Iterable, Iterator, Sequence
 from contextlib import contextmanager
 from copy import deepcopy
+from enum import StrEnum
 from functools import cached_property
 from typing import Generator, Self, TypeVar
 
@@ -746,6 +748,44 @@ def dijkstra_best_score[T](
     return seen
 
 
+def dijkstra_shortest_path[T](
+    grid: Grid[T],
+    start: Point,
+    target: Point,
+    direction: Point = UP,
+    unmovable: T | None = None,
+) -> list[Point]:
+    """
+    Find the shortest path between START and TARGET.
+    """
+    import heapq
+
+    type Steps = int
+    type Current = Point
+    type Path = list[Point]
+
+    heap: list[tuple[Steps, Current, Path]] = []
+    # add whatever other vars I might need to track like the Path
+    heapq.heappush(heap, (0, start, []))
+    seen: dict[Point, tuple[Steps, Path]] = {}
+    while heap:
+        num_steps, position, path = heapq.heappop(heap)
+        path.append(position)
+        if position == target:
+            s_steps, _ = seen.get(position, (int(1e9), []))
+            if num_steps <= s_steps:
+                seen[position] = (num_steps, path)
+            continue
+        if grid[position] == unmovable:
+            continue
+        if position in seen and seen[position][0] <= num_steps:
+            continue
+        seen[position] = num_steps, path
+        for new_position in grid.get_neighbours(position):
+            heapq.heappush(heap, (num_steps + 1, new_position, path[:]))
+    return seen[target][1]
+
+
 @dataclasses.dataclass
 class Grid[T]:
     """
@@ -811,6 +851,11 @@ class Grid[T]:
         return self.points[index]
 
     def __setitem__(self, index: Point, value: T) -> None:
+        if index not in self.points:
+            with contextlib.suppress(AttributeError):
+                del self.width
+            with contextlib.suppress(AttributeError):
+                del self.height
         self.points[index] = value
 
     def rows(self) -> Iterable[Sequence[T]]:
@@ -827,19 +872,15 @@ class Grid[T]:
     def width(self) -> int:
         """
         How wide the grid is.
-
-        Assumes the grid is complete.
         """
-        return max(self.points)[1] + 1
+        return max(p[1] for p in self.points) + 1
 
     @cached_property
     def height(self) -> int:
         """
         How tall the grid is.
-
-        Assumes the grid is complete.
         """
-        return max(self.points)[0] + 1
+        return max(p[0] for p in self.points) + 1
 
     @property
     def _directions(self) -> Sequence[Point]:
@@ -1089,6 +1130,7 @@ class GridAnimator:
     def update(self, grid: Grid[A], header: str | None = None) -> None:
         if not self.renderer:
             raise NotAnimating
+        self.header = header
         self.renderer.update(self._get_content(grid), refresh=True)
 
     def _get_content(self, grid: Grid[A]) -> panel.Panel:
@@ -1128,6 +1170,31 @@ def rotations_90(point: Point3d) -> list[Point3d]:
         (-z, -x, y),
         (-z, -y, -x),
     ]
+
+
+class Color(StrEnum):
+    RESET = "\033[0m"
+
+    DEFAULT = "\033[39m"
+    BLACK = "\033[30m"
+    RED = "\033[31m"
+    GREEN = "\033[32m"
+    YELLOW = "\033[33m"
+    BLUE = "\033[34m"
+    MAGENTA = "\033[35m"
+    CYAN = "\033[36m"
+    LIGHTGRAY = "\033[37m"
+    DARKGRAY = "\033[90m"
+    LIGHTRED = "\033[91m"
+    LIGHTGREEN = "\033[92m"
+    LIGHTYELLOW = "\033[93m"
+    LIGHTBLUE = "\033[94m"
+    LIGHTMAGENTA = "\033[95m"
+    LIGHTCYAN = "\033[96m"
+    WHITE = "\033[97m"
+
+    def colorize(self, text: str) -> str:
+        return f"{self.value}{text}"
 
 
 @dataclasses.dataclass
