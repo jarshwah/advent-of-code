@@ -44,7 +44,19 @@
         "python.testing.pytestArgs": ["python"],
         "mypy-type-checker.importStrategy": "fromEnvironment",
         "mypy-type-checker.preferDaemon": true,
-        "ruff.importStrategy": "fromEnvironment"
+        "ruff.importStrategy": "fromEnvironment",
+        "cursorpyright.analysis.diagnosticMode": "workspace",
+        "cursorpyright.analysis.exclude": [
+            "**/.*",
+            ".venv/"
+        ],
+        "cursorpyright.analysis.include": [
+            "python"
+        ],
+        "cursorpyright.analysis.inlayHints.functionReturnTypes": false,
+        "cursorpyright.analysis.inlayHints.variableTypes": false,
+        "cursorpyright.analysis.logLevel": "Information",
+        "cursorpyright.analysis.useLibraryCodeForTypes": true
     },
     "launch": {
         "version": "0.2.0",

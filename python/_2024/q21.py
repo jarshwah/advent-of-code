@@ -1,9 +1,7 @@
 from collections.abc import Sequence
 from functools import cache
 
-from networkx.algorithms.shortest_paths import (  # type: ignore [attr-defined]
-    all_pairs_all_shortest_paths,
-)
+from networkx.algorithms.shortest_paths import all_pairs_all_shortest_paths
 
 import utils
 
