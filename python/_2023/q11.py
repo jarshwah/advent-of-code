@@ -1,12 +1,10 @@
 import itertools
 
-import aocd
-
 import utils
 
 
-def both_parts(raw: str, expand: int) -> int:
-    rows = utils.Input(raw).lines().strings
+def compute_expansion(input: utils.Input, expand: int) -> int:
+    rows = input.lines().strings
     non_empty_cols = set()
     non_empty_rows = set()
     for rn, row in enumerate(rows):
@@ -30,8 +28,21 @@ def both_parts(raw: str, expand: int) -> int:
     return num_steps
 
 
-def test():
-    test_input = """...#......
+class Puzzle(utils.Puzzle):
+    def part_one(self, input: utils.Input) -> str | int:
+        return compute_expansion(input, expand=2)
+
+    def part_two(self, input: utils.Input) -> str | int:
+        # For test mode, use expand=10 instead of 1000000
+        expand = 10 if self.testing else 1000000
+        return compute_expansion(input, expand=expand)
+
+
+puzzle = Puzzle(
+    year=2023,
+    day=11,
+    test_answers=("374", "1030"),
+    test_input="""...#......
 .......#..
 #.........
 ..........
@@ -40,15 +51,8 @@ def test():
 .........#
 ..........
 .......#..
-#...#....."""
-    answer_1 = both_parts(test_input, expand=2)
-    answer_2 = both_parts(test_input, expand=10)
-    assert answer_1 == 374, answer_1
-    assert answer_2 == 1030, answer_2
-
+#...#.....""",
+)
 
 if __name__ == "__main__":
-    test()
-    data = aocd.get_data(day=11, year=2023)
-    print("Part 1: ", both_parts(data, expand=2))
-    print("Part 2: ", both_parts(data, expand=1000000))
+    puzzle.cli()

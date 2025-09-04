@@ -1,4 +1,3 @@
-import aocd
 import matplotlib
 
 import utils
@@ -42,46 +41,52 @@ def is_connected(grid: utils.Grid, check: utils.Point, target: utils.Point) -> b
     return False
 
 
-def both_parts(raw: str) -> tuple[int, int]:
-    grid = utils.Input(raw).grid()
-    start = utils.only(p for p in grid if grid[p] == "S")
+class Puzzle(utils.Puzzle):
+    def both_parts(self, input: utils.Input) -> tuple[str | int, str | int]:
+        grid = input.grid()
+        start = utils.only(p for p in grid if grid[p] == "S")
 
-    # Determine the beginning and end of the path
-    source = None
-    target = None
-    for nb in "|-LJ7F":
-        d1, d2 = NEIGHBOURS[nb]
-        source = utils.point_add(start, d1)
-        target = utils.point_add(start, d2)
-        if is_connected(grid, start, source) and is_connected(grid, start, target):
-            break
+        # Determine the beginning and end of the path
+        source = None
+        target = None
+        connected = []
+        for nb in grid.get_neighbours(start):
+            if is_connected(grid, start, nb):
+                connected.append(nb)
+        source, target = connected
 
-    assert source is not None and target is not None
+        if not is_connected(grid, start, source) or not is_connected(grid, start, target):
+            # Maybe we have the source and target reversed
+            source, target = target, source
 
-    # There is only a single valid path, so no need to use A* to estimate,
-    # or a queue to navigate
-    path = [start, source]
-    while True:
-        check = path[-1]
-        if check == target:
-            farthest_point = len(path) // 2
-            loop = set(path)
-            poly = matplotlib.path.Path(path)
-            trapped_squares = sum(
-                1 for point in grid if point not in loop and poly.contains_point(point)
-            )
-            return farthest_point, trapped_squares
+        assert source is not None and target is not None
 
-        for nb in grid.get_neighbours(check, directions=NEIGHBOURS[grid[check]]):
-            if nb == path[-2]:
-                continue
-            path.append(nb)
-            break
+        # There is only a single valid path, so no need to use A* to estimate,
+        # or a queue to navigate
+        path = [start, source]
+        while True:
+            check = path[-1]
+            if check == target:
+                farthest_point = len(path) // 2
+                loop = set(path)
+                poly = matplotlib.path.Path(path)
+                trapped_squares = sum(
+                    1 for point in grid if point not in loop and poly.contains_point(point)
+                )
+                return farthest_point, trapped_squares
+
+            for nb in grid.get_neighbours(check, directions=NEIGHBOURS[grid[check]]):
+                if nb == path[-2]:
+                    continue
+                path.append(nb)
+                break
 
 
-def test():
-    a1, a2 = both_parts(
-        """...........
+puzzle = Puzzle(
+    year=2023,
+    day=10,
+    test_answers=("23", "4"),
+    test_input="""...........
 .S-------7.
 .|F-----7|.
 .||.....||.
@@ -90,16 +95,9 @@ def test():
 .|..|.|..|.
 .L--J.L--J.
 ...........
-"""
-    )
-
-    assert a1 == 23, a1
-    assert a2 == 4, a2
-
+""",
+    both=True,
+)
 
 if __name__ == "__main__":
-    test()
-    data = aocd.get_data(day=10, year=2023)
-    a1, a2 = both_parts(data)
-    print("Part 1: ", a1)
-    print("Part 2: ", a2)
+    puzzle.cli()
