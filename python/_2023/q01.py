@@ -10,7 +10,7 @@ class Puzzle(utils.Puzzle):
                 if c.isdigit():
                     nums.append(c)
             total += int(nums[0] + nums[-1])
-        
+
         return total
 
     def part_two(self, input: utils.Input) -> str | int:
@@ -27,7 +27,7 @@ class Puzzle(utils.Puzzle):
                             nums.append(str(num))
                             break
             total += int(nums[0] + nums[-1])
-        
+
         return total
 
 

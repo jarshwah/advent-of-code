@@ -1,14 +1,7 @@
 import math
 from collections import defaultdict, deque
-
-import aocd
-
 import utils
 from utils import DOWN, LEFT, RIGHT, UP, Point
-
-WALL = {"#"}
-EMPTY = {"."}
-DIRECTIONS = [UP, LEFT, (0, 0), DOWN, RIGHT]
 
 
 def print_board(board: dict[Point, set[str]]):
@@ -127,22 +120,22 @@ def traverse(boards: list[dict[Point, set[str]]], step: int, start: Point, dest:
     return best
 
 
-def test():
-    test_input = """#.######
+class Puzzle(utils.Puzzle):
+    pass
+
+
+puzzle = Puzzle(
+    year=2022,
+    day=24,
+    test_answers=("", ""),
+    test_input="""\
+#.######
 #>>.<^<#
 #.<..<<#
 #>v.><>#
 #<^v^^>#
-######.#
-"""
-    answer_1, answer_2 = solve(test_input)
-    assert answer_1 == 18, answer_1
-    assert answer_2 == 54, answer_2
-
+######.#""",
+)
 
 if __name__ == "__main__":
-    test()
-    data = aocd.get_data(day=24, year=2022)
-    a1, a2 = solve(data)
-    print("Part 1: ", a1)
-    print("Part 2: ", a2)
+    puzzle.cli()

@@ -1,91 +1,87 @@
 from __future__ import annotations
 
-import copy
 import math
-import operator
-import typing as t
-from collections import deque
-from dataclasses import dataclass
+from collections.abc import Callable
+from dataclasses import dataclass, field
 
-import aocd
 import utils
 
 
 @dataclass
 class Monkey:
-    operator: t.Callable[[int, int], int]
-    operand: int
-    test_divisor: int
-    if_true: int
-    if_false: int
-    items: deque[int]
-    inspected: int = 0
+    number: int
+    items: list[int] = field(default_factory=list)
+    operation: Callable[[int], int] = lambda old: old
+    test_divisor: int = 1
+    true_target: int = 0
+    false_target: int = 0
+    inspections: int = 0
 
-    def inspect_item(self, reducer: t.Callable[[int], int]) -> tuple[int, int]:
-        self.inspected += 1
-        item = self.items.popleft()
-        new_worry = reducer(self.operator(item, self.operand))
-        return (
-            (self.if_true, new_worry)
-            if (new_worry % self.test_divisor) == 0
-            else (self.if_false, new_worry)
-        )
+    def exec_turn(self, reducer: Callable[[int], int], monkeys: list[Monkey]) -> None:
+        for item in self.items:
+            self.inspections += 1
+            item = self.operation(item)
+            item = reducer(item)
+            if item % self.test_divisor == 0:
+                monkeys[self.true_target].items.append(item)
+            else:
+                monkeys[self.false_target].items.append(item)
+        self.items.clear()
 
 
 def parse(raw: str) -> list[Monkey]:
-    data = utils.Input(raw).group("\n\n", "\n").strings
+    groups = raw.strip().split("\n\n")
     monkeys = []
-    for monkey in data:
-        items = [int(item.strip()) for item in monkey[1].split(":")[1].split(",")]
-        op, operand = monkey[2].split("old ")[1].split()
-        oper = operator.mul if op == "*" else operator.add
-        if operand == "old":
-            operand = "2"
-            oper = operator.pow
-        divisor = int(monkey[3].split("divisible by ")[1])
-        if_true = int(monkey[4][-1])
-        if_false = int(monkey[5][-1])
-        monkeys.append(
-            Monkey(
-                operator=oper,
-                operand=int(operand),
-                test_divisor=divisor,
-                if_true=if_true,
-                if_false=if_false,
-                items=deque(items),
-            )
-        )
+    for gp in groups:
+        monkey = Monkey(number=len(monkeys))
+        for line in gp.split("\n"):
+            line = line.strip()
+            if line.startswith("Starting items:"):
+                monkey.items = [int(num) for num in line.split(": ")[1].split(", ")]
+            elif line.startswith("Operation:"):
+                exec(f"monkey.operation = lambda old: {line.split(' = ')[1]}")
+            elif line.startswith("Test:"):
+                monkey.test_divisor = int(line.split()[-1])
+            elif line.startswith("If true:"):
+                monkey.true_target = int(line.split()[-1])
+            elif line.startswith("If false:"):
+                monkey.false_target = int(line.split()[-1])
+        monkeys.append(monkey)
     return monkeys
 
 
-def solve(monkeys: list[Monkey], rounds: int, reducer: t.Callable[[int, int], int]) -> int:
+def solve(monkeys: list[Monkey], rounds: int, reducer: Callable[[int], int]) -> int:
     for _ in range(rounds):
         for monkey in monkeys:
-            while monkey.items:
-                new_monkey, new_worry = monkey.inspect_item(reducer)
-                monkeys[new_monkey].items.append(new_worry)
-    inspections = sorted([m.inspected for m in monkeys], reverse=True)
-    return math.prod(inspections[:2])
+            monkey.exec_turn(reducer, monkeys)
+    inspection_counts = sorted([m.inspections for m in monkeys], reverse=True)
+    return inspection_counts[0] * inspection_counts[1]
 
 
-def part_one(monkeys: list[Monkey]) -> int:
-    def reducer(item: int) -> int:
-        return item // 3
+class Puzzle(utils.Puzzle):
+    def part_one(self, input: utils.Input) -> str | int:
+        monkeys = parse(input.string)
 
-    return solve(monkeys, 20, reducer)
+        def reducer(item: int) -> int:
+            return item // 3
+
+        return solve(monkeys, 20, reducer)
+
+    def part_two(self, input: utils.Input) -> str | int:
+        monkeys = parse(input.string)
+        reduction = math.lcm(*[m.test_divisor for m in monkeys])
+
+        def reducer(item: int) -> int:
+            return item % reduction
+
+        return solve(monkeys, 10000, reducer)
 
 
-def part_two(monkeys: list[Monkey]) -> int:
-    reduction = math.lcm(*[m.test_divisor for m in monkeys])
-
-    def reducer(item: int) -> int:
-        return item % reduction
-
-    return solve(monkeys, 10000, reducer)
-
-
-def test():
-    test_input = """Monkey 0:
+puzzle = Puzzle(
+    year=2022,
+    day=11,
+    test_answers=("10605", "2713310158"),
+    test_input="""Monkey 0:
   Starting items: 79, 98
   Operation: new = old * 19
   Test: divisible by 23
@@ -111,20 +107,8 @@ Monkey 3:
   Operation: new = old + 3
   Test: divisible by 17
     If true: throw to monkey 0
-    If false: throw to monkey 1
-"""
-    monkeys = parse(test_input)
-    monkeys_2 = copy.deepcopy(monkeys)
-    answer_1 = part_one(monkeys)
-    answer_2 = part_two(monkeys_2)
-    assert answer_1 == 10605, answer_1
-    assert answer_2 == 2713310158, answer_2
-
+    If false: throw to monkey 1""",
+)
 
 if __name__ == "__main__":
-    test()
-    data = aocd.get_data(day=11, year=2022)
-    monkeys = parse(data)
-    monkeys_2 = copy.deepcopy(monkeys)
-    print("Part 1: ", part_one(monkeys))
-    print("Part 2: ", part_two(monkeys_2))
+    puzzle.cli()

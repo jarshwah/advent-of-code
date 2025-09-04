@@ -1,6 +1,28 @@
 import utils
 
 
+def tilt_north(grid: utils.Grid) -> utils.Grid:
+    for cn in range(grid.width):
+        last_block = -1
+        for rn in range(grid.height):
+            if grid[rn, cn] == "O":
+                grid[rn, cn] = "."
+                last_block += 1
+                grid[last_block, cn] = "O"
+            elif grid[rn, cn] == "#":
+                last_block = rn
+    return grid
+
+
+def north_load(grid: utils.Grid) -> int:
+    total = 0
+    for rn in range(grid.height):
+        for cn in range(grid.width):
+            if grid[rn, cn] == "O":
+                total += grid.height - rn
+    return total
+
+
 class Puzzle(utils.Puzzle):
     def part_one(self, input: utils.Input) -> str | int:
         grid = input.grid()

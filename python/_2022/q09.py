@@ -1,4 +1,3 @@
-import aocd
 import utils
 
 
@@ -34,23 +33,24 @@ def solve(raw: str, knots: int) -> int:
     return len(visited)
 
 
-def test():
-    test_input = """R 5
+class Puzzle(utils.Puzzle):
+    pass
+
+
+puzzle = Puzzle(
+    year=2022,
+    day=9,
+    test_answers=("88", "36"),
+    test_input="""\
+R 5
 U 8
 L 8
 D 3
 R 17
 D 10
 L 25
-U 20"""
-    answer_1 = solve(test_input, knots=2)
-    answer_2 = solve(test_input, knots=10)
-    assert answer_1 == 88, answer_1
-    assert answer_2 == 36, answer_2
-
+U 20""",
+)
 
 if __name__ == "__main__":
-    test()
-    data = aocd.get_data(day=9, year=2022)
-    print("Part 1: ", solve(data, knots=2))
-    print("Part 2: ", solve(data, knots=10))
+    puzzle.cli()

@@ -1,7 +1,6 @@
 import typing as t
-
-import aocd
 from utils import Point
+import utils
 
 
 def horizontal(height) -> set[Point]:
@@ -22,13 +21,6 @@ def vertical(height: int) -> set[Point]:
 
 def square(height: int) -> set[Point]:
     return {(height, 2), (height + 1, 2), (height, 3), (height + 1, 3)}
-
-
-blocks = [horizontal, plus, L, vertical, square]
-
-LEFT = -1
-RIGHT = 1
-SIDEWAYS = t.Literal[-1, 1]
 
 
 def move_sideways(rock: set[Point], direction: SIDEWAYS) -> set[Point]:
@@ -60,31 +52,6 @@ def print_coords(coords: set[Point]) -> None:
             buf.append("@" if (r, c) in coords else ".")
         buf += "\n"
     print("".join(buf))
-
-
-def part_one(raw: str, rock_count: int) -> int:
-    jets = [(-1 if j == "<" else 1) for j in raw]
-    njets = len(jets)
-    nblocks = len(blocks)
-    tunnel = {(0, n) for n in range(7)}
-    height = 0
-    jet_num = 0
-    for rock_num in range(rock_count):
-        rock = blocks[rock_num % nblocks](height + 4)
-        while True:
-            check = move_sideways(rock, jets[jet_num % njets])
-            jet_num += 1
-            if check.isdisjoint(tunnel):
-                rock = check
-
-            check = move_downwards(rock)
-            if not check.isdisjoint(tunnel):
-                break
-            rock = check
-
-        tunnel.update(rock)
-        height = max(p[0] for p in tunnel)
-    return height
 
 
 def solve(raw: str, rock_count: int) -> int:
@@ -135,16 +102,38 @@ def solve(raw: str, rock_count: int) -> int:
     return height + add
 
 
-def test():
-    test_input = """>>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>"""
-    answer_1 = solve(test_input, 2022)
-    answer_2 = solve(test_input, 1000000000000)
-    assert answer_1 == 3068, answer_1
-    assert answer_2 == 1514285714288, answer_2
+class Puzzle(utils.Puzzle):
+    def part_one(self, input: utils.Input) -> str | int:
+        jets = [(-1 if j == "<" else 1) for j in raw]
+        njets = len(jets)
+        nblocks = len(blocks)
+        tunnel = {(0, n) for n in range(7)}
+        height = 0
+        jet_num = 0
+        for rock_num in range(rock_count):
+            rock = blocks[rock_num % nblocks](height + 4)
+            while True:
+                check = move_sideways(rock, jets[jet_num % njets])
+                jet_num += 1
+                if check.isdisjoint(tunnel):
+                    rock = check
 
+                check = move_downwards(rock)
+                if not check.isdisjoint(tunnel):
+                    break
+                rock = check
+
+            tunnel.update(rock)
+            height = max(p[0] for p in tunnel)
+        return height
+
+
+puzzle = Puzzle(
+    year=2022,
+    day=17,
+    test_answers=("3068", "1514285714288"),
+    test_input=""">>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>""",
+)
 
 if __name__ == "__main__":
-    test()
-    data = aocd.get_data(day=17, year=2022)
-    print("Part 1: ", solve(data, 2022))
-    print("Part 2: ", solve(data, 1000000000000))
+    puzzle.cli()

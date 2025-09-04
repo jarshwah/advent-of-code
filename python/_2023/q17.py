@@ -2,6 +2,67 @@ import heapq
 import utils
 
 
+def get_heat(
+    grid: utils.Grid,
+    start: utils.Point,
+    goal: utils.Point,
+    start_direction: utils.Point,
+    max_forward: int,
+    min_forward: int,
+) -> int:
+    visited = {}
+    queue = [(0, start, start_direction, 0)]
+
+    def skip(current: utils.Point, direction: utils.Point, steps: int) -> tuple[utils.Point, int]:
+        curr = current
+        scores = 0
+        for _ in range(steps):
+            curr = utils.point_add(curr, direction)
+            if curr not in grid:
+                return current, 0
+            scores += grid[curr]
+        return curr, scores
+
+    while queue:
+        score, current, direction, forward_steps = heapq.heappop(queue)
+        updown_or_leftright = abs(direction[0])
+        if (current, updown_or_leftright, forward_steps) in visited:
+            continue
+
+        if current == goal and forward_steps >= min_forward:
+            return score
+
+        visited[(current, updown_or_leftright, forward_steps)] = score
+
+        if forward_steps < min_forward:
+            # If we have a minimum number of moves, skip to the end of that, saves about half a second
+            new_current, sum_score = skip(current, direction, min_forward - forward_steps)
+            if new_current != current:
+                heapq.heappush(queue, (score + sum_score, new_current, direction, min_forward))
+            continue
+
+        possible_directions = [direction] if forward_steps < max_forward else []
+        possible_directions.extend((utils.turn_left(direction), utils.turn_right(direction)))
+
+        neighbours = [
+            (node, turn)
+            for turn in possible_directions
+            if ((node := utils.point_add(current, turn)) in grid)
+        ]
+        for nb, new_direction in neighbours:
+            heapq.heappush(
+                queue,
+                (
+                    score + grid[nb],
+                    nb,
+                    new_direction,
+                    forward_steps + 1 if new_direction == direction else 1,
+                ),
+            )
+
+    assert False
+
+
 class Puzzle(utils.Puzzle):
     def part_one(self, input: utils.Input) -> str | int:
         grid = input.grid_int()

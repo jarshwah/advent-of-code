@@ -1,6 +1,40 @@
 from collections import deque
+
 import networkx as nx
+
 import utils
+
+DIRS = {
+    ">": [utils.RIGHT],
+    "<": [utils.LEFT],
+    "^": [utils.UP],
+    "v": [utils.DOWN],
+    "#": [],
+    ".": utils.DIRECTIONS_4,
+}
+
+
+def to_graph(grid: utils.Grid) -> dict[utils.Point, set[utils.Point]]:
+    # Rather than creating a node per point, create a node per non-branching path.
+    graph = nx.Graph()
+    start = (0, 1)
+    queue = deque([(start, start, 0)])
+    seen = set()
+    while queue:
+        connected_to, curr, weight = queue.popleft()
+        while True:
+            seen.add(curr)
+            nbs = [nb for nb in grid.get_neighbours(curr) if grid[nb] != "#" and nb not in seen]
+            if len(nbs) == 1:
+                curr = nbs[0]
+                weight += 1
+                continue
+            graph.add_edge(connected_to, curr, weight=weight)
+            for nb in nbs:
+                # Start with a weight of 1, not 0
+                queue.append((curr, nb, 1))
+            break
+    return graph
 
 
 class Puzzle(utils.Puzzle):

@@ -1,12 +1,14 @@
 import itertools
 import math
+
 from parse import parse
+
 import utils
 
 
 class Puzzle(utils.Puzzle):
     def part_one(self, input: utils.Input) -> str | int:
-        [[directions], network] = utils.Input.group(sep="\n").strings
+        [[directions], network] = input.group(sep="\n").strings
 
         indexes = itertools.cycle(
             [int(lr) for lr in directions.replace("L", "0").replace("R", "1")]
@@ -23,7 +25,7 @@ class Puzzle(utils.Puzzle):
                 return move_number
 
     def part_two(self, input: utils.Input) -> str | int:
-        [[directions], network] = utils.Input.group(sep="\n").strings
+        [[directions], network] = input.group(sep="\n").strings
         dirs = len(directions)
         nodes = {
             parsed["start"]: (parsed["left"], parsed["right"])

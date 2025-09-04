@@ -1,5 +1,5 @@
-import aocd
 import parse
+import utils
 
 
 def solve(raw: str) -> int:
@@ -22,8 +22,16 @@ def solve(raw: str) -> int:
     return p1
 
 
-def test():
-    test_input = """addx 15
+class Puzzle(utils.Puzzle):
+    pass
+
+
+puzzle = Puzzle(
+    year=2022,
+    day=10,
+    test_answers=("", ""),
+    test_input="""\
+addx 15
 addx -11
 addx 6
 addx -3
@@ -168,13 +176,8 @@ addx -6
 addx -11
 noop
 noop
-noop"""
-    answer_1 = solve(test_input)
-    assert answer_1 == 13140, answer_1
-
+noop""",
+)
 
 if __name__ == "__main__":
-    test()
-    data = aocd.get_data(day=10, year=2022)
-    answer_1 = solve(data)
-    print("Part 1: ", answer_1)
+    puzzle.cli()

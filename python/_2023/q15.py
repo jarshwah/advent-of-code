@@ -1,15 +1,21 @@
 from __future__ import annotations
+
 from functools import reduce
+
 import utils
+
+
+def hashed(label: str) -> int:
+    return reduce(lambda total, ch: ((ord(ch) + total) * 17) % 256, label, 0)
 
 
 class Puzzle(utils.Puzzle):
     def part_one(self, input: utils.Input) -> str | int:
-        sequences = utils.Input.string.strip("\n").split(",")
+        sequences = input.string.strip("\n").split(",")
         return sum(hashed(seq) for seq in sequences)
 
     def part_two(self, input: utils.Input) -> str | int:
-        sequences = utils.Input.string.strip("\n").replace("-", "").split(",")
+        sequences = input.string.strip("\n").replace("-", "").split(",")
         boxes: list[dict[str, int]] = [{} for _ in range(256)]
         for seq in sequences:
             match seq.split("="):

@@ -1,6 +1,6 @@
 from collections import deque
 
-import aocd
+import utils
 from utils import (
     DOWN,
     DOWNLEFT,
@@ -81,22 +81,23 @@ def solve(raw: str) -> tuple[int, int]:
     raise ValueError(f"{step=} {size_at_10=}")
 
 
-def test():
-    test_input = """....#..
+class Puzzle(utils.Puzzle):
+    pass
+
+
+puzzle = Puzzle(
+    year=2022,
+    day=23,
+    test_answers=("", ""),
+    test_input="""\
+....#..
 ..###.#
 #...#.#
 .#...##
 #.###..
 ##.#.##
-.#..#.."""
-    answer_1, answer_2 = solve(test_input)
-    assert answer_1 == 110, answer_1
-    assert answer_2 == 20, answer_2
-
+.#..#..""",
+)
 
 if __name__ == "__main__":
-    # test()
-    data = aocd.get_data(day=23, year=2022)
-    answer_1, answer_2 = solve(data)
-    print("Part 1: ", answer_1)
-    print("Part 2: ", answer_2)
+    puzzle.cli()

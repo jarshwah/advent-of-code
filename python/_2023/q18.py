@@ -1,5 +1,16 @@
 import utils
 
+DIRS = {
+    "R": utils.RIGHT,
+    "L": utils.LEFT,
+    "U": utils.UP,
+    "D": utils.DOWN,
+    "0": utils.RIGHT,
+    "2": utils.LEFT,
+    "3": utils.UP,
+    "1": utils.DOWN,
+}
+
 
 class Puzzle(utils.Puzzle):
     def part_one(self, input: utils.Input) -> str | int:
