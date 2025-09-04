@@ -46,11 +46,12 @@ class Puzzle(utils.Puzzle):
         return "".join(str(ix) for ix in in_signal[offset : offset + 8])
 
 
+puzzle = Puzzle(
+    year=2019,
+    day=16,
+    test_answers=("24176176", ""),
+    test_input="""80871224585914546619083218645595""",
+)
+
 if __name__ == "__main__":
-    runner = Puzzle(
-        year=2019,
-        day=16,
-        test_answers=("24176176", ""),
-        test_input="""80871224585914546619083218645595""",
-    )
-    runner.cli()
+    puzzle.cli()

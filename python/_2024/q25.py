@@ -25,12 +25,11 @@ class Puzzle(utils.Puzzle):
         return "no-answer"
 
 
-if __name__ == "__main__":
-    runner = Puzzle(
-        year=2024,
-        day=25,
-        test_answers=("3", "no-answer"),
-        test_input="""#####
+puzzle = Puzzle(
+    year=2024,
+    day=25,
+    test_answers=("3", "no-answer"),
+    test_input="""#####
 .####
 .####
 .####
@@ -69,5 +68,7 @@ if __name__ == "__main__":
 #.#..
 #.#.#
 #####""",
-    )
-    runner.cli()
+)
+
+if __name__ == "__main__":
+    puzzle.cli()

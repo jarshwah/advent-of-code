@@ -32,16 +32,17 @@ class Puzzle(utils.Puzzle):
         )
 
 
-if __name__ == "__main__":
-    runner = Puzzle(
-        year=2024,
-        day=2,
-        test_answers=("2", "4"),
-        test_input="""7 6 4 2 1
+puzzle = Puzzle(
+    year=2024,
+    day=2,
+    test_answers=("2", "4"),
+    test_input="""7 6 4 2 1
 1 2 7 8 9
 9 7 6 2 1
 1 3 2 4 5
 8 6 4 4 1
 1 3 6 7 9""",
-    )
-    runner.cli()
+)
+
+if __name__ == "__main__":
+    puzzle.cli()

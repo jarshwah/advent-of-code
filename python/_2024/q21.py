@@ -1,7 +1,9 @@
 from collections.abc import Sequence
 from functools import cache
 
-from networkx.algorithms.shortest_paths import all_pairs_all_shortest_paths
+from networkx.algorithms.shortest_paths import (  # type: ignore [attr-defined]
+    all_pairs_all_shortest_paths,
+)
 
 import utils
 
@@ -112,16 +114,17 @@ class Puzzle(utils.Puzzle):
         return p1, p2
 
 
-if __name__ == "__main__":
-    runner = Puzzle(
-        year=2024,
-        day=21,
-        both=True,
-        test_answers=("126384", "154115708116294"),
-        test_input="""029A
+puzzle = Puzzle(
+    year=2024,
+    day=21,
+    both=True,
+    test_answers=("126384", "154115708116294"),
+    test_input="""029A
 980A
 179A
 456A
 379A""",
-    )
-    runner.cli()
+)
+
+if __name__ == "__main__":
+    puzzle.cli()

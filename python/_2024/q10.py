@@ -47,12 +47,11 @@ class Puzzle(utils.Puzzle):
         return sum(score_trail(grid, th, scores) for th in trailheads)
 
 
-if __name__ == "__main__":
-    runner = Puzzle(
-        year=2024,
-        day=10,
-        test_answers=("36", "81"),
-        test_input="""89010123
+puzzle = Puzzle(
+    year=2024,
+    day=10,
+    test_answers=("36", "81"),
+    test_input="""89010123
 78121874
 87430965
 96549874
@@ -60,5 +59,7 @@ if __name__ == "__main__":
 32019012
 01329801
 10456732""",
-    )
-    runner.cli()
+)
+
+if __name__ == "__main__":
+    puzzle.cli()

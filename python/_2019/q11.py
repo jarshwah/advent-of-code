@@ -48,13 +48,14 @@ class Puzzle(utils.Puzzle):
         return lengths[0], "".join(message)
 
 
+puzzle = Puzzle(
+    year=2019,
+    day=11,
+    both=True,
+    no_tests=True,
+    test_answers=("", ""),
+    test_input="""""",
+)
+
 if __name__ == "__main__":
-    runner = Puzzle(
-        year=2019,
-        day=11,
-        both=True,
-        no_tests=True,
-        test_answers=("", ""),
-        test_input="""""",
-    )
-    runner.cli()
+    puzzle.cli()

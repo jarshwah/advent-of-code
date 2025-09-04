@@ -40,12 +40,11 @@ class Puzzle(utils.Puzzle):
         return sum(mas(grid, pos) for pos in grid.points)
 
 
-if __name__ == "__main__":
-    runner = Puzzle(
-        year=2024,
-        day=4,
-        test_answers=("18", "9"),
-        test_input="""MMMSXXMASM
+puzzle = Puzzle(
+    year=2024,
+    day=4,
+    test_answers=("18", "9"),
+    test_input="""MMMSXXMASM
 MSAMXMSMSA
 AMXSXMAAMM
 MSAMASMSMX
@@ -55,5 +54,7 @@ SMSMSASXSS
 SAXAMASAAA
 MAMMMXMMMM
 MXMXAXMASX""",
-    )
-    runner.cli()
+)
+
+if __name__ == "__main__":
+    puzzle.cli()

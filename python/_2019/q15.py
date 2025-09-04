@@ -108,11 +108,12 @@ class Puzzle(utils.Puzzle):
         return steps_to_oxygen, time_to_fill
 
 
+puzzle = Puzzle(
+    year=2019,
+    day=15,
+    both=True,
+    no_tests=True,
+)
+
 if __name__ == "__main__":
-    runner = Puzzle(
-        year=2019,
-        day=15,
-        both=True,
-        no_tests=True,
-    )
-    runner.cli()
+    puzzle.cli()

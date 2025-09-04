@@ -91,13 +91,14 @@ class Puzzle(utils.Puzzle):
         return num_blocks, score
 
 
+puzzle = Puzzle(
+    year=2019,
+    day=13,
+    both=True,
+    no_tests=True,
+    test_answers=("", ""),
+    test_input="""""",
+)
+
 if __name__ == "__main__":
-    runner = Puzzle(
-        year=2019,
-        day=13,
-        both=True,
-        no_tests=True,
-        test_answers=("", ""),
-        test_input="""""",
-    )
-    runner.cli()
+    puzzle.cli()

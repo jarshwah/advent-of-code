@@ -27,13 +27,12 @@ class Puzzle(utils.Puzzle):
         return matches, match_count
 
 
-if __name__ == "__main__":
-    runner = Puzzle(
-        year=2024,
-        day=19,
-        both=True,
-        test_answers=("6", "16"),
-        test_input="""r, wr, b, g, bwu, rb, gb, br
+puzzle = Puzzle(
+    year=2024,
+    day=19,
+    both=True,
+    test_answers=("6", "16"),
+    test_input="""r, wr, b, g, bwu, rb, gb, br
 
 brwrr
 bggr
@@ -43,5 +42,7 @@ ubwu
 bwurrg
 brgr
 bbrgwb""",
-    )
-    runner.cli()
+)
+
+if __name__ == "__main__":
+    puzzle.cli()

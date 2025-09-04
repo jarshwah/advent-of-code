@@ -18,16 +18,17 @@ class Puzzle(utils.Puzzle):
         return sum(ln * right.count(ln) for ln in left)
 
 
-if __name__ == "__main__":
-    runner = Puzzle(
-        year=2024,
-        day=1,
-        test_answers=("11", "31"),
-        test_input="""3   4
+puzzle = Puzzle(
+    year=2024,
+    day=1,
+    test_answers=("11", "31"),
+    test_input="""3   4
 4   3
 2   5
 1   3
 3   9
 3   3""",
-    )
-    runner.cli()
+)
+
+if __name__ == "__main__":
+    puzzle.cli()

@@ -19,11 +19,12 @@ class Puzzle(utils.Puzzle):
         return int(interpreter.run()[-1])
 
 
+puzzle = Puzzle(
+    year=2019,
+    day=9,
+    test_answers=("99", "99"),
+    test_input="""109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99""",
+)
+
 if __name__ == "__main__":
-    runner = Puzzle(
-        year=2019,
-        day=9,
-        test_answers=("99", "99"),
-        test_input="""109,1,204,-1,1001,100,1,100,1008,100,16,101,1006,101,0,99""",
-    )
-    runner.cli()
+    puzzle.cli()

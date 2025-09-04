@@ -52,13 +52,12 @@ def check_equation(check: int, values: Sequence[int], *ops: Callable[[int, int],
     return 0
 
 
-if __name__ == "__main__":
-    runner = Puzzle(
-        year=2024,
-        day=7,
-        both=True,
-        test_answers=("3749", "11387"),
-        test_input="""190: 10 19
+puzzle = Puzzle(
+    year=2024,
+    day=7,
+    both=True,
+    test_answers=("3749", "11387"),
+    test_input="""190: 10 19
 3267: 81 40 27
 83: 17 5
 156: 15 6
@@ -67,5 +66,7 @@ if __name__ == "__main__":
 192: 17 8 14
 21037: 9 7 18 13
 292: 11 6 16 20""",
-    )
-    runner.cli()
+)
+
+if __name__ == "__main__":
+    puzzle.cli()

@@ -47,11 +47,12 @@ class Puzzle(utils.Puzzle):
         return message
 
 
+puzzle = Puzzle(
+    year=2019,
+    day=8,
+    test_answers=("1", ""),
+    test_input="""123456789012""",
+)
+
 if __name__ == "__main__":
-    runner = Puzzle(
-        year=2019,
-        day=8,
-        test_answers=("1", ""),
-        test_input="""123456789012""",
-    )
-    runner.cli()
+    puzzle.cli()

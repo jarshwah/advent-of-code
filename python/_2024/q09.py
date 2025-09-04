@@ -97,11 +97,12 @@ class Puzzle(utils.Puzzle):
         return checksum(DISK)
 
 
+puzzle = Puzzle(
+    year=2024,
+    day=9,
+    test_answers=("1928", "2858"),
+    test_input="""2333133121414131402""",
+)
+
 if __name__ == "__main__":
-    runner = Puzzle(
-        year=2024,
-        day=9,
-        test_answers=("1928", "2858"),
-        test_input="""2333133121414131402""",
-    )
-    runner.cli()
+    puzzle.cli()

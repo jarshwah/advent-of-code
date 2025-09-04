@@ -36,11 +36,12 @@ class Puzzle(utils.Puzzle):
         return -1
 
 
+puzzle = Puzzle(
+    year=2019,
+    day=2,
+    test_answers=("30", "no-answer"),
+    test_input="""1,1,1,4,99,5,6,0,99""",
+)
+
 if __name__ == "__main__":
-    runner = Puzzle(
-        year=2019,
-        day=2,
-        test_answers=("30", "no-answer"),
-        test_input="""1,1,1,4,99,5,6,0,99""",
-    )
-    runner.cli()
+    puzzle.cli()

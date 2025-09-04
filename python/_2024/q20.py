@@ -38,13 +38,12 @@ class Puzzle(utils.Puzzle):
         return p1, p2
 
 
-if __name__ == "__main__":
-    runner = Puzzle(
-        year=2024,
-        day=20,
-        both=True,
-        test_answers=("44", "285"),
-        test_input="""###############
+puzzle = Puzzle(
+    year=2024,
+    day=20,
+    both=True,
+    test_answers=("44", "285"),
+    test_input="""###############
 #...#...#.....#
 #.#.#.#.#.###.#
 #S#...#.#.#...#
@@ -59,8 +58,10 @@ if __name__ == "__main__":
 #.#.#.#.#.#.###
 #...#...#...###
 ###############""",
-    )
-    runner.cli()
+)
+
+if __name__ == "__main__":
+    puzzle.cli()
 
 
 n = [

@@ -49,15 +49,16 @@ class Puzzle(utils.Puzzle):
         return secrets, sequences.most_common(1)[0][1]
 
 
-if __name__ == "__main__":
-    runner = Puzzle(
-        year=2024,
-        day=22,
-        both=True,
-        test_answers=("37990510", "23"),
-        test_input="""1
+puzzle = Puzzle(
+    year=2024,
+    day=22,
+    both=True,
+    test_answers=("37990510", "23"),
+    test_input="""1
 2
 3
 2024""",
-    )
-    runner.cli()
+)
+
+if __name__ == "__main__":
+    puzzle.cli()

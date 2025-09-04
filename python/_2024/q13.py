@@ -53,12 +53,11 @@ class Puzzle(utils.Puzzle):
         return sum(how_many_tokens(game, scale=10000000000000) for game in games)
 
 
-if __name__ == "__main__":
-    runner = Puzzle(
-        year=2024,
-        day=13,
-        test_answers=("480", "875318608908"),
-        test_input="""Button A: X+94, Y+34
+puzzle = Puzzle(
+    year=2024,
+    day=13,
+    test_answers=("480", "875318608908"),
+    test_input="""Button A: X+94, Y+34
 Button B: X+22, Y+67
 Prize: X=8400, Y=5400
 
@@ -73,5 +72,7 @@ Prize: X=7870, Y=6450
 Button A: X+69, Y+23
 Button B: X+27, Y+71
 Prize: X=18641, Y=10279""",
-    )
-    runner.cli()
+)
+
+if __name__ == "__main__":
+    puzzle.cli()

@@ -101,12 +101,11 @@ class Puzzle(utils.Puzzle):
                 break
 
 
-if __name__ == "__main__":
-    runner = Puzzle(
-        year=2024,
-        day=15,
-        test_answers=("2028", "618"),
-        test_input="""########
+puzzle = Puzzle(
+    year=2024,
+    day=15,
+    test_answers=("2028", "618"),
+    test_input="""########
 #..O.O.#
 ##@.O..#
 #...O..#
@@ -116,7 +115,7 @@ if __name__ == "__main__":
 ########
 
 <^^>>>vv<v>>v<<""",
-        test_input_2="""#######
+    test_input_2="""#######
 #...#.#
 #.....#
 #..OO@#
@@ -125,5 +124,7 @@ if __name__ == "__main__":
 #######
 
 <vv<<^^<<^^""",
-    )
-    runner.cli()
+)
+
+if __name__ == "__main__":
+    puzzle.cli()

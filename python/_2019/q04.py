@@ -45,11 +45,12 @@ class Puzzle(utils.Puzzle):
         return sum(valid(check) for check in range(start, end + 1))
 
 
+puzzle = Puzzle(
+    year=2019,
+    day=4,
+    test_answers=("no-answer", "no-answer"),
+    test_input="""""",
+)
+
 if __name__ == "__main__":
-    runner = Puzzle(
-        year=2019,
-        day=4,
-        test_answers=("no-answer", "no-answer"),
-        test_input="""""",
-    )
-    runner.cli()
+    puzzle.cli()

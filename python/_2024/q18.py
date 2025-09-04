@@ -72,12 +72,11 @@ class Puzzle(utils.Puzzle):
         return ",".join(str(p) for p in corruptions[min_search - 1])
 
 
-if __name__ == "__main__":
-    runner = Puzzle(
-        year=2024,
-        day=18,
-        test_answers=("22", "6,1"),
-        test_input="""5,4
+puzzle = Puzzle(
+    year=2024,
+    day=18,
+    test_answers=("22", "6,1"),
+    test_input="""5,4
 4,2
 4,5
 3,0
@@ -102,5 +101,7 @@ if __name__ == "__main__":
 0,5
 1,6
 2,0""",
-    )
-    runner.cli()
+)
+
+if __name__ == "__main__":
+    puzzle.cli()

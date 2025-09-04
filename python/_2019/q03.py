@@ -36,12 +36,13 @@ class Puzzle(utils.Puzzle):
         return min(steps1 + p2.get(pp, int(1e9)) for pp, steps1 in p1.items())
 
 
-if __name__ == "__main__":
-    runner = Puzzle(
-        year=2019,
-        day=3,
-        test_answers=("159", "610"),
-        test_input="""R75,D30,R83,U83,L12,D49,R71,U7,L72
+puzzle = Puzzle(
+    year=2019,
+    day=3,
+    test_answers=("159", "610"),
+    test_input="""R75,D30,R83,U83,L12,D49,R71,U7,L72
 U62,R66,U55,R34,D71,R55,D58,R83""",
-    )
-    runner.cli()
+)
+
+if __name__ == "__main__":
+    puzzle.cli()
