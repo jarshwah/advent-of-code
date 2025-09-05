@@ -1,8 +1,6 @@
 import ast
 from functools import cache
 
-import aocd
-
 import utils
 
 
@@ -74,44 +72,41 @@ def possible_configs(config: str, curr_matches: int, matches: tuple[int, ...]) -
     return num_configs
 
 
-def part_one(raw: str) -> int:
-    reports = utils.Input(raw).lines().strings
-    num_configurations = 0
-    for report in reports:
-        layout, broken = report.split()
-        damaged_layout = ast.literal_eval(broken)
-        num = possible_configs(layout, 0, damaged_layout)
-        num_configurations += num
-    return num_configurations
+class Puzzle(utils.Puzzle):
+    def part_one(self, input: utils.Input) -> str | int:
+        reports = input.lines().strings
+        num_configurations = 0
+        for report in reports:
+            layout, broken = report.split()
+            damaged_layout = ast.literal_eval(broken)
+            num = possible_configs(layout, 0, damaged_layout)
+            num_configurations += num
+        return num_configurations
+
+    def part_two(self, input: utils.Input) -> str | int:
+        reports = input.lines().strings
+        num_configurations = 0
+        for report in reports:
+            layout, broken = report.split()
+            expanded_layout = "?".join([layout] * 5)
+            damaged_layout = ast.literal_eval(broken) * 5
+            num = possible_configs(expanded_layout, 0, damaged_layout)
+            num_configurations += num
+        return num_configurations
 
 
-def part_two(raw: str) -> int:
-    reports = utils.Input(raw).lines().strings
-    num_configurations = 0
-    for report in reports:
-        layout, broken = report.split()
-        expanded_layout = "?".join([layout] * 5)
-        damaged_layout = ast.literal_eval(broken) * 5
-        num = possible_configs(expanded_layout, 0, damaged_layout)
-        num_configurations += num
-    return num_configurations
-
-
-def test():
-    test_input = """???.### 1,1,3
+puzzle = Puzzle(
+    year=2023,
+    day=12,
+    test_answers=("21", "525152"),
+    test_input="""\
+???.### 1,1,3
 .??..??...?##. 1,1,3
 ?#?#?#?#?#?#?#? 1,3,1,6
 ????.#...#... 4,1,1
 ????.######..#####. 1,6,5
-?###???????? 3,2,1"""
-    answer_1 = part_one(test_input)
-    answer_2 = part_two(test_input)
-    assert answer_1 == 21, answer_1
-    assert answer_2 == 525152, answer_2
-
+?###???????? 3,2,1""",
+)
 
 if __name__ == "__main__":
-    test()
-    data = aocd.get_data(day=12, year=2023)
-    print("Part 1: ", part_one(data))
-    print("Part 2: ", part_two(data))
+    puzzle.cli()

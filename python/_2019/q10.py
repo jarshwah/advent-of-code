@@ -39,16 +39,17 @@ class Puzzle(utils.Puzzle):
         return best_view, a_200th[1] * 100 + a_200th[0]
 
 
-if __name__ == "__main__":
-    runner = Puzzle(
-        year=2019,
-        day=10,
-        both=True,
-        test_answers=("8", "no-answer"),
-        test_input=""".#..#
+puzzle = Puzzle(
+    year=2019,
+    day=10,
+    both=True,
+    test_answers=("8", "no-answer"),
+    test_input=""".#..#
 .....
 #####
 ....#
 ...##""",
-    )
-    runner.cli()
+)
+
+if __name__ == "__main__":
+    puzzle.cli()

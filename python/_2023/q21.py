@@ -70,6 +70,34 @@ def part_two(raw: str, steps: int) -> int:
     return s1 + N * D1 + N * (N - 1) // 2 * D3
 
 
+class Puzzle(utils.Puzzle):
+    def part_one(self, input: utils.Input) -> str | int:
+        return part_one(input.string, 6 if self.testing else 64)
+
+    def part_two(self, input: utils.Input) -> str | int:
+        if self.testing:
+            return "no-answer"
+        return part_two(input.string, 26501365)
+
+
+puzzle = Puzzle(
+    year=2023,
+    day=21,
+    test_answers=("16", "no-answer"),
+    test_input="""...........
+.....###.#.
+.###.##..#.
+..#.#...#..
+....#.#....
+.##..S####.
+.##..#...#.
+.......##..
+.##.#.####.
+.##..##.##.
+...........""",
+)
+
+
 def test():
     test_input = """...........
 .....###.#.
@@ -87,7 +115,9 @@ def test():
 
 
 if __name__ == "__main__":
-    test()
-    data = aocd.get_data(day=21, year=2023)
-    print("Part 1: ", part_one(data, 64))
-    print("Part 2: ", part_two(data, 26501365))
+    puzzle.cli()
+    if False:
+        test()
+        data = aocd.get_data(day=21, year=2023)
+        print("Part 1: ", part_one(data, 64))
+        print("Part 2: ", part_two(data, 26501365))

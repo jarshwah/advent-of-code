@@ -1,6 +1,4 @@
-import aocd
 import networkx as nx
-
 import utils
 
 
@@ -34,28 +32,25 @@ def solve(raw: str, all_lowest: bool = False):
     )
 
 
-def part_one(raw: str) -> int:
-    return solve(raw, all_lowest=False)
+class Puzzle(utils.Puzzle):
+    def part_one(self, input: utils.Input) -> str | int:
+        return solve(raw, all_lowest=False)
+
+    def part_two(self, input: utils.Input) -> str | int:
+        return solve(raw, all_lowest=True)
 
 
-def part_two(raw: str) -> int:
-    return solve(raw, all_lowest=True)
-
-
-def test():
-    test_input = """Sabqponm
+puzzle = Puzzle(
+    year=2022,
+    day=12,
+    test_answers=("31", "29"),
+    test_input="""\
+Sabqponm
 abcryxxl
 accszExk
 acctuvwj
-abdefghi"""
-    answer_1 = part_one(test_input)
-    answer_2 = part_two(test_input)
-    assert answer_1 == 31, answer_1
-    assert answer_2 == 29, answer_2
-
+abdefghi""",
+)
 
 if __name__ == "__main__":
-    test()
-    data = aocd.get_data(day=12, year=2022)
-    print("Part 1: ", part_one(data))
-    print("Part 2: ", part_two(data))
+    puzzle.cli()

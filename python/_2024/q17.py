@@ -82,20 +82,21 @@ class Puzzle(utils.Puzzle):
             ra += 1
 
 
-if __name__ == "__main__":
-    runner = Puzzle(
-        year=2024,
-        day=17,
-        test_answers=("4,6,3,5,6,3,5,2,1,0", "117440"),
-        test_input="""Register A: 729
+puzzle = Puzzle(
+    year=2024,
+    day=17,
+    test_answers=("4,6,3,5,6,3,5,2,1,0", "117440"),
+    test_input="""Register A: 729
 Register B: 0
 Register C: 0
 
 Program: 0,1,5,4,3,0""",
-        test_input_2="""Register A: 2024
+    test_input_2="""Register A: 2024
 Register B: 0
 Register C: 0
 
 Program: 0,3,5,4,3,0""",
-    )
-    runner.cli()
+)
+
+if __name__ == "__main__":
+    puzzle.cli()

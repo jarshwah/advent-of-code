@@ -7,8 +7,6 @@ from collections.abc import Sequence
 from dataclasses import dataclass
 from functools import reduce
 
-import aocd
-
 import utils
 
 
@@ -123,6 +121,16 @@ def build_network(raw: str, output: str) -> dict[str, Gate]:
     return network
 
 
+class Puzzle(utils.Puzzle):
+    def part_one(self, input: utils.Input) -> str | int:
+        return part_one(input.string, output_gate="output" if self.testing else "rx")
+
+    def part_two(self, input: utils.Input) -> str | int:
+        if self.testing:
+            return "no-answer"
+        return part_two(input.string, output_gate="rx")
+
+
 def part_one(raw: str, output_gate: str) -> int:
     network = build_network(raw, output_gate)
     for button_push in range(1000):
@@ -173,18 +181,18 @@ def part_two(raw: str, output_gate: str) -> int:
             return math.lcm(*parents.values())
 
 
-def test():
-    test_input = """broadcaster -> a
+puzzle = Puzzle(
+    year=2023,
+    day=20,
+    # answer 2 is fake
+    test_answers=("11687500", "no-answer"),
+    test_input="""broadcaster -> a
 %a -> inv, con
 &inv -> b
 %b -> con
-&con -> output"""
-    answer_1 = part_one(test_input, output_gate="output")
-    assert answer_1 == 11687500, answer_1
+&con -> output""",
+)
 
 
 if __name__ == "__main__":
-    test()
-    data = aocd.get_data(day=20, year=2023)
-    print("Part 1: ", part_one(data, output_gate="rx"))
-    print("Part 2: ", part_two(data, output_gate="rx"))
+    puzzle.cli()

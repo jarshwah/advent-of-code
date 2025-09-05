@@ -1,7 +1,4 @@
 import heapq
-
-import aocd
-
 import utils
 
 
@@ -66,33 +63,37 @@ def get_heat(
     assert False
 
 
-def part_one(raw: str) -> int:
-    grid = utils.Input(raw).grid_int()
+class Puzzle(utils.Puzzle):
+    def part_one(self, input: utils.Input) -> str | int:
+        grid = input.grid_int()
 
-    return get_heat(
-        grid=grid,
-        start=(0, 0),
-        goal=(grid.height - 1, grid.width - 1),
-        start_direction=utils.RIGHT,
-        max_forward=3,
-        min_forward=1,
-    )
+        return get_heat(
+            grid=grid,
+            start=(0, 0),
+            goal=(grid.height - 1, grid.width - 1),
+            start_direction=utils.RIGHT,
+            max_forward=3,
+            min_forward=1,
+        )
+
+    def part_two(self, input: utils.Input) -> str | int:
+        grid = input.grid_int()
+        return get_heat(
+            grid=grid,
+            start=(0, 0),
+            goal=(grid.height - 1, grid.width - 1),
+            start_direction=utils.RIGHT,
+            max_forward=10,
+            min_forward=4,
+        )
 
 
-def part_two(raw: str) -> int:
-    grid = utils.Input(raw).grid_int()
-    return get_heat(
-        grid=grid,
-        start=(0, 0),
-        goal=(grid.height - 1, grid.width - 1),
-        start_direction=utils.RIGHT,
-        max_forward=10,
-        min_forward=4,
-    )
-
-
-def test():
-    test_input = """2413432311323
+puzzle = Puzzle(
+    year=2023,
+    day=17,
+    test_answers=("102", "94"),
+    test_input="""\
+2413432311323
 3215453535623
 3255245654254
 3446585845452
@@ -104,15 +105,8 @@ def test():
 4564679986453
 1224686865563
 2546548887735
-4322674655533"""
-    answer_1 = part_one(test_input)
-    answer_2 = part_two(test_input)
-    assert answer_1 == 102, answer_1
-    assert answer_2 == 94, answer_2
-
+4322674655533""",
+)
 
 if __name__ == "__main__":
-    test()
-    data = aocd.get_data(day=17, year=2023)
-    print("Part 1: ", part_one(data))
-    print("Part 2: ", part_two(data))
+    puzzle.cli()

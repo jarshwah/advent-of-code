@@ -53,12 +53,11 @@ class Puzzle(utils.Puzzle):
         return result
 
 
-if __name__ == "__main__":
-    runner = Puzzle(
-        year=2024,
-        day=5,
-        test_answers=("143", "123"),
-        test_input="""47|53
+puzzle = Puzzle(
+    year=2024,
+    day=5,
+    test_answers=("143", "123"),
+    test_input="""47|53
 97|13
 97|61
 97|47
@@ -86,5 +85,7 @@ if __name__ == "__main__":
 75,97,47,61,53
 61,13,29
 97,13,75,29,47""",
-    )
-    runner.cli()
+)
+
+if __name__ == "__main__":
+    puzzle.cli()

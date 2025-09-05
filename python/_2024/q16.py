@@ -82,13 +82,12 @@ def print_path(grid, path, loc, dir):  # type: ignore
     new_grid.print()
 
 
-if __name__ == "__main__":
-    runner = Puzzle(
-        year=2024,
-        day=16,
-        both=True,
-        test_answers=("7036", "45"),
-        test_input="""###############
+puzzle = Puzzle(
+    year=2024,
+    day=16,
+    both=True,
+    test_answers=("7036", "45"),
+    test_input="""###############
 #.......#....E#
 #.#.###.#.###.#
 #.....#.#...#.#
@@ -103,5 +102,7 @@ if __name__ == "__main__":
 #.###.#.#.#.#.#
 #S..#.....#...#
 ###############""",
-    )
-    runner.cli()
+)
+
+if __name__ == "__main__":
+    puzzle.cli()

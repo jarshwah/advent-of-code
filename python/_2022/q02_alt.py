@@ -1,6 +1,5 @@
 import enum
 
-import aocd
 import utils
 
 
@@ -53,32 +52,24 @@ def shape_required(them: Shape, us: Result) -> Shape:
     # fmt: on
 
 
-def part_one(raw: str) -> int:
-    games = [
-        (Choice[abc].value, Choice[xyz].value) for abc, xyz in utils.Input(raw).group("\n").strings
-    ]
-    return sum(rock_paper_scissors(them, us) + us for them, us in games)
+class Puzzle(utils.Puzzle):
+    def part_one_alt(self, input: utils.Input) -> str | int:
+        games = [(Choice[abc].value, Choice[xyz].value) for abc, xyz in input.group("\n").strings]
+        return sum(rock_paper_scissors(them, us) + us for them, us in games)
+
+    def part_two_alt(self, input: utils.Input) -> str | int:
+        games = ((Choice[abc].value, Target[xyz].value) for abc, xyz in input.group("\n").strings)
+        return sum(shape_required(them, target) + target for them, target in games)
 
 
-def part_two(raw: str) -> int:
-    games = (
-        (Choice[abc].value, Target[xyz].value) for abc, xyz in utils.Input(raw).group("\n").strings
-    )
-    return sum(shape_required(them, target) + target for them, target in games)
-
-
-def test():
-    test_input = """A Y
+puzzle = Puzzle(
+    year=2022,
+    day=2,
+    test_answers=("15", "12"),
+    test_input="""A Y
 B X
-C Z"""
-    answer_1 = part_one(test_input)
-    answer_2 = part_two(test_input)
-    assert answer_1 == 15, answer_1
-    assert answer_2 == 12, answer_2
-
+C Z""",
+)
 
 if __name__ == "__main__":
-    test()
-    data = aocd.get_data(day=2, year=2022)
-    print("Part 1: ", part_one(data))
-    print("Part 2: ", part_two(data))
+    puzzle.cli()

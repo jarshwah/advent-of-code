@@ -1,6 +1,4 @@
 from collections import deque
-
-import aocd
 import utils
 
 
@@ -45,8 +43,16 @@ def solve(raw: str) -> tuple[int, int]:
     return surfaces, surfaces - empty
 
 
-def test():
-    test_input = """2,2,2
+class Puzzle(utils.Puzzle):
+    pass
+
+
+puzzle = Puzzle(
+    year=2022,
+    day=18,
+    test_answers=("", ""),
+    test_input="""\
+2,2,2
 1,2,2
 3,2,2
 2,1,2
@@ -58,15 +64,8 @@ def test():
 1,2,5
 3,2,5
 2,1,5
-2,3,5"""
-    answer_1, answer_2 = solve(test_input)
-    assert answer_1 == 64, answer_1
-    assert answer_2 == 58, answer_2
-
+2,3,5""",
+)
 
 if __name__ == "__main__":
-    test()
-    data = aocd.get_data(day=18, year=2022)
-    a1, a2 = solve(data)
-    print("Part 1: ", a1)
-    print("Part 2: ", a2)
+    puzzle.cli()

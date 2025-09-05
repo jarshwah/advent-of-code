@@ -25,11 +25,12 @@ class Puzzle(utils.Puzzle):
         return fuel
 
 
+puzzle = Puzzle(
+    year=2019,
+    day=1,
+    test_answers=("33583", "50346"),
+    test_input="""100756""",
+)
+
 if __name__ == "__main__":
-    runner = Puzzle(
-        year=2019,
-        day=1,
-        test_answers=("33583", "50346"),
-        test_input="""100756""",
-    )
-    runner.cli()
+    puzzle.cli()

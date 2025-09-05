@@ -56,12 +56,11 @@ class Puzzle(utils.Puzzle):
         return price
 
 
-if __name__ == "__main__":
-    runner = Puzzle(
-        year=2024,
-        day=12,
-        test_answers=("1930", "1206"),
-        test_input="""RRRRIICCFF
+puzzle = Puzzle(
+    year=2024,
+    day=12,
+    test_answers=("1930", "1206"),
+    test_input="""RRRRIICCFF
 RRRRIICCCF
 VVRRRCCFFF
 VVRCCCJFFF
@@ -72,5 +71,7 @@ MIIIIIJJEE
 MIIISIJEEE
 MMMISSJEEE
 """,
-    )
-    runner.cli()
+)
+
+if __name__ == "__main__":
+    puzzle.cli()

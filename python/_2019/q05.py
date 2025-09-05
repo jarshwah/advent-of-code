@@ -17,6 +17,7 @@ class Puzzle(utils.Puzzle):
         return int(program.run()[-1])
 
 
+puzzle = Puzzle(year=2019, day=5, no_tests=True)
+
 if __name__ == "__main__":
-    runner = Puzzle(year=2019, day=5, no_tests=True)
-    runner.cli()
+    puzzle.cli()

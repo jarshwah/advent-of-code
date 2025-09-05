@@ -1,64 +1,62 @@
-import aocd
-
 import utils
 
 
-def part_one(raw: str) -> int:
-    data = utils.Input(raw).group(sep="\n").strings
-    locations = {}
-    seeds = [int(seed) for line in data[0] for seed in line.split(":")[1].split()]
-    for seed in seeds:
-        current_src = seed
+class Puzzle(utils.Puzzle):
+    def part_one(self, input: utils.Input) -> str | int:
+        data = input.group(sep="\n").strings
+        locations = {}
+        seeds = [int(seed) for line in data[0] for seed in line.split(":")[1].split()]
+        for seed in seeds:
+            current_src = seed
+            for maps in data[1:]:
+                for line in maps[1:]:
+                    dst, src, cnt = [int(num) for num in line.split()]
+                    if not (src <= current_src <= src + cnt - 1):
+                        continue
+                    current_src = dst + (current_src - src)
+                    break
+            locations[seed] = current_src
+        return min(locations.values())
+
+    def part_two(self, input: utils.Input) -> str | int:
+        # Brute force :(
+        # 8 minutes with python 3
+        # 26 seconds with pypy3
+        data = input.group(sep="\n").strings
+        seeds = [int(seed) for line in data[0] for seed in line.split(":")[1].split()]
+
+        seed_ranges = list(zip(seeds[0::2], seeds[1::2]))
+
+        def valid_seed(seed: int) -> bool:
+            return any(
+                seed_start <= seed <= seed_start + seed_count - 1
+                for seed_start, seed_count in seed_ranges
+            )
+
+        map_groups = []
         for maps in data[1:]:
-            for line in maps[1:]:
-                dst, src, cnt = [int(num) for num in line.split()]
-                if not (src <= current_src <= src + cnt - 1):
-                    continue
-                current_src = dst + (current_src - src)
-                break
-        locations[seed] = current_src
-    return min(locations.values())
+            map_groups.append([tuple([int(num) for num in line.split()]) for line in maps[1:]])
+
+        # Start from a reasonable value for testing
+        start_from = 50_000_000 if not self.testing else 1
+
+        for location in range(start_from, 1_000_000_000):
+            current_src = location
+            for maps in map_groups[::-1]:
+                for dst, src, cnt in maps:
+                    if not (dst <= current_src <= dst + cnt - 1):
+                        continue
+                    current_src = src + (current_src - dst)
+                    break
+            if valid_seed(current_src):
+                return location
 
 
-def part_two(raw: str, start_from: int = 50_000_000) -> int:
-    # Brute force :(
-    # 8 minutes with python 3
-    # 26 seconds with pypy3
-    data = utils.Input(raw).group(sep="\n").strings
-    seeds = [int(seed) for line in data[0] for seed in line.split(":")[1].split()]
-
-    seed_ranges = list(zip(seeds[0::2], seeds[1::2]))
-
-    def valid_seed(seed: int) -> bool:
-        return any(
-            seed_start <= seed <= seed_start + seed_count - 1
-            for seed_start, seed_count in seed_ranges
-        )
-
-    map_groups = []
-    for maps in data[1:]:
-        map_groups.append([tuple([int(num) for num in line.split()]) for line in maps[1:]])
-
-    # We're going to go backwards, and check every possible number up to we find a valid seed
-    map_groups = map_groups[::-1]
-
-    loc = start_from
-    while True:
-        current_src = loc
-        for maps in map_groups:
-            for line in maps:
-                src, dst, cnt = line
-                if not (src <= current_src <= src + cnt - 1):
-                    continue
-                current_src = dst + (current_src - src)
-                break
-        if valid_seed(current_src):
-            return loc
-        loc += 1
-
-
-def test():
-    test_input = """seeds: 79 14 55 13
+puzzle = Puzzle(
+    year=2023,
+    day=5,
+    test_answers=("35", "46"),
+    test_input="""seeds: 79 14 55 13
 
 seed-to-soil map:
 50 98 2
@@ -90,15 +88,8 @@ temperature-to-humidity map:
 
 humidity-to-location map:
 60 56 37
-56 93 4"""
-    answer_1 = part_one(test_input)
-    answer_2 = part_two(test_input, start_from=1)
-    assert answer_1 == 35, answer_1
-    assert answer_2 == 46, answer_2
-
+56 93 4""",
+)
 
 if __name__ == "__main__":
-    test()
-    data = aocd.get_data(day=5, year=2023)
-    print("Part 1: ", part_one(data))
-    print("Part 2: ", part_two(data))
+    puzzle.cli()

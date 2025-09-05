@@ -57,12 +57,13 @@ class Puzzle(utils.Puzzle):
         return computation
 
 
+puzzle = Puzzle(
+    year=2024,
+    day=3,
+    test_answers=("161", "48"),
+    test_input="""xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))""",
+    test_input_2="""xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))""",
+)
+
 if __name__ == "__main__":
-    runner = Puzzle(
-        year=2024,
-        day=3,
-        test_answers=("161", "48"),
-        test_input="""xmul(2,4)%&mul[3,7]!@^do_not_mul(5,5)+mul(32,64]then(mul(11,8)mul(8,5))""",
-        test_input_2="""xmul(2,4)&mul[3,7]!^don't()_mul(5,5)+mul(32,64](mul(11,8)undo()?mul(8,5))""",
-    )
-    runner.cli()
+    puzzle.cli()

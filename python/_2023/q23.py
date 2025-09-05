@@ -1,6 +1,5 @@
 from collections import deque
 
-import aocd
 import networkx as nx
 
 import utils
@@ -13,26 +12,6 @@ DIRS = {
     "#": [],
     ".": utils.DIRECTIONS_4,
 }
-
-
-def part_one(raw: str) -> int:
-    grid = utils.Input(raw).grid()
-    path_found = 0
-    start = (0, 1)
-    target = (grid.height - 1, grid.width - 2)
-    queue = deque([(start, 0, set())])
-    while queue:
-        curr, steps, path = queue.popleft()
-        if curr in path:
-            continue
-        curr_tile = grid[curr]
-        if curr == target:
-            path_found = max(path_found, steps)
-        directions = DIRS.get(curr_tile)
-        for nb in grid.get_neighbours(curr, directions=directions):
-            queue.appendleft((nb, steps + 1, path | {curr}))
-
-    return path_found
 
 
 def to_graph(grid: utils.Grid) -> dict[utils.Point, set[utils.Point]]:
@@ -58,26 +37,50 @@ def to_graph(grid: utils.Grid) -> dict[utils.Point, set[utils.Point]]:
     return graph
 
 
-def part_two(raw: str) -> int:
-    grid = utils.Input(raw).grid()
-    path_found = 0
-    graph = to_graph(grid)
-    start = (0, 1)
-    target = (grid.height - 1, grid.width - 2)
-    queue = deque([(start, 0, frozenset(set()))])
-    while queue:
-        curr, steps, path = queue.popleft()
-        if curr in path:
-            continue
-        if curr == target:
-            path_found = max(path_found, steps)
-        for nb, attrs in graph[curr].items():
-            queue.appendleft((nb, steps + attrs["weight"], frozenset(path | {curr})))
-    return path_found
+class Puzzle(utils.Puzzle):
+    def part_one(self, input: utils.Input) -> str | int:
+        grid = input.grid()
+        path_found = 0
+        start = (0, 1)
+        target = (grid.height - 1, grid.width - 2)
+        queue = deque([(start, 0, set())])
+        while queue:
+            curr, steps, path = queue.popleft()
+            if curr in path:
+                continue
+            curr_tile = grid[curr]
+            if curr == target:
+                path_found = max(path_found, steps)
+            directions = DIRS.get(curr_tile)
+            for nb in grid.get_neighbours(curr, directions=directions):
+                queue.appendleft((nb, steps + 1, path | {curr}))
+
+        return path_found
+
+    def part_two(self, input: utils.Input) -> str | int:
+        grid = input.grid()
+        path_found = 0
+        graph = to_graph(grid)
+        start = (0, 1)
+        target = (grid.height - 1, grid.width - 2)
+        queue = deque([(start, 0, frozenset(set()))])
+        while queue:
+            curr, steps, path = queue.popleft()
+            if curr in path:
+                continue
+            if curr == target:
+                path_found = max(path_found, steps)
+            for nb, attrs in graph[curr].items():
+                queue.appendleft((nb, steps + attrs["weight"], frozenset(path | {curr})))
+        return path_found
 
 
-def test():
-    test_input = """#.#####################
+puzzle = Puzzle(
+    year=2023,
+    day=23,
+    test_answers=("94", "154"),
+    test_input="""\
+#.#####################
 #.......#########...###
 #######.#########.#.###
 ###.....#.>.>.###.#.###
@@ -99,15 +102,8 @@ def test():
 #...#...#.#.>.>.#.>.###
 #.###.###.#.###.#.#v###
 #.....###...###...#...#
-#####################.#"""
-    answer_1 = part_one(test_input)
-    answer_2 = part_two(test_input)
-    assert answer_1 == 94, answer_1
-    assert answer_2 == 154, answer_2
-
+#####################.#""",
+)
 
 if __name__ == "__main__":
-    test()
-    data = aocd.get_data(day=23, year=2023)
-    print("Part 1: ", part_one(data))
-    print("Part 2: ", part_two(data))
+    puzzle.cli()

@@ -1,59 +1,9 @@
 from __future__ import annotations
-
 import dataclasses
 import enum
 from collections.abc import Callable
-
-import aocd
 from utils import Point
-
-
-class Turn(str, enum.Enum):
-    L = "L"
-    R = "R"
-
-
-class Facing(enum.IntEnum):
-    R = 0
-    D = 1
-    L = 2
-    U = 3
-
-    def rotate(self, turn: Turn) -> Facing:
-        match turn:
-            case Turn.L:
-                return Facing((self.value - 1) % 4)
-            case Turn.R:
-                return Facing((self.value + 1) % 4)
-
-    def move(self) -> tuple[int, int]:
-        match self:
-            case Facing.R:
-                return (0, 1)
-            case Facing.D:
-                return (1, 0)
-            case Facing.L:
-                return (0, -1)
-            case Facing.U:
-                return (-1, 0)
-
-
-@dataclasses.dataclass
-class Instruction:
-    move: int | Turn
-
-
-@dataclasses.dataclass
-class Node:
-    row: int
-    col: int
-    empty: bool
-
-    def __repr__(self) -> str:
-        return f"Node(row={self.row}, col={self.col}, empty={self.empty})"
-
-    def __str__(self) -> str:
-        return f"Node(({self.row},{self.col}): {'.' if self.empty else '#'}"
+import utils
 
 
 def parse_instructions(instructions: str) -> list[Instruction]:
@@ -128,7 +78,6 @@ def edge_map_3d(
         case (6, Facing.D): return (0, 100 + col, Facing.D)
         case (6, Facing.L): return (0, 50 + row % 50, Facing.D)
         case _: raise ValueError(square, facing)
-    # fmt: on
 
 
 def solve(
@@ -164,15 +113,15 @@ def solve(
     return 1000 * (prow + 1) + 4 * (pcol + 1) + facing.value
 
 
-def test():
-    # has trailing whitespace so read from file
-    test_input = open("./q22.example").read()
-    answer_1 = solve(test_input, edge_map_2d)
-    assert answer_1 == 6032, answer_1
+class Puzzle(utils.Puzzle):
+    pass
 
+
+puzzle = Puzzle(
+    year=2022,
+    day=22,
+    test_answers=("", ""),
+)
 
 if __name__ == "__main__":
-    test()
-    data = aocd.get_data(day=22, year=2022)
-    print("Part 1: ", solve(data, edge_map_2d))
-    print("Part 2: ", solve(data, edge_map_3d))
+    puzzle.cli()

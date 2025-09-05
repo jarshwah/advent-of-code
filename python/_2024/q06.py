@@ -92,12 +92,11 @@ def wander(
     return visited, False
 
 
-if __name__ == "__main__":
-    runner = Puzzle(
-        year=2024,
-        day=6,
-        test_answers=("41", "6"),
-        test_input="""....#.....
+puzzle = Puzzle(
+    year=2024,
+    day=6,
+    test_answers=("41", "6"),
+    test_input="""....#.....
 .........#
 ..........
 ..#.......
@@ -107,5 +106,7 @@ if __name__ == "__main__":
 ........#.
 #.........
 ......#...""",
-    )
-    runner.cli()
+)
+
+if __name__ == "__main__":
+    puzzle.cli()

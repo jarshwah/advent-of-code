@@ -1,8 +1,6 @@
 from collections import Counter
 from dataclasses import dataclass
 
-import aocd
-
 import utils
 
 CARDS = {
@@ -76,32 +74,29 @@ def get_hands(raw: str) -> list[Hand]:
     return hands
 
 
-def part_one(hands: list[Hand]) -> int:
-    hands.sort(key=lambda hand: hand.result())
-    return sum(hand.bid * rank for rank, hand in enumerate(hands, 1))
+class Puzzle(utils.Puzzle):
+    def part_one(self, input: utils.Input) -> str | int:
+        hands = get_hands(input.string)
+        hands.sort(key=lambda hand: hand.result())
+        return sum(hand.bid * rank for rank, hand in enumerate(hands, 1))
+
+    def part_two(self, input: utils.Input) -> str | int:
+        hands = get_hands(input.string)
+        hands.sort(key=lambda hand: hand.result_wilds())
+        return sum(hand.bid * rank for rank, hand in enumerate(hands, 1))
 
 
-def part_two(hands: list[Hand]) -> int:
-    hands.sort(key=lambda hand: hand.result_wilds())
-    return sum(hand.bid * rank for rank, hand in enumerate(hands, 1))
-
-
-def test():
-    test_input = """32T3K 765
+puzzle = Puzzle(
+    year=2023,
+    day=7,
+    test_answers=("6440", "5905"),
+    test_input="""\
+32T3K 765
 T55J5 684
 KK677 28
 KTJJT 220
-QQQJA 483"""
-    hands = get_hands(test_input)
-    answer_1 = part_one(hands)
-    answer_2 = part_two(hands)
-    assert answer_1 == 6440, answer_1
-    assert answer_2 == 5905, answer_2
-
+QQQJA 483""",
+)
 
 if __name__ == "__main__":
-    test()
-    data = aocd.get_data(day=7, year=2023)
-    hands = get_hands(data)
-    print("Part 1: ", part_one(hands))
-    print("Part 2: ", part_two(hands))
+    puzzle.cli()

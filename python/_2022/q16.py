@@ -1,29 +1,9 @@
 from __future__ import annotations
-
 import itertools
 import re
 from dataclasses import dataclass
-
-import aocd
 import networkx as nx
 import utils
-
-re_valves = re.compile(r"([A-Z]{2})")
-re_rate = re.compile(r"rate=(\d+)")
-
-
-@dataclass(eq=True, frozen=True)
-class Frame:
-    valve: str
-    opened: frozenset[str]
-    pressure: int
-    time: int
-
-    def __eq__(self, other: Frame):
-        return self.pressure == other.pressure
-
-    def __lt__(self, other: Frame):
-        return self.pressure < other.pressure
 
 
 def solve(raw: str, minutes: int, actors: int) -> int:
@@ -104,8 +84,16 @@ def solve(raw: str, minutes: int, actors: int) -> int:
     raise ValueError(actors)
 
 
-def test():
-    test_input = """Valve AA has flow rate=0; tunnels lead to valves DD, II, BB
+class Puzzle(utils.Puzzle):
+    pass
+
+
+puzzle = Puzzle(
+    year=2022,
+    day=16,
+    test_answers=("1651", "1707"),
+    test_input="""\
+Valve AA has flow rate=0; tunnels lead to valves DD, II, BB
 Valve BB has flow rate=13; tunnels lead to valves CC, AA
 Valve CC has flow rate=2; tunnels lead to valves DD, BB
 Valve DD has flow rate=20; tunnels lead to valves CC, AA, EE
@@ -114,15 +102,8 @@ Valve FF has flow rate=0; tunnels lead to valves EE, GG
 Valve GG has flow rate=0; tunnels lead to valves FF, HH
 Valve HH has flow rate=22; tunnel leads to valve GG
 Valve II has flow rate=0; tunnels lead to valves AA, JJ
-Valve JJ has flow rate=21; tunnel leads to valve II"""
-    answer_1 = solve(test_input, 30, 1)
-    answer_2 = solve(test_input, 26, 2)
-    assert answer_1 == 1651, answer_1
-    assert answer_2 == 1707, answer_2
-
+Valve JJ has flow rate=21; tunnel leads to valve II""",
+)
 
 if __name__ == "__main__":
-    test()
-    data = aocd.get_data(day=16, year=2022)
-    print("Part 1: ", solve(data, 30, 1))
-    print("Part 2: ", solve(data, 26, 2))
+    puzzle.cli()

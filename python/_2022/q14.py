@@ -1,15 +1,7 @@
 import enum
 from ast import literal_eval
-
-import aocd
 import more_itertools
 import utils
-
-
-class M(str, enum.Enum):
-    AIR = "."
-    ROCK = "#"
-    SAND = "O"
 
 
 def parse(raw: str) -> dict[str, M]:
@@ -20,49 +12,6 @@ def parse(raw: str) -> dict[str, M]:
             for rock in utils.line_algorithm(from_point, to_point):
                 cave[rock] = M.ROCK
     return cave
-
-
-def part_one(cave: dict[str, M]) -> int:
-    origin = (0, 500)
-    floor = max(k[0] for k in cave)
-    grains = 0
-    grain = origin
-    while grain[0] < floor:
-        grain = origin
-        while grain[0] < floor:
-            for direction in (utils.DOWN, utils.DOWNLEFT, utils.DOWNRIGHT):
-                check = utils.sum_points(grain, direction)
-                if check not in cave:
-                    grain = check
-                    break
-            else:
-                cave[grain] = M.SAND
-                grains += 1
-                break
-    return grains
-
-
-def part_two(cave: dict[str, M]) -> int:
-    origin = (0, 500)
-    floor = max(k[0] for k in cave) + 2
-    grains = 0
-    grain = origin
-    cave[origin] = M.AIR
-    while cave[origin] != M.SAND:
-        grain = origin
-        while grain[0] < floor:
-            for direction in (utils.DOWN, utils.DOWNLEFT, utils.DOWNRIGHT):
-                check = utils.sum_points(grain, direction)
-                if check not in cave:
-                    grain = check
-                    break
-            else:
-                cave[grain] = M.SAND
-                grains += 1
-                break
-        else:
-            cave[grain] = M.SAND
-    return grains
 
 
 def part_two_alt(raw: str) -> int:
@@ -136,24 +85,57 @@ def print_cave(cave: dict[utils.Point, M]) -> None:
                 print(M.AIR.value, end="")
 
 
-def test():
-    test_input = """498,4 -> 498,6 -> 496,6
-503,4 -> 502,4 -> 502,9 -> 494,9"""
-    cave = parse(test_input)
-    answer_1 = part_one(cave.copy())
-    answer_2 = part_two(cave.copy())
-    answer_2_alt = part_two_alt(test_input)
-    assert answer_1 == 24, answer_1
-    assert answer_2 == 93, answer_2
-    assert answer_2_alt == 93, answer_2_alt
+class Puzzle(utils.Puzzle):
+    def part_one(self, input: utils.Input) -> str | int:
+        origin = (0, 500)
+        floor = max(k[0] for k in cave)
+        grains = 0
+        grain = origin
+        while grain[0] < floor:
+            grain = origin
+            while grain[0] < floor:
+                for direction in (utils.DOWN, utils.DOWNLEFT, utils.DOWNRIGHT):
+                    check = utils.sum_points(grain, direction)
+                    if check not in cave:
+                        grain = check
+                        break
+                else:
+                    cave[grain] = M.SAND
+                    grains += 1
+                    break
+        return grains
 
+    def part_two(self, input: utils.Input) -> str | int:
+        origin = (0, 500)
+        floor = max(k[0] for k in cave) + 2
+        grains = 0
+        grain = origin
+        cave[origin] = M.AIR
+        while cave[origin] != M.SAND:
+            grain = origin
+            while grain[0] < floor:
+                for direction in (utils.DOWN, utils.DOWNLEFT, utils.DOWNRIGHT):
+                    check = utils.sum_points(grain, direction)
+                    if check not in cave:
+                        grain = check
+                        break
+                else:
+                    cave[grain] = M.SAND
+                    grains += 1
+                    break
+            else:
+                cave[grain] = M.SAND
+        return grains
+
+
+puzzle = Puzzle(
+    year=2022,
+    day=14,
+    test_answers=("24", "93"),
+    test_input="""\
+498,4 -> 498,6 -> 496,6
+503,4 -> 502,4 -> 502,9 -> 494,9""",
+)
 
 if __name__ == "__main__":
-    test()
-    data = aocd.get_data(day=14, year=2022)
-    cave = parse(data)
-    print("Part 1: ", part_one(cave.copy()))
-    print("Part 2: ", part_two(cave.copy()))
-    # P2: 26625  P2Alt: 26854
-    # Answer too high  - see issues in alt docstring
-    print("Part 2 Alt (too high): ", part_two_alt(data))
+    puzzle.cli()

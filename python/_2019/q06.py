@@ -44,12 +44,11 @@ class Puzzle(utils.Puzzle):
         return min_san + min_you
 
 
-if __name__ == "__main__":
-    runner = Puzzle(
-        year=2019,
-        day=6,
-        test_answers=("54", "4"),
-        test_input="""COM)B
+puzzle = Puzzle(
+    year=2019,
+    day=6,
+    test_answers=("54", "4"),
+    test_input="""COM)B
 B)C
 C)D
 D)E
@@ -62,5 +61,7 @@ J)K
 K)L
 K)YOU
 I)SAN""",
-    )
-    runner.cli()
+)
+
+if __name__ == "__main__":
+    puzzle.cli()

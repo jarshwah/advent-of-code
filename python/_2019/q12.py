@@ -85,14 +85,15 @@ class Puzzle(utils.Puzzle):
         return reduce(math.lcm, cycles)
 
 
-if __name__ == "__main__":
-    runner = Puzzle(
-        year=2019,
-        day=12,
-        test_answers=("1940", "4686774924"),
-        test_input="""<x=-8, y=-10, z=0>
+puzzle = Puzzle(
+    year=2019,
+    day=12,
+    test_answers=("1940", "4686774924"),
+    test_input="""<x=-8, y=-10, z=0>
 <x=5, y=5, z=10>
 <x=2, y=-7, z=3>
 <x=9, y=-8, z=-3>""",
-    )
-    runner.cli()
+)
+
+if __name__ == "__main__":
+    puzzle.cli()

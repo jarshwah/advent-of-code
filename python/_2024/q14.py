@@ -109,12 +109,11 @@ def quadrant_scores(robots: Robots, bounds: Bounds) -> QuadrantScore:
     return tuple(scores)  # type: ignore
 
 
-if __name__ == "__main__":
-    runner = Puzzle(
-        year=2024,
-        day=14,
-        test_answers=("12", "5"),
-        test_input="""p=0,4 v=3,-3
+puzzle = Puzzle(
+    year=2024,
+    day=14,
+    test_answers=("12", "5"),
+    test_input="""p=0,4 v=3,-3
 p=6,3 v=-1,-3
 p=10,3 v=-1,2
 p=2,0 v=2,-1
@@ -126,5 +125,7 @@ p=9,3 v=2,3
 p=7,3 v=-1,2
 p=2,4 v=2,-3
 p=9,5 v=-3,-3""",
-    )
-    runner.cli()
+)
+
+if __name__ == "__main__":
+    puzzle.cli()

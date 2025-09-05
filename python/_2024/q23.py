@@ -31,12 +31,11 @@ class Puzzle(utils.Puzzle):
         return ",".join(sorted(lan_party))
 
 
-if __name__ == "__main__":
-    runner = Puzzle(
-        year=2024,
-        day=23,
-        test_answers=("7", "co,de,ka,ta"),
-        test_input="""kh-tc
+puzzle = Puzzle(
+    year=2024,
+    day=23,
+    test_answers=("7", "co,de,ka,ta"),
+    test_input="""kh-tc
 qp-kh
 de-cg
 ka-co
@@ -68,5 +67,7 @@ co-tc
 wh-qp
 tb-vc
 td-yn""",
-    )
-    runner.cli()
+)
+
+if __name__ == "__main__":
+    puzzle.cli()

@@ -1,6 +1,5 @@
 from itertools import combinations
 
-import aocd
 import z3
 
 import utils
@@ -50,40 +49,39 @@ def solve_xyz(
     return sum(model[v].as_long() for v in vector)
 
 
-def part_one(raw: str, lower: int, upper: int) -> int:
-    hailstones = []
-    for line in utils.Input(raw).lines().strings:
-        pos, vel = line.split(" @ ")
-        x, y, z = [int(p) for p in pos.split(", ")]
-        vx, vy, vz = [int(v) for v in vel.split(", ")]
-        hailstones.append(((x, y, z), (vx, vy, vz)))
-    return sum(solve_xy(h1, h2, lower, upper) for h1, h2 in combinations(hailstones, 2))
+class Puzzle(utils.Puzzle):
+    def part_one(self, input: utils.Input) -> str | int:
+        hailstones = []
+        for line in input.lines().strings:
+            pos, vel = line.split(" @ ")
+            x, y, z = [int(p) for p in pos.split(", ")]
+            vx, vy, vz = [int(v) for v in vel.split(", ")]
+            hailstones.append(((x, y, z), (vx, vy, vz)))
+        lower = 7 if self.testing else 200000000000000
+        upper = 27 if self.testing else 400000000000000
+        return sum(solve_xy(h1, h2, lower, upper) for h1, h2 in combinations(hailstones, 2))
+
+    def part_two(self, input: utils.Input) -> str | int:
+        hailstones = []
+        for line in input.lines().strings[:3]:
+            pos, vel = line.split(" @ ")
+            x, y, z = [int(p) for p in pos.split(", ")]
+            vx, vy, vz = [int(v) for v in vel.split(", ")]
+            hailstones.append(((x, y, z), (vx, vy, vz)))
+        return solve_xyz(*hailstones)
 
 
-def part_two(raw: str) -> int:
-    hailstones = []
-    for line in utils.Input(raw).lines().strings[:3]:
-        pos, vel = line.split(" @ ")
-        x, y, z = [int(p) for p in pos.split(", ")]
-        vx, vy, vz = [int(v) for v in vel.split(", ")]
-        hailstones.append(((x, y, z), (vx, vy, vz)))
-    return solve_xyz(*hailstones)
-
-
-def test():
-    test_input = """19, 13, 30 @ -2,  1, -2
+puzzle = Puzzle(
+    year=2023,
+    day=24,
+    test_answers=("2", "47"),
+    test_input="""\
+19, 13, 30 @ -2,  1, -2
 18, 19, 22 @ -1, -1, -2
 20, 25, 34 @ -2, -2, -4
 12, 31, 28 @ -1, -2, -1
-20, 19, 15 @  1, -5, -3"""
-    answer_1 = part_one(test_input, 7, 27)
-    answer_2 = part_two(test_input)
-    assert answer_1 == 2, answer_1
-    assert answer_2 == 47, answer_2
-
+20, 19, 15 @  1, -5, -3""",
+)
 
 if __name__ == "__main__":
-    test()
-    data = aocd.get_data(day=24, year=2023)
-    print("Part 1: ", part_one(data, 200000000000000, 400000000000000))
-    print("Part 2: ", part_two(data))
+    puzzle.cli()

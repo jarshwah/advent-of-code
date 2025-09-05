@@ -82,11 +82,12 @@ class Puzzle(utils.Puzzle):
         return sum(mutate(stone, 75) for stone in stones)
 
 
+puzzle = Puzzle(
+    year=2024,
+    day=11,
+    test_answers=("55312", "65601038650482"),
+    test_input="""125 17""",
+)
+
 if __name__ == "__main__":
-    runner = Puzzle(
-        year=2024,
-        day=11,
-        test_answers=("55312", "65601038650482"),
-        test_input="""125 17""",
-    )
-    runner.cli()
+    puzzle.cli()

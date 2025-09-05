@@ -124,12 +124,11 @@ def simulate(wires: dict[str, Wire], dependencies: list[str]) -> None:
             raise ValueError(f"Unknown gate type: {wire.gate_type}")
 
 
-if __name__ == "__main__":
-    runner = Puzzle(
-        year=2024,
-        day=24,
-        test_answers=("2024", "no-answer"),
-        test_input="""x00: 1
+puzzle = Puzzle(
+    year=2024,
+    day=24,
+    test_answers=("2024", "no-answer"),
+    test_input="""x00: 1
 x01: 0
 x02: 1
 x03: 1
@@ -176,5 +175,7 @@ y03 OR x01 -> nrd
 hwm AND bqk -> z03
 tgd XOR rvg -> z12
 tnw OR pbm -> gnj""",
-    )
-    runner.cli()
+)
+
+if __name__ == "__main__":
+    puzzle.cli()
