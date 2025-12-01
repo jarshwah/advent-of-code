@@ -4,6 +4,15 @@
             "path": "."
         }
     ],
+    "extensions": {
+        "recommendations": [
+            "charliermarsh.ruff",
+            "ms-python.vscode-pylance",
+            "ms-python.python",
+            "ms-python.debugpy",
+            "spadin.memento-inputs",
+        ]
+    },
     "settings": {
         "editor.rulers": [
             80,
@@ -20,6 +29,10 @@
                 "source.organizeImports": "explicit",
                 "source.fixAll": "explicit"
             },
+        },
+        "files.exclude": {
+            "bin": true,
+            "obj": true
         },
         "python.languageServer": "None",
         "ty.experimental.rename": true,
@@ -38,14 +51,18 @@
         "python.analysis.diagnosticMode": "openFilesOnly",
         "python.analysis.inlayHints.functionReturnTypes": false,
         "python.analysis.inlayHints.variableTypes": false,
-        "python.analysis.include": ["python"],
+        "python.analysis.include": [
+            "python"
+        ],
         "python.analysis.exclude": [
             "**/.*",
             ".venv/"
         ],
         "python.testing.unittestEnabled": false,
         "python.testing.pytestEnabled": true,
-        "python.testing.pytestArgs": ["python"],
+        "python.testing.pytestArgs": [
+            "python"
+        ],
         "mypy-type-checker.importStrategy": "fromEnvironment",
         "mypy-type-checker.preferDaemon": true,
         "ruff.importStrategy": "fromEnvironment",
@@ -60,7 +77,8 @@
         "cursorpyright.analysis.inlayHints.functionReturnTypes": false,
         "cursorpyright.analysis.inlayHints.variableTypes": false,
         "cursorpyright.analysis.logLevel": "Information",
-        "cursorpyright.analysis.useLibraryCodeForTypes": true
+        "cursorpyright.analysis.useLibraryCodeForTypes": true,
+        "dotnet.defaultSolution": "AoC.slnx"
     },
     "launch": {
         "version": "0.2.0",
@@ -82,7 +100,9 @@
                 "type": "debugpy",
                 "request": "launch",
                 "program": "${file}",
-                "args": ["-1"],
+                "args": [
+                    "-1"
+                ],
                 "cwd": "${fileDirname}",
                 "console": "integratedTerminal",
                 "env": {
@@ -95,7 +115,9 @@
                 "type": "debugpy",
                 "request": "launch",
                 "program": "${file}",
-                "args": ["-2"],
+                "args": [
+                    "-2"
+                ],
                 "cwd": "${fileDirname}",
                 "console": "integratedTerminal",
                 "env": {
@@ -108,14 +130,31 @@
                 "type": "debugpy",
                 "request": "launch",
                 "program": "${file}",
-                "args": ["-t"],
+                "args": [
+                    "-t"
+                ],
                 "cwd": "${fileDirname}",
                 "console": "integratedTerminal",
                 "env": {
                     "PYTHONPATH": "python",
                     "PYDEVD_CONTAINER_RANDOM_ACCESS_MAX_ITEMS": "10000"
                 }
-            }
+            },
+            {
+                "name": ".NET Core Launch (console)",
+                "type": "coreclr",
+                "request": "launch",
+                "preLaunchTask": "build",
+                "program": "${workspaceFolder}csharp/AoC/bin/Debug/net10.0/AoC.dll",
+                "args": [
+                    "${relativeFileDirname}"
+                ],
+                "cwd": "${workspaceFolder}/csharp/AoC",
+                "console": "internalConsole",
+                "stopAtEntry": false,
+                "internalConsoleOptions": "openOnSessionStart",
+                "requireExactSource": false,
+            },
         ]
     },
     "tasks": {
@@ -131,6 +170,78 @@
                 "description": "The year of puzzles",
                 "type": "promptString",
             },
+            {
+                "id": "year",
+                "type": "command",
+                "command": "memento.promptString",
+                "args": {
+                    "id": "year",
+                    "description": "Current year (YYYY)"
+                }
+            },
+            {
+                "id": "part",
+                "type": "command",
+                "command": "memento.pickString",
+                "args": {
+                    "id": "part",
+                    "options": [
+                        "1",
+                        "2"
+                    ],
+                    "description": "Part of the day"
+                }
+            },
+            {
+                "id": "day",
+                "type": "command",
+                "command": "memento.pickString",
+                "args": {
+                    "id": "day",
+                    "options": [
+                        "01",
+                        "02",
+                        "03",
+                        "04",
+                        "05",
+                        "06",
+                        "07",
+                        "08",
+                        "09",
+                        "10",
+                        "11",
+                        "12",
+                        "13",
+                        "14",
+                        "15",
+                        "16",
+                        "17",
+                        "18",
+                        "19",
+                        "20",
+                        "21",
+                        "22",
+                        "23",
+                        "24",
+                        "25"
+                    ],
+                    "description": "Current day"
+                }
+            },
+            {
+                "id": "answer",
+                "type": "promptString",
+                "description": "Answer for the part day"
+            },
+            {
+                "id": "session",
+                "type": "command",
+                "command": "memento.promptString",
+                "args": {
+                    "id": "session",
+                    "description": "Session cookie"
+                }
+            }
         ],
         "tasks": [
             {
@@ -150,7 +261,50 @@
                     "cwd": "python"
                 },
                 "problemMatcher": []
-            }
+            },
+            // csharp
+            {
+                "label": "build (csharp)",
+                "command": "dotnet",
+                "type": "process",
+                "options": {
+                    "cwd": "csharp/AoC"
+                },
+                "args": [
+                    "build",
+                    "AoC.csproj",
+                    "/property:GenerateFullPaths=true",
+                    "/consoleloggerparameters:NoSummary"
+                ],
+                "problemMatcher": "$msCompile"
+            },
+            {
+                "label": "run (csharp)",
+                "command": "dotnet",
+                "options": {
+                    "cwd": "csharp/AoC"
+                },
+                "args": [
+                    "run",
+                    "${input:year}/${input:day}"
+                ],
+                "problemMatcher": [],
+                "dependsOn": [
+                    "build (csharp)"
+                ]
+            },
+            {
+                "label": "run today (csharp)",
+                "command": "dotnet",
+                "args": [
+                    "run",
+                    "today"
+                ],
+                "problemMatcher": [],
+                "dependsOn": [
+                    "build (csharp)"
+                ]
+            },
         ]
     }
 }
