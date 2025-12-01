@@ -21,6 +21,10 @@
                 "source.fixAll": "explicit"
             },
         },
+        "python.languageServer": "None",
+        "ty.experimental.rename": true,
+        "ty.inlayHints.variableTypes": false,
+        "ty.importStrategy": "fromEnvironment",
         "python.terminal.activateEnvInCurrentTerminal": true,
         "python.terminal.executeInFileDir": true,
         "python.terminal.activateEnvironment": true,
