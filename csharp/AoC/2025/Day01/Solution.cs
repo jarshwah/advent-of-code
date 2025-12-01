@@ -8,10 +8,10 @@ using System.Linq;
 class Solution : Solver
 {
 
-    static IEnumerable<(char direction, int clicks)> Parse(string input)
+    static IEnumerable<(int direction, int clicks)> Parse(string input)
     {
         return input.Split("\n")
-                   .Select(line => (direction: line[0], clicks: int.Parse(line[1..])));
+                   .Select(line => (direction: line[0] == 'R' ? 1 : -1, clicks: int.Parse(line[1..])));
     }
 
     public object PartOne(string input)
@@ -21,7 +21,7 @@ class Solution : Solver
                 new { Position = 50, Zeros = 0 },
                 (acc, next) =>
                 {
-                    var movement = next.direction == 'R' ? next.clicks : -next.clicks;
+                    var movement = next.clicks * next.direction;
                     var newPosition = (acc.Position + movement) % 100;
                     return new { Position = newPosition, Zeros = acc.Zeros + (newPosition == 0 ? 1 : 0) };
                 })
@@ -31,7 +31,7 @@ class Solution : Solver
     public object PartTwo(string input)
     {
         return Parse(input)
-            .SelectMany(move => Enumerable.Range(0, move.clicks).Select(_ => move.direction == 'R' ? 1 : -1))
+            .SelectMany(move => Enumerable.Range(0, move.clicks).Select(_ => move.direction))
             .Aggregate(
                 new { Position = 50, Zeros = 0 },
                 (acc, step) =>
