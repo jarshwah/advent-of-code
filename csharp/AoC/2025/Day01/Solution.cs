@@ -2,7 +2,7 @@ namespace AdventOfCode.Y2025.Day01;
 
 using System.Collections.Generic;
 using System.Linq;
-
+using AngleSharp.Css.Dom;
 
 [ProblemName("Secret Entrance")]
 class Solution : Solver
@@ -17,28 +17,17 @@ class Solution : Solver
     public object PartOne(string input)
     {
         return Parse(input)
-            .Aggregate(
-                new { Position = 50, Zeros = 0 },
-                (acc, next) =>
-                {
-                    var movement = next.clicks * next.direction;
-                    var newPosition = (acc.Position + movement) % 100;
-                    return new { Position = newPosition, Zeros = acc.Zeros + (newPosition == 0 ? 1 : 0) };
-                })
-            .Zeros;
+            .Select((move, direction) => move.clicks * move.direction)
+            .Cumulative(50, (pos, step) => (pos + step) % 100)
+            .Count(x => x == 0);
     }
+
 
     public object PartTwo(string input)
     {
         return Parse(input)
             .SelectMany(move => Enumerable.Range(0, move.clicks).Select(_ => move.direction))
-            .Aggregate(
-                new { Position = 50, Zeros = 0 },
-                (acc, step) =>
-                {
-                    var newPosition = (acc.Position + step) % 100;
-                    return new { Position = newPosition, Zeros = acc.Zeros + (newPosition == 0 ? 1 : 0) };
-                })
-            .Zeros;
+            .Cumulative(50, (pos, step) => (pos + step) % 100)
+            .Count(x => x == 0);
     }
 }
