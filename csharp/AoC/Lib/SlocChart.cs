@@ -1,0 +1,81 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace AdventOfCode;
+
+
+class SlocChart {
+    public static void Show(int year, List<(int day, int sloc)> slocs) {
+        if (slocs.Count < 2) {
+            return;
+        }
+
+
+        var chars = "█▁▂▃▄▅▆▇";
+        var max = slocs.Max(sloc => sloc.sloc);
+        var min = slocs.Min(sloc => sloc.sloc);
+        var total = slocs.Sum(sloc => sloc.sloc);
+
+        Console.WriteLine($"  {year } in code lines                           total: {total} max: {max} min: {min}");
+        Console.WriteLine("");
+
+        var columns = new List<List<ColoredString>>();
+
+        var icol = 0;
+        var prevSloc = -1;
+        foreach (var sloc in slocs) {
+            icol++;
+            var col = new List<ColoredString>();
+            var h = sloc.sloc;
+
+            var color =
+                h > 200 ? ConsoleColor.Red :
+                h > 100 ? ConsoleColor.Yellow :
+                ConsoleColor.DarkGray;
+            h /= 2;
+
+            if (Math.Abs(prevSloc - sloc.sloc) > 20 || prevSloc < 100 && sloc.sloc < 100) {
+                var slocSt = sloc.sloc.ToString();
+                col.Add(slocSt.WithColor(ConsoleColor.White));
+            }
+            prevSloc = sloc.sloc;
+            if (h % chars.Length != 0) {
+                var ch = chars[h % chars.Length];
+                col.Add($"{ch}{ch}".WithColor(color));
+                h -= h % chars.Length;
+            }
+            while (h >= 0) {
+                var ch = chars[0];
+                col.Add($"{ch}{ch}".WithColor(color));
+                h -= chars.Length;
+            }
+            col.Add(sloc.day.ToString().PadLeft(2, ' ').WithColor(ConsoleColor.White));
+            var w = 3;
+            col = col.Select(r => r.st.PadLeft(w).WithColor(r.c)).ToList();
+            columns.Add(col);
+        }
+
+        var rows = new List<List<ColoredString>>();
+        var height = columns.Select(col => col.Count).Max();
+        for (var irow = 0; irow < height; irow++) {
+            var row = new List<ColoredString>();
+            foreach (var col in columns) {
+                var color = col.Count > irow ? col[col.Count - irow - 1].c : ConsoleColor.Gray;
+                var st = col.Count > irow ? col[col.Count - irow - 1].st : "";
+                var w = col.Select(r => r.st.Length).Max();
+                st = st.PadLeft(w);
+                row.Add(st.WithColor(color));
+            }
+            rows.Insert(0, row);
+        }
+
+        foreach (var row in rows) {
+            foreach (var item in row) {
+                Terminal.Write(item.c, item.st);
+            }
+            Console.WriteLine();
+        }
+        Console.WriteLine("");
+    }
+}

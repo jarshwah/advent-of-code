@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Text;
 using System.Numerics;
+using static AdventOfCode.Utilities;
 
 [ProblemName("Gift Shop")]
 class Solution : Solver
