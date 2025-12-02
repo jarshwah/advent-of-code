@@ -30,6 +30,11 @@
                 "source.fixAll": "explicit"
             },
         },
+        "[csharp]": {
+            "editor.formatOnSave": true,
+            "editor.formatOnPaste": false,
+            "editor.formatOnSaveMode": "file",
+        },
         "files.exclude": {
             "bin": true,
             "obj": true
