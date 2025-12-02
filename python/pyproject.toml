@@ -58,9 +58,10 @@ exclude = [
     "_2021",
     "_2022",
     "_2023",
-    "test_utils",
+    "_2024/utils",
+    "_2025/utils",
     "test_intcode",
-    "_2024/utils"
+    "test_utils",
 ]
 
 [[tool.mypy.overrides]]
