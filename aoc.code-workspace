@@ -34,7 +34,7 @@
             "bin": true,
             "obj": true
         },
-        "python.languageServer": "None",
+        "python.languageServer": "Pylance",
         "ty.experimental.rename": true,
         "ty.inlayHints.variableTypes": false,
         "ty.importStrategy": "fromEnvironment",

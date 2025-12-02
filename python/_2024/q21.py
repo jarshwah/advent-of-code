@@ -62,9 +62,9 @@ def get_paths(grid: utils.Grid[str]) -> AdjacencyMatrix:
     paths = all_pairs_all_shortest_paths(graph)
     for source, targets in paths:
         adjacency[grid[source]] = {}
-        for target, paths in targets.items():
+        for target, paths in targets.items():  # type: ignore [assignment]
             adjacency[grid[source]][grid[target]] = trim_paths(
-                [path_to_dirstring(path) for path in paths]
+                [path_to_dirstring(path) for path in paths]  # type: ignore [arg-type]
             )
     return adjacency
 

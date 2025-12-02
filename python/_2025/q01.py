@@ -10,14 +10,9 @@ class Puzzle(utils.Puzzle):
     def part_one(self, input: utils.Input) -> str | int:
         start = 50
         hit_zero = 0
-        for match in input.lines().parse("{dir}{rotations:d}"):
-            direction = match["dir"]
-            rotations = match["rotations"]
-            match direction:
-                case "L":
-                    start -= rotations
-                case "R":
-                    start += rotations
+        for match in input.lines().strings:
+            direction, rotations = match[0], int(match[1:])
+            start += rotations if direction == "R" else -rotations
             start %= 100
             if start == 0:
                 hit_zero += 1
@@ -26,22 +21,13 @@ class Puzzle(utils.Puzzle):
     def part_two(self, input: utils.Input) -> str | int:
         start = 50
         hit_zero = 0
-        for match in input.lines().parse("{dir}{rotations:d}"):
-            direction = match["dir"]
-            rotations = match["rotations"]
-            match direction:
-                case "L":
-                    for _ in range(rotations):
-                        start -= 1
-                        start %= 100
-                        if start == 0:
-                            hit_zero += 1
-                case "R":
-                    for _ in range(rotations):
-                        start += 1
-                        start %= 100
-                        if start == 0:
-                            hit_zero += 1
+        for match in input.lines().strings:
+            direction, rotations = match[0], int(match[1:])
+            adder = 1 if direction == "R" else -1
+            for _ in range(rotations):
+                start = (start + adder) % 100
+                if start == 0:
+                    hit_zero += 1
         return hit_zero
 
 
