@@ -1,5 +1,5 @@
 # solution input/output files
-input.in
+input.in*
 input.refout
 
 # Byte-compiled / optimized / DLL files
