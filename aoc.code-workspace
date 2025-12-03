@@ -149,10 +149,10 @@
                 "name": ".NET Core Launch (console)",
                 "type": "coreclr",
                 "request": "launch",
-                "preLaunchTask": "build",
-                "program": "${workspaceFolder}csharp/AoC/bin/Debug/net10.0/AoC.dll",
+                "preLaunchTask": "build (csharp)",
+                "program": "${workspaceFolder}/csharp/AoC/bin/Debug/net10.0/AoC.dll",
                 "args": [
-                    "${relativeFileDirname}"
+                    "today"
                 ],
                 "cwd": "${workspaceFolder}/csharp/AoC",
                 "console": "internalConsole",
