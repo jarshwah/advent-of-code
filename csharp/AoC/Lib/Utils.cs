@@ -109,5 +109,14 @@ namespace AdventOfCode
                 return Directions4[Mod(Directions4.IndexOf(direction) + 1, 4)];
             }
         }
+
+        public static IEnumerable<IEnumerable<T>> Transpose<T>(IEnumerable<IEnumerable<T>> rows)
+        {
+            var length = rows.First().Count();
+            for (int i = 0; i < length; i++)
+            {
+                yield return rows.Select(row => row.Skip(i).First());
+            }
+        }
     }
 }
