@@ -56,7 +56,7 @@ class Puzzle(utils.Puzzle):
         start = (0, 0)
         grid[start] = Tile.DROID
         states: deque[State] = deque([(start, init.fork(), command) for command in Command])
-        animate = True
+        animate = self.animate
         with grid.animate(on=animate) as animator:
             while states:
                 droid, program, command = states.popleft()

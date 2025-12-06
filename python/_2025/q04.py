@@ -10,23 +10,20 @@ class Puzzle(utils.Puzzle):
         return len(found)
 
     def part_two(self, input: utils.Input) -> str | int:
-        grid = input.grid()
+        grid = input.replace(".", " ").grid()
         removed = 0
         loop = 0
-        animate = False
-        while True:
-            loop += 1
-            with grid.animate(animate) as animator:
-                animator.set_header(f"Loop: {loop} | Removed: {removed}")
+        animate = self.animate
+        with grid.animate(animate) as animator:
+            while True:
+                loop += 1
                 found = list(grid.search(point_accessible, diagonal=True))
                 if not found:
                     break
                 for f in found:
-                    grid[f[0]] = "X"
+                    grid[f[0]] = " "
                     removed += 1
-                    if animate:
-                        grid[f[0]] = utils.Color.YELLOW_BRIGHT.colorize("X")
-                        animator.update(grid)
+                    animator.update(grid, header=f"Loop: {loop} | Removed: {removed}")
         return removed
 
 

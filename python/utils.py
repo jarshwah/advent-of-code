@@ -108,6 +108,10 @@ class Input:
         """
         return Grid.from_number_string(self.data)
 
+    def replace(self, old: str, new: str) -> Self:
+        self.data = self.data.replace(old, new)
+        return self
+
 
 @dataclasses.dataclass
 class InputList:
@@ -1200,6 +1204,7 @@ class Puzzle:
     both: bool = False
     testing: bool = False
     no_tests: bool = False
+    animate: bool = False
 
     def part_one(self, input: Input) -> str | int:
         return ""
@@ -1225,6 +1230,7 @@ class Puzzle:
         @click.command()
         @click.option("--p1", "-1", is_flag=True, help="Run part one")
         @click.option("--p2", "-2", is_flag=True, help="Run part two")
+        @click.option("--animate", is_flag=True, help="Run the animation if one exists")
         @click.option("--test", "-t", is_flag=True, help="Run tests")
         @click.option("--alt", "-a", is_flag=True, help="Run alternative")
         @click.option(
@@ -1234,10 +1240,14 @@ class Puzzle:
             is_flag=True,
             help="Stop on first test failure (implies --test)",
         )
-        def entrypoint(p1: bool, p2: bool, test: bool, fail_fast: bool, alt: bool) -> None:
+        def entrypoint(
+            p1: bool, p2: bool, animate: bool, test: bool, fail_fast: bool, alt: bool
+        ) -> None:
             if not (p1 or p2 or test):
                 # default, run it all
                 p1 = p2 = test = True
+
+            puzzle_runner.animate = animate
 
             part_1 = puzzle_runner.part_one_alt if alt else puzzle_runner.part_one
             part_2 = puzzle_runner.part_two_alt if alt else puzzle_runner.part_two

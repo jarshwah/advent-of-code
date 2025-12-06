@@ -56,7 +56,8 @@ class Puzzle(utils.Puzzle):
         score = 0
         num_ticks = 0
         game.run()
-        with grid.animate(False) as animator:
+        animate = self.animate
+        with grid.animate(animate) as animator:
             while not game._halted:
                 num_ticks += 1
                 joystick = 0
