@@ -1133,7 +1133,7 @@ class GridAnimator:
 
     def update(self, grid: Grid[A], header: str | None = None) -> None:
         if not self.renderer:
-            raise NotAnimating
+            return
         self.header = header
         self.renderer.update(self._get_content(grid), refresh=True)
 
