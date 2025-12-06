@@ -23,7 +23,7 @@ class Puzzle(utils.Puzzle):
         start, end = 0, -num + 1
         for _ in range(num):
             # [slice_start: slice_end] doesn't work correctly for the last element in a list
-            start = bank.index(max(bank[start : end if end < 0 else None]), start)
+            start = bank.index(max(bank[start : end or None]), start)
             output.append(bank[start])
             end += 1
             start += 1
