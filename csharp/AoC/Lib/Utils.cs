@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 
 namespace AdventOfCode
 {
@@ -71,6 +72,42 @@ namespace AdventOfCode
             return r < 0 ? r + m : r;
         }
 
+        public record Point(long Row, long Col)
+        {
+            public Point Add(Point point) => new(point.Row + Row, point.Col + Col);
 
+            public Point Subtract(Point point) => new(point.Row - Row, point.Col - Col);
+
+            public long Manhattan(Point point)
+            {
+                return Math.Abs(point.Row - Row) + Math.Abs(point.Col - Col);
+            }
+        }
+
+        public static class Direction
+        {
+            public static readonly Point Center = new(0, 0);
+            public static readonly Point Up = new(-1, 0);
+            public static readonly Point Down = new(1, 0);
+            public static readonly Point Left = new(0, -1);
+            public static readonly Point Right = new(0, 1);
+            public static readonly Point UpLeft = new(-1, -1);
+            public static readonly Point UpRight = new(-1, 1);
+            public static readonly Point DownLeft = new(1, -1);
+            public static readonly Point DownRight = new(1, 1);
+
+            public static readonly IList<Point> Directions4 = [Up, Right, Down, Left];
+            public static readonly IList<Point> Directions8 = [Up, UpRight, Right, DownRight, Down, DownLeft, Left, UpLeft];
+
+            public static Point TurnRight(Point direction)
+            {
+                return Directions4[(Directions4.IndexOf(direction) + 1) % 4];
+            }
+
+            public static Point TurnLeft(Point direction)
+            {
+                return Directions4[Mod(Directions4.IndexOf(direction) + 1, 4)];
+            }
+        }
     }
 }
