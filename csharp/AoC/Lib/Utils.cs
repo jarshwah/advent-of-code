@@ -1,5 +1,8 @@
 using System;
-using System.ComponentModel;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Drawing;
 
 namespace AdventOfCode
 {
@@ -117,6 +120,62 @@ namespace AdventOfCode
             {
                 yield return rows.Select(row => row.Skip(i).First());
             }
+        }
+    }
+
+    public class Grid<T> : IReadOnlyDictionary<Utilities.Point, T>
+    {
+        public readonly IDictionary<Utilities.Point, T> points;
+        public readonly int NumRows;
+        public readonly int NumCols;
+
+        public IEnumerable<IEnumerable<T>> Rows => points.OrderBy(p => p.Key.Row).ThenBy(p => p.Key.Col).Select(p => p.Value).Chunk(NumCols);
+        public IEnumerable<IEnumerable<T>> Cols => points.OrderBy(p => p.Key.Col).ThenBy(p => p.Key.Row).Select(p => p.Value).Chunk(NumCols);
+
+        public Grid(IEnumerable<IEnumerable<T>> points)
+        {
+            this.points = new Dictionary<Utilities.Point, T>();
+            int rc = 0;
+            foreach (var row in points)
+            {
+                int cc = 0;
+                foreach (var col in row)
+                {
+                    this.points.Add(new Utilities.Point(rc, cc), col);
+                    cc++;
+                }
+                rc++;
+            }
+            NumRows = points.Count();
+            NumCols = points.First().Count();
+        }
+
+        public IEnumerable<Utilities.Point> Keys => points.Keys;
+
+        public IEnumerable<T> Values => points.Values;
+
+        public int Count => NumRows * NumCols;
+
+        public T this[Utilities.Point key] => points[key];
+
+        public bool ContainsKey(Utilities.Point key)
+        {
+            return points.ContainsKey(key);
+        }
+
+        public bool TryGetValue(Utilities.Point key, [MaybeNullWhen(false)] out T value)
+        {
+            return points.TryGetValue(key, out value);
+        }
+
+        public IEnumerator<KeyValuePair<Utilities.Point, T>> GetEnumerator()
+        {
+            return points.GetEnumerator();
+        }
+
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
     }
 }
