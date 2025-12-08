@@ -27,7 +27,18 @@ class Puzzle(utils.Puzzle):
                 continue
 
             for nb in grid.neighbours(beam, directions=[utils.DOWN]):
+                grid[beam] = "|"
+                grid.save_frame()
                 beams.append(nb)
+        if self.animate:
+            grid.draw_frames(
+                {
+                    "^": utils.ColorRGB.Yellow.value,
+                    ".": utils.BackgroundColor.value,
+                    "|": utils.ColorRGB.PurpleLight.value,
+                }
+            )
+            grid.render_video("2025-Q07-Part1", framerate=500)
         return len(visited & splitters)
 
     def part_two(self, input: utils.Input) -> str | int:

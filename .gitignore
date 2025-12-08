@@ -1,6 +1,7 @@
 # solution input/output files
 input.in*
 input.refout
+animations/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

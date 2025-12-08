@@ -28,6 +28,7 @@ dependencies = [
     "shapely>=2.0.6",
     "types-networkx>=3.4.2.20241115",
     "z3-solver>=4.13.3.0",
+    "pillow>=11.0.0",
 ]
 
 [tool.pyright]

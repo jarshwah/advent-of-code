@@ -3,14 +3,17 @@ from __future__ import annotations
 import contextlib
 import dataclasses
 import itertools
+import math
+import multiprocessing
+import pathlib
 import re
 from collections import deque
 from collections.abc import Callable, Collection, Iterable, Iterator, Sequence
 from contextlib import contextmanager
 from copy import deepcopy
-from enum import StrEnum
+from enum import Enum, StrEnum
 from functools import cached_property
-from typing import Generator, Self, TypeVar
+from typing import Any, Generator, Self, TypedDict, TypeVar
 
 import aocd
 import networkx as nx
@@ -797,6 +800,7 @@ class Grid[T]:
     """
 
     points: dict[Point, T]
+    _drawer: GridDrawer
     _animating: bool = False
 
     def __init__(self, rows: Iterable[Iterable[T]], pad_with: T | None = None):
@@ -806,6 +810,7 @@ class Grid[T]:
             for c, item in enumerate(row):
                 self.points[(r, c)] = item
         self._animating = False
+        self._drawer = GridDrawer(frames=[])
 
     @classmethod
     def from_number_string(
@@ -1095,6 +1100,15 @@ class Grid[T]:
             for r in range(rmin, rmax + 1)
         ]
 
+    def save_frame(self, header: str = "") -> None:
+        self._drawer.frames.append(Frame(content=list(self.strings()), header=header))
+
+    def draw_frames(self, color_map: ColorMap) -> None:
+        self._drawer.draw(color_map)
+
+    def render_video(self, name: str, framerate: int = 10) -> None:
+        self._drawer.create_mp4(name, framerate)
+
     @contextmanager
     def animate(self, on: bool = True) -> Iterator[GridAnimator]:
         animator = GridAnimator(on)
@@ -1143,6 +1157,188 @@ class GridAnimator:
             s += row
             s += "\n"
         return panel.Panel.fit(s, title=self.header)
+
+
+BLOCK = "#"
+SPACE = " "
+LINE_COLOR = (50, 50, 50)
+BACKGROUND_COLOR = (0, 0, 0)
+
+
+class ColorRGB(Enum):
+    Black = (0, 0, 0)
+    White = (255, 255, 255)
+    Yellow = (255, 255, 0)
+    Grey = (192, 192, 192)
+    GreyDark = (96, 96, 96)
+    PurpleLight = (192, 192, 255)
+
+
+DefaultColor = ColorRGB.GreyDark
+BackgroundColor = ColorRGB.Black
+
+type RGB = tuple[int, int, int]
+type ColorMap = dict[str | int, RGB]
+
+DEFAULT_COLOR_MAP: ColorMap = {
+    0: ColorRGB.Black.value,
+    " ": ColorRGB.Black.value,
+    ".": ColorRGB.Black.value,
+    1: ColorRGB.White.value,
+    "#": ColorRGB.White.value,
+    "Star": ColorRGB.Yellow.value,
+    "star": ColorRGB.Yellow.value,
+    "Target": ColorRGB.PurpleLight.value,
+    "target": ColorRGB.PurpleLight.value,
+    "Gray": ColorRGB.Grey.value,
+    "DarkGray": ColorRGB.GreyDark.value,
+}
+
+DEFAULT_DISP_MAP: dict[str | int, str] = {
+    " ": SPACE,
+    0: SPACE,
+    ".": SPACE,
+    "#": BLOCK,
+    1: BLOCK,
+}
+
+
+@dataclasses.dataclass
+class Frame:
+    content: list[str]
+    header: str
+
+
+class RenderFrameData(TypedDict, total=True):
+    frame: Frame
+    frame_num: int
+    color_map: ColorMap
+    target_dir: str
+
+
+@dataclasses.dataclass
+class GridDrawer:
+    frames: list[Frame] = dataclasses.field(default_factory=list)
+
+    def delete_rendered_frames(self) -> None:
+        target_dir = pathlib.Path("./animations/")
+        if not target_dir.exists():
+            return
+        for existing in target_dir.glob("*.png"):
+            if existing.is_file():
+                existing.unlink()
+
+    def draw(self, color_map: ColorMap = DEFAULT_COLOR_MAP) -> None:
+        target_dir = pathlib.Path("./animations/")
+        if not target_dir.exists():
+            target_dir.mkdir(parents=True, exist_ok=True)
+        self.delete_rendered_frames()
+
+        todo: list[RenderFrameData] = [
+            {
+                "color_map": color_map,
+                "frame": frame,
+                "frame_num": idx,
+                "target_dir": str(target_dir.absolute()),
+            }
+            for idx, frame in enumerate(self.frames, 1)
+        ]
+        total = len(todo)
+        percent_done = 0
+        with multiprocessing.Pool() as pool:
+            for result in pool.imap_unordered(render_frame, todo):
+                done = total - len(todo)
+                perc = math.floor((done / total) * 100)
+                if perc > percent_done and perc % 5 == 0:
+                    percent_done = perc
+                    print(f"{done}/{total} ({percent_done}%): {result}")
+
+    def create_mp4(self, name: str, rate: int = 10) -> None:
+        import subprocess
+
+        target_dir = pathlib.Path("./animations").resolve().absolute()
+        if not target_dir.exists():
+            raise ValueError("Path does not exist for rendering the movie")
+
+        cmd = [
+            "ffmpeg",
+            "-y",
+            "-hide_banner",
+            "-f",
+            "image2",
+            "-framerate",
+            str(rate),
+            "-i",
+            "./animations/frame_%05d.png",
+            "-c:v",
+            "libx264",
+            "-profile:v",
+            "main",
+            "-pix_fmt",
+            "yuv420p",
+            "-vf",
+            "pad=ceil(iw/2)*2:ceil(ih/2)*2",
+            "-an",
+            "-movflags",
+            "+faststart",
+            str(target_dir / f"animation_{name}.mp4"),
+        ]
+        print("$ " + " ".join(cmd))
+        subprocess.check_call(cmd)
+        self.delete_rendered_frames()
+
+    def __deepcopy__(self, memo: Any) -> Self:
+        # Do not copy all of the frames.
+        return self
+
+
+def render_frame(render_frame: RenderFrameData) -> None:
+    from PIL import Image, ImageDraw
+
+    frame = render_frame["frame"]
+    frame_num = render_frame["frame_num"]
+    colors = render_frame["color_map"]
+    target_dir = render_frame["target_dir"]
+
+    height = len(frame.content)
+    width = len(frame.content[0])
+
+    border_size = 5
+    im = Image.new(
+        "RGB",
+        (
+            width + (border_size * 2) + 1,
+            height + (border_size * 2) + 1,
+        ),
+        color=BACKGROUND_COLOR,
+    )
+    draw = ImageDraw.Draw(im, "RGBA")
+
+    # Draw the border
+    draw.rectangle(
+        ((border_size, border_size), (border_size + width, border_size + height)),
+        ColorRGB.GreyDark.value,
+        ColorRGB.GreyDark.value,
+    )
+    for y, row in enumerate(frame.content):
+        for x, ch in enumerate(row):
+            color = colors.get(ch, DefaultColor.value)
+            draw.rectangle(
+                (
+                    (border_size + x + 1, border_size + y + 1),
+                    (border_size + x + 1, border_size + y + 1),
+                ),
+                color,
+                color,
+            )
+
+    # Do scaling later.
+    scale = 10
+    im = im.resize(
+        (int(im.width * scale), int(im.height * scale)), resample=Image.Resampling.LANCZOS
+    )
+
+    im.save(pathlib.Path(target_dir) / f"frame_{frame_num:05d}.png")
 
 
 def rotations_90(point: Point3d) -> list[Point3d]:
