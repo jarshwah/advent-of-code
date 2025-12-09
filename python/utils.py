@@ -793,6 +793,36 @@ def dijkstra_shortest_path[T](
     return seen[target][1]
 
 
+def line_overlaps(l1: Point, l2: Point) -> bool:
+    # We allow the line to *touch* > but not *cross* >=
+    return max(l1) > min(l2) and max(l2) > min(l1)
+
+
+@dataclasses.dataclass(frozen=True, slots=True)
+class Rect:
+    x1: int
+    x2: int
+    y1: int
+    y2: int
+
+    @classmethod
+    def from_corners(cls, p1: Point, p2: Point) -> Rect:
+        return Rect(min(p1[0], p2[0]), max(p1[0], p2[0]), min(p1[1], p2[1]), max(p1[1], p2[1]))
+
+    @property
+    def area(self) -> int:
+        return (self.x2 - self.x1 + 1) * (self.y2 - self.y1 + 1)
+
+    def overlaps(self, other: Rect) -> bool:
+        # fmt: off
+        return (
+            line_overlaps((self.x1, self.x2), (other.x1, other.x2)) and
+            line_overlaps((self.y1, self.y2), (other.y1, other.y2)
+            )
+        )
+        # fmt: on
+
+
 H = TypeVar("H", bound=Hashable)
 type Tree[H] = set[H]
 type Forest[H] = dict[H, Tree[H]]
@@ -800,6 +830,10 @@ type Forest[H] = dict[H, Tree[H]]
 
 @dataclasses.dataclass()
 class DisjointSet[H]:
+    """
+    DisjointSet allows for Union-Find to connect sets together.
+    """
+
     forest: dict[H, set[H]]
 
     def __init__(self, forest: Forest[H]) -> None:
