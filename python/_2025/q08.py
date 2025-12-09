@@ -5,28 +5,6 @@ import utils
 
 
 class Puzzle(utils.Puzzle):
-    def both_parts_alt(self, input: utils.Input) -> tuple[str | int, str | int]:
-        p1 = p2 = 0
-        circuits = {tuple(nums[:3]): {tuple(nums[:3])} for nums in input.lines().split(",").numbers}
-        pairs = sorted(combinations(circuits, 2), key=lambda pair: math.dist(*pair))
-        lines = 10 if self.testing else 1000
-        for idx, (j1, j2) in enumerate(pairs, 1):
-            # Find the circuits the junctions are currently attached to
-            c1 = utils.first((circuit for circuit in circuits if j1 in circuits[circuit]))
-            c2 = utils.first((circuit for circuit in circuits if j2 in circuits[circuit]))
-            if c1 != c2:
-                # If not already connected, merge the circuits
-                circuits[c1] |= circuits[c2]
-                circuits.pop(c2)
-            if idx == lines:
-                # Multiply the length of the 3 largest circuits after N attempts
-                p1 = math.prod(sorted((len(circuits[j]) for j in circuits), reverse=True)[:3])
-            if len(circuits) == 1:
-                # Multiply the X-coords of the last junctions to be connected
-                p2 = j1[0] * j2[0]
-                break
-        return p1, p2
-
     def both_parts(self, input: utils.Input) -> tuple[str | int, str | int]:
         p1 = p2 = 0
         circuits: list[utils.Point3d] = [
