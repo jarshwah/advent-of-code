@@ -8,7 +8,7 @@ import multiprocessing
 import pathlib
 import re
 from collections import deque
-from collections.abc import Callable, Collection, Iterable, Iterator, Sequence
+from collections.abc import Callable, Collection, Hashable, Iterable, Iterator, Sequence
 from contextlib import contextmanager
 from copy import deepcopy
 from enum import Enum, StrEnum
@@ -791,6 +791,46 @@ def dijkstra_shortest_path[T](
         for new_position in grid.get_neighbours(position):
             heapq.heappush(heap, (num_steps + 1, new_position, path[:]))
     return seen[target][1]
+
+
+H = TypeVar("H", bound=Hashable)
+type Tree[H] = set[H]
+type Forest[H] = dict[H, Tree[H]]
+
+
+@dataclasses.dataclass()
+class DisjointSet[H]:
+    forest: dict[H, set[H]]
+
+    def __init__(self, forest: Forest[H]) -> None:
+        self.forest = forest
+
+    @classmethod
+    def from_iterable(cls, nodes: Sequence[H]) -> DisjointSet[H]:
+        return DisjointSet({n: {n} for n in nodes})
+
+    def find(self, node: H) -> H:
+        for parent in self.forest:
+            if node in self.forest[parent]:
+                return parent
+        raise ValueError("Not in forest")
+
+    def union(self, from_node: H, to_node: H) -> H:
+        from_parent = self.find(from_node)
+        to_parent = self.find(to_node)
+        if from_parent != to_parent:
+            self.forest[to_parent] |= self.forest[from_parent]
+            del self.forest[from_parent]
+        return to_parent
+
+    def size(self) -> int:
+        return len(self.forest)
+
+    def trees(self) -> Sequence[set[H]]:
+        return list(self.forest.values())
+
+    def connected(self, from_node: H, to_node: H) -> bool:
+        return self.find(from_node) == self.find(to_node)
 
 
 @dataclasses.dataclass

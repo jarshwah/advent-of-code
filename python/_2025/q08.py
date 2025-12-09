@@ -5,7 +5,7 @@ import utils
 
 
 class Puzzle(utils.Puzzle):
-    def both_parts(self, input: utils.Input) -> tuple[str | int, str | int]:
+    def both_parts_alt(self, input: utils.Input) -> tuple[str | int, str | int]:
         p1 = p2 = 0
         circuits = {tuple(nums[:3]): {tuple(nums[:3])} for nums in input.lines().split(",").numbers}
         pairs = sorted(combinations(circuits, 2), key=lambda pair: math.dist(*pair))
@@ -22,6 +22,24 @@ class Puzzle(utils.Puzzle):
                 # Multiply the length of the 3 largest circuits after N attempts
                 p1 = math.prod(sorted((len(circuits[j]) for j in circuits), reverse=True)[:3])
             if len(circuits) == 1:
+                # Multiply the X-coords of the last junctions to be connected
+                p2 = j1[0] * j2[0]
+                break
+        return p1, p2
+
+    def both_parts(self, input: utils.Input) -> tuple[str | int, str | int]:
+        p1 = p2 = 0
+        circuits: list[utils.Point3d] = [
+            (nums[0], nums[1], nums[2]) for nums in input.lines().split(",").numbers
+        ]
+        djs = utils.DisjointSet[utils.Point3d].from_iterable(circuits)
+        pairs = sorted(combinations(circuits, 2), key=lambda pair: math.dist(*pair))
+        lines = 10 if self.testing else 1000
+        for idx, (j1, j2) in enumerate(pairs, 1):
+            djs.union(j1, j2)
+            if idx == lines:
+                p1 = math.prod(sorted((len(tree) for tree in djs.trees()), reverse=True)[:3])
+            if djs.size() == 1:
                 # Multiply the X-coords of the last junctions to be connected
                 p2 = j1[0] * j2[0]
                 break
