@@ -1,4 +1,3 @@
-from collections import deque
 from functools import cache
 
 import utils
@@ -11,15 +10,11 @@ class Puzzle(utils.Puzzle):
             head = line[:3]
             tail = set(line[5:].split(" "))
             graph[head] = tail
-        queue = deque(["you"])
-        paths = 0
-        while queue:
-            node = queue.pop()
-            if node == "out":
-                paths += 1
-                continue
-            queue.extend(graph[node])
-        return paths
+
+        def recurse(node: str) -> int:
+            return 1 if node == "out" else sum(recurse(descendent) for descendent in graph[node])
+
+        return recurse("you")
 
     def part_two(self, input: utils.Input) -> str | int:
         graph: dict[str, set[str]] = {}
