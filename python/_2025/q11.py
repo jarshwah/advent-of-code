@@ -5,23 +5,19 @@ import utils
 
 class Puzzle(utils.Puzzle):
     def part_one(self, input: utils.Input) -> str | int:
-        graph: dict[str, set[str]] = {}
-        for line in input.lines().strings:
-            head = line[:3]
-            tail = set(line[5:].split(" "))
-            graph[head] = tail
+        dag: dict[str, set[str]] = {
+            line[:3]: set(line[5:].split(" ")) for line in input.lines().strings
+        }
 
         def recurse(node: str) -> int:
-            return 1 if node == "out" else sum(recurse(descendent) for descendent in graph[node])
+            return 1 if node == "out" else sum(recurse(descendent) for descendent in dag[node])
 
         return recurse("you")
 
     def part_two(self, input: utils.Input) -> str | int:
-        graph: dict[str, set[str]] = {}
-        for line in input.lines().strings:
-            head = line[:3]
-            tail = set(line[5:].split(" "))
-            graph[head] = tail
+        dag: dict[str, set[str]] = {
+            line[:3]: set(line[5:].split(" ")) for line in input.lines().strings
+        }
 
         @cache
         def recurse(node: str, dac: bool, fft: bool) -> int:
@@ -29,7 +25,7 @@ class Puzzle(utils.Puzzle):
                 return 1 if dac and fft else 0
             return sum(
                 recurse(descendent, dac or node == "dac", fft or node == "fft")
-                for descendent in graph[node]
+                for descendent in dag[node]
             )
 
         return recurse("svr", False, False)
